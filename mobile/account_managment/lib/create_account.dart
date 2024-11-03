@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:account_managment/components/input_text_form.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class CreateAccount extends StatefulWidget {
-  const CreateAccount({super.key});
+  final String createOrUpdate;
+
+  const CreateAccount({super.key, required this.createOrUpdate});
 
   @override
   _CreateAccountState createState() => _CreateAccountState();
@@ -21,39 +24,126 @@ class _CreateAccountState extends State<CreateAccount> {
   final TextEditingController _salaryController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Define your function here
-  Future<void> _handleSubmit() async {
-    if (_formKey.currentState!.validate()) {
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/user/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData(); // Call the function to fetch user data when the widget is initialized
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      final token = await FlutterSecureStorage().read(key: 'accessToken');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8000/api/user/'), // Adjust the URL as needed
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
         },
-        body: jsonEncode(<String, String>{
-          'username': _usernameController.text,
-          'first_name': _firstNameController.text,
-          'last_name': _lastNameController.text,
-          'email': _emailController.text,
-          'salary': _salaryController.text,
-          'password': _passwordController.text,
-        }),
       );
+      print(response.body);
 
       if (response.statusCode == 200) {
-        Navigator.pop(context);
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          _usernameController.text = data['username'] ?? '';
+          _firstNameController.text = data['first_name'] ?? '';
+          _lastNameController.text = data['last_name'] ?? '';
+          _emailController.text = data['email'] ?? '';
+          _salaryController.text = data['salary'] ?? '';
+        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Wrong login"),
-            backgroundColor: Color.fromRGBO(255, 0, 0, 1),
-            behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2), // Customize duration as needed
-            margin: EdgeInsets.only(
-                bottom: 50.0,
-                left: 20.0,
-                right: 20.0), // Adjust margins for positioning
+            content: Text("Failed to load user data"),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
           ),
         );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  // Define your function here
+  Future<void> _handleSubmit() async {
+    if (_formKey.currentState!.validate()) {
+      final token = await FlutterSecureStorage().read(key: 'accessToken');
+
+      if (widget.createOrUpdate == "create") {
+        final response = await http.post(
+          Uri.parse('http://10.0.2.2:8000/api/user/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token'
+          },
+          body: jsonEncode(<String, String>{
+            'username': _usernameController.text,
+            'first_name': _firstNameController.text,
+            'last_name': _lastNameController.text,
+            'email': _emailController.text,
+            'salary': _salaryController.text,
+            'password': _passwordController.text,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Wrong login"),
+              backgroundColor: Color.fromRGBO(255, 0, 0, 1),
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2), // Customize duration as needed
+              margin: EdgeInsets.only(
+                  bottom: 50.0,
+                  left: 20.0,
+                  right: 20.0), // Adjust margins for positioning
+            ),
+          );
+        }
+      } else if (widget.createOrUpdate == "update") {
+        final response = await http.patch(
+          Uri.parse('http://10.0.2.2:8000/api/user/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token'
+          },
+          body: jsonEncode(<String, String>{
+            'username': _usernameController.text,
+            'first_name': _firstNameController.text,
+            'last_name': _lastNameController.text,
+            'email': _emailController.text,
+            'salary': _salaryController.text,
+            'password': _passwordController.text,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Cannot update profile"),
+              backgroundColor: Color.fromRGBO(255, 0, 0, 1),
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2), // Customize duration as needed
+              margin: EdgeInsets.only(
+                  bottom: 50.0,
+                  left: 20.0,
+                  right: 20.0), // Adjust margins for positioning
+            ),
+          );
+        }
       }
     }
   }
@@ -134,9 +224,10 @@ class _CreateAccountState extends State<CreateAccount> {
                             _handleSubmit();
                           }
                         },
-                        child: const Text(
-                          'Create my account',
-                          style: TextStyle(color: Color.fromRGBO(0, 0, 0, 1)),
+                        child: Text(
+                          "${widget.createOrUpdate} my account",
+                          style: const TextStyle(
+                              color: Color.fromRGBO(0, 0, 0, 1)),
                         ),
                       ),
                     ],

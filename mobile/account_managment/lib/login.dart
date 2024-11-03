@@ -4,6 +4,7 @@ import 'package:account_managment/components/input_text_form.dart';
 import 'package:account_managment/create_account.dart';
 import 'package:account_managment/my_accounts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/login/'),
+        Uri.parse('http://10.0.2.2:8000/api/token/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -34,6 +35,16 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final accessToken = responseData['access'];
+        final refreshToken = responseData['refresh'];
+
+        // Store the token securely
+        await const FlutterSecureStorage()
+            .write(key: 'accessToken', value: accessToken);
+        await const FlutterSecureStorage()
+            .write(key: 'refreshToken', value: refreshToken);
+
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const MyAccounts()));
       } else {
@@ -94,7 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const CreateAccount()));
+                                  builder: (context) => const CreateAccount(
+                                      createOrUpdate: 'create')));
                         },
                         child: const Text(
                           'Create an account',
