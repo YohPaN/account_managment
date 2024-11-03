@@ -32,7 +32,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Future<void> _fetchUserData() async {
     try {
-      final token = await FlutterSecureStorage().read(key: 'accessToken');
+      final token = await const FlutterSecureStorage().read(key: 'accessToken');
 
       final response = await http.get(
         Uri.parse('http://10.0.2.2:8000/api/user/'), // Adjust the URL as needed
@@ -41,7 +41,6 @@ class _CreateAccountState extends State<CreateAccount> {
           'Authorization': 'Bearer $token'
         },
       );
-      print(response.body);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -76,7 +75,7 @@ class _CreateAccountState extends State<CreateAccount> {
   // Define your function here
   Future<void> _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
-      final token = await FlutterSecureStorage().read(key: 'accessToken');
+      final token = await const FlutterSecureStorage().read(key: 'accessToken');
 
       if (widget.createOrUpdate == "create") {
         final response = await http.post(

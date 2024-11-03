@@ -2,8 +2,11 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from  rest_framework import status
 from back_account_managment.serializers import UserSerializer
+from back_account_managment.models import Item
+from back_account_managment.models import Account
+from back_account_managment.serializers import AccountSerializer, ItemSerializer
 
 # Create your views here.
 class LoginView(APIView):
@@ -71,3 +74,33 @@ class IsLoggedView(APIView):
             data["is_logged"] = True
 
         return Response(status=status.HTTP_200_OK, data=data)
+    
+class ItemView(APIView):
+    queryset = Item.objects.all()
+
+    def get(self, request):
+        user = request.user
+
+        if user is not None:
+            account = Account.objects.get(user=user)
+            account_serializer = AccountSerializer(account)
+
+            items = Item.objects.filter(account=account)
+            item_serializer = ItemSerializer(items, many=True)
+
+            return Response(data={"account": account_serializer.data, "items": item_serializer.data})
+        
+    def post(self, request):
+        data = request.data
+
+        new_item = Item.objects.create(
+            title=data["title"],
+            description=data["description"],
+            valuation=data["valuation"],
+            account=Account.objects.get(pk=data["account_id"]),
+        )
+
+        new_item.save()
+
+        return Response()
+
