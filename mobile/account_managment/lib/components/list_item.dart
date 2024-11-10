@@ -1,8 +1,16 @@
+import 'package:account_managment/components/create_item.dart';
+import 'package:account_managment/models/item.dart';
 import 'package:flutter/material.dart';
 
 class ListItem extends StatelessWidget {
-  final item;
-  const ListItem({super.key, required this.item});
+  final Item item;
+  final Function callbackFn;
+  int accountId;
+  ListItem(
+      {super.key,
+      required this.item,
+      required this.callbackFn,
+      required this.accountId});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +29,14 @@ class ListItem extends StatelessWidget {
           padding: const EdgeInsets.only(right: 16),
           child: Text(item.valuation + "€"),
         ),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.mode))
+        IconButton(
+            onPressed: () => showBottomDrawer(
+                context: context,
+                accountId: accountId,
+                closeCallback: callbackFn,
+                createOrUpdate: "update",
+                item: item),
+            icon: const Icon(Icons.mode))
       ],
     );
   }

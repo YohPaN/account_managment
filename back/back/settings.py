@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "10.0.2.2"]
 
-
+AUTH_USER_MODEL = "back_account_managment.User"
 # Application definition
 
 INSTALLED_APPS = [
@@ -57,6 +57,9 @@ MIDDLEWARE = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 

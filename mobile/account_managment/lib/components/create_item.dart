@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:account_managment/components/input_text_form.dart';
+import 'package:account_managment/models/item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -11,55 +12,127 @@ final TextEditingController _titleController = TextEditingController();
 final TextEditingController _descriptionController = TextEditingController();
 final TextEditingController _valuationController = TextEditingController();
 
-Future<void> createItem(BuildContext context, int accountId) async {
+Future<void> createItem(BuildContext context, int accountId,
+    String createOrUpdate, int? itemId) async {
   if (_formKey.currentState!.validate()) {
-    final token = await const FlutterSecureStorage().read(key: 'accessToken');
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/item/'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token'
-      },
-      body: jsonEncode(<String, String>{
-        'account_id': accountId.toString(),
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'valuation': _valuationController.text,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Can't create item"),
-          backgroundColor: Color.fromRGBO(255, 0, 0, 1),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2), // Customize duration as needed
-          margin: EdgeInsets.only(
-              bottom: 50.0,
-              left: 20.0,
-              right: 20.0), // Adjust margins for positioning
-        ),
+    if (createOrUpdate == "create") {
+      final token = await const FlutterSecureStorage().read(key: 'accessToken');
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8000/api/items/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'account': 1,
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          'valuation': _valuationController.text,
+        }),
       );
+
+      if (response.statusCode == 201) {
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Can't create item"),
+            backgroundColor: Color.fromRGBO(255, 0, 0, 1),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2), // Customize duration as needed
+            margin: EdgeInsets.only(
+                bottom: 50.0,
+                left: 20.0,
+                right: 20.0), // Adjust margins for positioning
+          ),
+        );
+      }
+    } else {
+      final token = await const FlutterSecureStorage().read(key: 'accessToken');
+      final response = await http.patch(
+        Uri.parse('http://10.0.2.2:8000/api/items/$itemId/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          'valuation': _valuationController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Can't update item"),
+            backgroundColor: Color.fromRGBO(255, 0, 0, 1),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2), // Customize duration as needed
+            margin: EdgeInsets.only(
+                bottom: 50.0,
+                left: 20.0,
+                right: 20.0), // Adjust margins for positioning
+          ),
+        );
+      }
     }
   }
 }
 
-void showBottomDrawer(BuildContext context, accountId, Function closeCallback) {
+Future<void> deleteItem(BuildContext context, int itemId) async {
+  final token = await const FlutterSecureStorage().read(key: 'accessToken');
+  final response = await http.delete(
+    Uri.parse('http://10.0.2.2:8000/api/items/$itemId/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token'
+    },
+  );
+
+  if (response.statusCode == 204) {
+    Navigator.pop(context);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Can't create item"),
+        backgroundColor: Color.fromRGBO(255, 0, 0, 1),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 2), // Customize duration as needed
+        margin: EdgeInsets.only(
+            bottom: 50.0,
+            left: 20.0,
+            right: 20.0), // Adjust margins for positioning
+      ),
+    );
+  }
+}
+
+void showBottomDrawer(
+    {required BuildContext context,
+    required int accountId,
+    required Function closeCallback,
+    required String createOrUpdate,
+    Item? item}) {
+  if (item != null) {
+    _titleController.text = item.title;
+    _descriptionController.text = item.description;
+    _valuationController.text = item.valuation;
+  }
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Container(
         padding: const EdgeInsets.all(16.0),
-        height: 300, // Customize the height as needed
+        height: 400, // Customize the height as needed
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Create an item',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              "$createOrUpdate an item",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Form(
               key: _formKey,
@@ -115,14 +188,15 @@ void showBottomDrawer(BuildContext context, accountId, Function closeCallback) {
                             ),
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                await createItem(context, accountId);
+                                await createItem(context, accountId,
+                                    createOrUpdate, item?.id);
                                 closeCallback();
                               }
                             },
-                            child: const Text(
-                              "create an item",
-                              style:
-                                  TextStyle(color: Color.fromRGBO(0, 0, 0, 1)),
+                            child: Text(
+                              "$createOrUpdate an item",
+                              style: const TextStyle(
+                                  color: Color.fromRGBO(0, 0, 0, 1)),
                             ),
                           ),
                         ],
@@ -131,7 +205,15 @@ void showBottomDrawer(BuildContext context, accountId, Function closeCallback) {
                   ],
                 ),
               ),
-            )
+            ),
+            if (createOrUpdate == "update")
+              ElevatedButton(
+                onPressed: () async {
+                  await deleteItem(context, item!.id);
+                  closeCallback();
+                },
+                child: const Text("Delete"),
+              )
           ],
         ),
       );

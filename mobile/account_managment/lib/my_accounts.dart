@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:account_managment/components/bottom_bar.dart';
 import 'package:account_managment/components/create_item.dart';
 import 'package:account_managment/components/list_item.dart';
+import 'package:account_managment/models/item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -12,17 +13,6 @@ class MyAccounts extends StatefulWidget {
 
   @override
   _MyAccountsState createState() => _MyAccountsState();
-}
-
-class Item {
-  String title;
-  String description;
-  String valuation;
-
-  Item(
-      {required this.title,
-      required this.description,
-      required this.valuation});
 }
 
 class Account {
@@ -49,7 +39,8 @@ class _MyAccountsState extends State<MyAccounts> {
   Future<void> _retrieveList() async {
     final token = await const FlutterSecureStorage().read(key: 'accessToken');
 
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/item/'),
+    final response = await http.get(
+        Uri.parse('http://10.0.2.2:8000/api/items/'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token'
@@ -57,19 +48,16 @@ class _MyAccountsState extends State<MyAccounts> {
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
+
       setState(() {
         itemList.clear();
-        for (var item in responseData["items"]) {
+        for (var item in responseData) {
           itemList.add(Item(
+              id: item["id"],
               title: item["title"],
               description: item["description"],
               valuation: item["valuation"]));
         }
-
-        account = Account(
-          id: responseData["account"]["id"],
-          name: responseData["account"]["name"],
-        );
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +104,10 @@ class _MyAccountsState extends State<MyAccounts> {
                         ],
                       ),
                       child: ListTile(
-                        title: ListItem(item: itemList[index]),
+                        title: ListItem(
+                            item: itemList[index],
+                            callbackFn: _retrieveList,
+                            accountId: account.id),
                       ),
                     ),
                   );
@@ -128,7 +119,11 @@ class _MyAccountsState extends State<MyAccounts> {
       ),
       bottomNavigationBar: const BottomBar(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => showBottomDrawer(context, account.id, _retrieveList),
+        onPressed: () => showBottomDrawer(
+            context: context,
+            accountId: account.id,
+            closeCallback: _retrieveList,
+            createOrUpdate: "create"),
         foregroundColor: Theme.of(context).colorScheme.primary,
         backgroundColor: Theme.of(context).colorScheme.surface,
         child: const Icon(Icons.add),

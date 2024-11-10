@@ -1,12 +1,20 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
-from back_account_managment.models import Account, Item
+from back_account_managment.models import Account, Item, Profile
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ["first_name", "last_name", "salary"]
 
 class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "username", "email"]
-
+        fields = ["username", "email", "profile"]
 
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,4 +24,4 @@ class AccountSerializer(serializers.ModelSerializer):
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ["title", "description", "valuation"]
+        fields = ["id", "title", "description", "valuation", "account"]

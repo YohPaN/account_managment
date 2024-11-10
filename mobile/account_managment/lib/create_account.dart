@@ -31,44 +31,47 @@ class _CreateAccountState extends State<CreateAccount> {
   }
 
   Future<void> _fetchUserData() async {
-    try {
-      final token = await const FlutterSecureStorage().read(key: 'accessToken');
+    if (widget.createOrUpdate == "update") {
+      try {
+        final token =
+            await const FlutterSecureStorage().read(key: 'accessToken');
 
-      final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/user/'), // Adjust the URL as needed
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
-        },
-      );
+        final response = await http.get(
+          Uri.parse('http://10.0.2.2:8000/api/profile/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token'
+          },
+        );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
 
-        setState(() {
-          _usernameController.text = data['username'] ?? '';
-          _firstNameController.text = data['first_name'] ?? '';
-          _lastNameController.text = data['last_name'] ?? '';
-          _emailController.text = data['email'] ?? '';
-          _salaryController.text = data['salary'] ?? '';
-        });
-      } else {
+          setState(() {
+            _usernameController.text = data['username'] ?? '';
+            _firstNameController.text = data['profile']['first_name'] ?? '';
+            _lastNameController.text = data['profile']['last_name'] ?? '';
+            _emailController.text = data['email'] ?? '';
+            _salaryController.text = data['profile']['salary'] ?? '';
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Failed to load user data"),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to load user data"),
+          SnackBar(
+            content: Text("Error: $e"),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
     }
   }
 
@@ -79,10 +82,9 @@ class _CreateAccountState extends State<CreateAccount> {
 
       if (widget.createOrUpdate == "create") {
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:8000/api/user/'),
+          Uri.parse('http://10.0.2.2:8000/api/register/'),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token'
           },
           body: jsonEncode(<String, String>{
             'username': _usernameController.text,
@@ -94,7 +96,7 @@ class _CreateAccountState extends State<CreateAccount> {
           }),
         );
 
-        if (response.statusCode == 200) {
+        if (response.statusCode == 201) {
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -112,7 +114,7 @@ class _CreateAccountState extends State<CreateAccount> {
         }
       } else if (widget.createOrUpdate == "update") {
         final response = await http.patch(
-          Uri.parse('http://10.0.2.2:8000/api/user/'),
+          Uri.parse('http://10.0.2.2:8000/api/profile/'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token'
@@ -123,7 +125,6 @@ class _CreateAccountState extends State<CreateAccount> {
             'last_name': _lastNameController.text,
             'email': _emailController.text,
             'salary': _salaryController.text,
-            'password': _passwordController.text,
           }),
         );
 
@@ -182,11 +183,12 @@ class _CreateAccountState extends State<CreateAccount> {
                   name: "email",
                   isRequired: true,
                 ),
-                InputTextForm(
-                  controller: _passwordController,
-                  name: "password",
-                  isRequired: true,
-                ),
+                if (widget.createOrUpdate == "create")
+                  InputTextForm(
+                    controller: _passwordController,
+                    name: "password",
+                    isRequired: true,
+                  ),
                 InputTextForm(
                   controller: _salaryController,
                   name: "salary",
@@ -217,8 +219,6 @@ class _CreateAccountState extends State<CreateAccount> {
                               Color.fromARGB(255, 33, 116, 36)),
                         ),
                         onPressed: () {
-                          // Validate will return true if the form is valid, or false if
-                          // the form is invalid.
                           if (_formKey.currentState!.validate()) {
                             _handleSubmit();
                           }
