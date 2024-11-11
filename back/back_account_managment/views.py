@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from back_account_managment.serializers import UserSerializer, ItemSerializer
+from back_account_managment.serializers import UserSerializer, ItemSerializer, AccountSerializer
 from back_account_managment import models
 from rest_framework import permissions, status
 from django.contrib.auth.hashers import make_password
@@ -67,7 +67,6 @@ class RegisterView(APIView):
 
     def post(self, request):
         data = request.data
-        print(data, flush=True)
 
         try:
             user = User.objects.create_user(
@@ -110,3 +109,8 @@ class IsLoggedView(APIView):
 class ItemView(ModelViewSet):
     queryset = models.Item.objects.all()
     serializer_class = ItemSerializer
+
+
+class AccountView(ModelViewSet):
+    queryset = models.Account.objects.all()
+    serializer_class = AccountSerializer

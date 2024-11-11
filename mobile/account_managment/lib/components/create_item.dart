@@ -24,7 +24,7 @@ Future<void> createItem(BuildContext context, int accountId,
           'Authorization': 'Bearer $token'
         },
         body: jsonEncode(<String, dynamic>{
-          'account': 1,
+          'account': accountId,
           'title': _titleController.text,
           'description': _descriptionController.text,
           'valuation': _valuationController.text,
@@ -113,7 +113,7 @@ Future<void> deleteItem(BuildContext context, int itemId) async {
 void showBottomDrawer(
     {required BuildContext context,
     required int accountId,
-    required Function closeCallback,
+    required Function(int) closeCallback,
     required String createOrUpdate,
     Item? item}) {
   if (item != null) {
@@ -190,7 +190,7 @@ void showBottomDrawer(
                               if (_formKey.currentState!.validate()) {
                                 await createItem(context, accountId,
                                     createOrUpdate, item?.id);
-                                closeCallback();
+                                closeCallback(accountId);
                               }
                             },
                             child: Text(
@@ -210,7 +210,7 @@ void showBottomDrawer(
               ElevatedButton(
                 onPressed: () async {
                   await deleteItem(context, item!.id);
-                  closeCallback();
+                  closeCallback(accountId);
                 },
                 child: const Text("Delete"),
               )

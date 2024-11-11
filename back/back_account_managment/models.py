@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Sum
-import uuid 
+import uuid
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -22,9 +22,12 @@ class Account(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def items(self):
+        return Item.objects.filter(account=self.pk)
+
     def total(self):
         return Item.objects.filter(account=self.pk).aggregate(total_sum=Sum('valuation'))
-
+    
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
 
@@ -35,4 +38,3 @@ class Item(models.Model):
     valuation = models.DecimalField(max_digits=5, decimal_places=2)
 
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-

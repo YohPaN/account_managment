@@ -16,12 +16,14 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["username", "email", "profile"]
 
-class AccountSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-        fields = ["id", "name", "total"]
-
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ["id", "title", "description", "valuation", "account"]
+
+class AccountSerializer(serializers.ModelSerializer):
+    items = ItemSerializer(many=True)
+    class Meta:
+        model = Account
+        fields = ["id", "name", "total", "items"]
+

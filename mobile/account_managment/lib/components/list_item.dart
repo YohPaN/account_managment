@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class ListItem extends StatelessWidget {
   final Item item;
-  final Function callbackFn;
+  final Function(int) callbackFn;
   int accountId;
   ListItem(
       {super.key,
@@ -27,13 +27,13 @@ class ListItem extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: Text(item.valuation + "€"),
+          child: Text("${item.valuation}€"),
         ),
         IconButton(
             onPressed: () => showBottomDrawer(
                 context: context,
                 accountId: accountId,
-                closeCallback: callbackFn,
+                closeCallback: (int accountId) => callbackFn(accountId),
                 createOrUpdate: "update",
                 item: item),
             icon: const Icon(Icons.mode))
