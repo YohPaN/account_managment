@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
-class CreateAccount extends StatefulWidget {
+class CreateProfile extends StatefulWidget {
   final String createOrUpdate;
 
-  const CreateAccount({super.key, required this.createOrUpdate});
+  const CreateProfile({super.key, required this.createOrUpdate});
 
   @override
-  _CreateAccountState createState() => _CreateAccountState();
+  _CreateProfileState createState() => _CreateProfileState();
 }
 
-class _CreateAccountState extends State<CreateAccount> {
+class _CreateProfileState extends State<CreateProfile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _usernameController = TextEditingController();

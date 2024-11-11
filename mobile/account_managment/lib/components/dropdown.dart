@@ -45,29 +45,31 @@ class _DropdownState extends State<Dropdown> {
 
   @override
   Widget build(BuildContext context) {
-    if (accounts.isEmpty) {
-      return DropdownButton<String>(
-        items: const [
-          DropdownMenuItem(
-            value: null,
-            child: Text("No accounts available"),
-          ),
-        ],
-        onChanged: (value) {},
-      );
-    }
-    return DropdownMenu<Account>(
-      initialSelection: accounts.first,
-      onSelected: (Account? value) {
-        setState(() {
-          dropdownValue = accounts.first.name;
-          widget.selectAccount(value);
-        });
-      },
-      dropdownMenuEntries:
-          accounts.map<DropdownMenuEntry<Account>>((Account value) {
-        return DropdownMenuEntry<Account>(value: value, label: value.name);
-      }).toList(),
+    return Container(
+      child: accounts.isEmpty
+          ? DropdownButton<String>(
+              items: const [
+                DropdownMenuItem(
+                  value: null,
+                  child: Text("No accounts available"),
+                ),
+              ],
+              onChanged: (value) {},
+            )
+          : DropdownMenu<Account>(
+              initialSelection: accounts.first,
+              onSelected: (Account? value) {
+                setState(() {
+                  dropdownValue = accounts.first.name;
+                  widget.selectAccount(value);
+                });
+              },
+              dropdownMenuEntries:
+                  accounts.map<DropdownMenuEntry<Account>>((Account value) {
+                return DropdownMenuEntry<Account>(
+                    value: value, label: value.name);
+              }).toList(),
+            ),
     );
   }
 }

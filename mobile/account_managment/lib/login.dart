@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:account_managment/components/input_text_form.dart';
-import 'package:account_managment/create_account.dart';
+import 'package:account_managment/create_profile.dart';
 import 'package:account_managment/my_accounts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const CreateAccount(
+                                  builder: (context) => const CreateProfile(
                                       createOrUpdate: 'create')));
                         },
                         child: const Text(

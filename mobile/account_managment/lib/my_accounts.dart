@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:account_managment/components/bottom_bar.dart';
+import 'package:account_managment/components/create_account.dart';
 import 'package:account_managment/components/create_item.dart';
 import 'package:account_managment/components/dropdown.dart';
 import 'package:account_managment/components/list_item.dart';
@@ -82,9 +83,18 @@ class _MyAccountsState extends State<MyAccounts> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(selectedAccount != null ? selectedAccount!.name : ""),
-                  Container(child: Dropdown(selectAccount: selectAccount))
+                  Container(child: Dropdown(selectAccount: selectAccount)),
+                  ElevatedButton(
+                      onPressed: () =>
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const CreateAccount(
+                              createOrUpdate: 'create',
+                            ),
+                          )),
+                      child: const Icon(Icons.add))
                 ],
               ),
             ),

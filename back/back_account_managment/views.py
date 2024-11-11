@@ -7,6 +7,7 @@ from back_account_managment import models
 from rest_framework import permissions, status
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
+from back_account_managment.serializers import ManageAccountSerializer
 
 User = get_user_model()
 
@@ -114,3 +115,15 @@ class ItemView(ModelViewSet):
 class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
+
+    def create(self, request, *args, **kwargs):
+        data = {"name": request.data["name"], "user": request.user.id}
+        serializer = ManageAccountSerializer(data=data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            return Response(status=status.HTTP_201_CREATED)
+        
+        # Return errors if validation fails
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

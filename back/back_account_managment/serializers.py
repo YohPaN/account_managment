@@ -27,3 +27,8 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ["id", "name", "total", "items"]
 
+class ManageAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ["id", "name", "user"]
+

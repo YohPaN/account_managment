@@ -1,4 +1,4 @@
-import 'package:account_managment/create_account.dart';
+import 'package:account_managment/create_profile.dart';
 import 'package:flutter/material.dart';
 
 class BottomBar extends StatelessWidget {
@@ -26,7 +26,7 @@ class BottomBar extends StatelessWidget {
               child: IconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const CreateAccount(
+                  builder: (context) => const CreateProfile(
                     createOrUpdate: 'update',
                   ),
                 )),
