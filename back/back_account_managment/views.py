@@ -1,3 +1,4 @@
+import back_account_managment.models
 from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +9,8 @@ from rest_framework import permissions, status
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from back_account_managment.serializers import ManageAccountSerializer
+from rest_framework.decorators import action
+from back_account_managment.models import Account
 
 User = get_user_model()
 
@@ -30,6 +33,31 @@ class UserView(ModelViewSet):
     queryset = User.objects.all()
     serializer_class  = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=False, methods=['get'], url_path='me')
+    def get_current_user(self, request):
+        user = request.user
+        serializer = self.serializer_class(user)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['patch'], url_path='me/update')
+    def update_current_user(self, request):
+        user = request.user
+        profile = user.profile
+
+        user.username = request.data["username"]
+        user.password = request.data["password"]
+        user.email = request.data["email"]
+        user.save()
+
+        profile.first_name = request.data["first_name"]
+        profile.last_name = request.data["last_name"]
+        profile.salary = request.data["salary"]
+        profile.save()
+
+        serializer = self.serializer_class(user)
+
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 class ProfileView(ModelViewSet):
     queryset = models.Profile.objects.all()
@@ -115,6 +143,19 @@ class ItemView(ModelViewSet):
 class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
+
+    @action(detail=True, methods=['get'], url_path="items")
+    def get_items(self, request, pk=None):
+        try:
+            account = Account.objects.get(pk=pk)
+        except models.Account.DoesNotExist:
+            return Response({"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        items = account.items()
+        
+        serializer = ItemSerializer(items, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         data = {"name": request.data["name"], "user": request.user.id}
