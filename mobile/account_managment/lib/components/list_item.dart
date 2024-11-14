@@ -1,16 +1,14 @@
-import 'package:account_managment/components/create_item.dart';
+import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:flutter/material.dart';
 
 class ListItem extends StatelessWidget {
   final Item item;
-  final Function(int) callbackFn;
-  int accountId;
-  ListItem(
-      {super.key,
-      required this.item,
-      required this.callbackFn,
-      required this.accountId});
+
+  ListItem({
+    super.key,
+    required this.item,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +19,10 @@ class ListItem extends StatelessWidget {
             padding: const EdgeInsets.only(left: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(item.title), Text(item.description)],
+              children: [
+                Text(item.title),
+                Text(item.description),
+              ],
             ),
           ),
         ),
@@ -30,13 +31,27 @@ class ListItem extends StatelessWidget {
           child: Text("${item.valuation}€"),
         ),
         IconButton(
-            onPressed: () => showBottomDrawer(
-                context: context,
-                accountId: accountId,
-                closeCallback: (int accountId) => callbackFn(accountId),
-                createOrUpdate: "update",
-                item: item),
-            icon: const Icon(Icons.mode))
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              isScrollControlled:
+                  true, // Makes the bottom sheet full-screen if needed
+              builder: (BuildContext context) {
+                return ItemDrawer(
+                  closeCallback: () {
+                    Navigator.pop(context); // Close the bottom sheet
+                  },
+                  action: "update",
+                  item: item,
+                );
+              },
+            );
+          },
+          icon: const Icon(Icons.mode),
+        ),
       ],
     );
   }
