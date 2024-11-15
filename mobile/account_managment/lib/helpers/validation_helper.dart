@@ -70,8 +70,9 @@ class ValidationHelper {
 
   static String? twoDigitMax(value) {
     final comaPlace = value.indexOf('.');
+    final numberOfDecimal = value.substring(comaPlace + 1).length;
 
-    if (value.substring(comaPlace + 1).length > 2) {
+    if (comaPlace != -1 && numberOfDecimal > 2) {
       return "Value must contain only 2 decimal";
     }
     return null;
