@@ -28,29 +28,34 @@ class AccountScreen extends StatelessWidget {
           : Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: itemViewModel.items?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5.0),
-                            color: Colors.white,
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black,
-                                offset: Offset(0.0, 1.0),
-                                blurRadius: 4.0,
-                              ),
-                            ],
+                  child: RefreshIndicator(
+                    onRefresh: () async => {await itemViewModel.list()},
+                    child: ListView.builder(
+                      itemCount: itemViewModel.items?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              left: 16, right: 16, top: 8, bottom: 8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Colors.white,
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  offset: Offset(0.0, 1.0),
+                                  blurRadius: 4.0,
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              title:
+                                  ListItem(item: itemViewModel.items![index]),
+                            ),
                           ),
-                          child: ListTile(
-                            title: ListItem(item: itemViewModel.items![index]),
-                          ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
