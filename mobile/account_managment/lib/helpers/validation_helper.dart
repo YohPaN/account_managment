@@ -6,6 +6,7 @@ class ValidationHelper {
     "validEmail": validEmail,
     "validDouble": validDouble,
     "validTextOrDigitOnly": validTextOrDigitOnly,
+    "twoDigitMax": twoDigitMax,
   };
 
   static String? validateInput(dynamic value, List<String> rules) {
@@ -65,5 +66,14 @@ class ValidationHelper {
     } catch (e) {
       return "It must be a valid number";
     }
+  }
+
+  static String? twoDigitMax(value) {
+    final comaPlace = value.indexOf('.');
+
+    if (value.substring(comaPlace + 1).length > 2) {
+      return "Value must contain only 2 decimal";
+    }
+    return null;
   }
 }

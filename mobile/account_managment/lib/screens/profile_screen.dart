@@ -104,8 +104,8 @@ class ProfileScreen extends StatelessWidget {
                   controller: salaryController,
                   maxLength: 15,
                   decoration: const InputDecoration(labelText: 'Salary'),
-                  validator: (value) =>
-                      ValidationHelper.validateInput(value, ["validDouble"]),
+                  validator: (value) => ValidationHelper.validateInput(
+                      value, ["validDouble", "twoDigitMax"]),
                 ),
                 //TODO: add max length when password will be manage
                 TextFormField(
