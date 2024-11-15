@@ -81,7 +81,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               decoration: const InputDecoration(labelText: 'Valuation'),
               maxLength: 15,
               validator: (value) => ValidationHelper.validateInput(
-                  value, ["notEmpty", "notNull", "validDouble"]),
+                  value, ["notEmpty", "notNull", "validDouble", "twoDigitMax"]),
             ),
             const SizedBox(height: 16),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
