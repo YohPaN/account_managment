@@ -18,7 +18,7 @@ class AccountViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchAccount(int accountId) async {
+  Future<void> fetchAccount([int? accountId]) async {
     _account = await accountRepository.getAccount(accountId);
     notifyListeners();
   }

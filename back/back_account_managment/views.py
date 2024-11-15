@@ -1,33 +1,15 @@
-import back_account_managment.models
-from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from back_account_managment.serializers import UserSerializer, ItemSerializer, AccountSerializer
 from back_account_managment import models
-from rest_framework import permissions, status
-from django.contrib.auth.hashers import make_password
+from rest_framework import status, permissions
 from django.contrib.auth import get_user_model
 from back_account_managment.serializers import ManageAccountSerializer
 from rest_framework.decorators import action
 from back_account_managment.models import Account
 
 User = get_user_model()
-
-# Create your views here.
-class LoginView(APIView):
-    def post(self, request):
-        data = request.data
-        username = data["username"]
-        password = data["password"]
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 class UserView(ModelViewSet):
     queryset = User.objects.all()
@@ -124,17 +106,6 @@ class RegisterView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-class IsLoggedView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def get(self, request):
-        data = {"is_logged": False}
-
-        if request.user.is_authenticated:
-            data["is_logged"] = True
-
-        return Response(status=status.HTTP_200_OK, data=data)
-    
 class ItemView(ModelViewSet):
     queryset = models.Item.objects.all()
     serializer_class = ItemSerializer
@@ -143,6 +114,19 @@ class ItemView(ModelViewSet):
 class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
+
+    @action(detail=False, methods=['get'], url_path="me")
+    def get_current_user_account(self, request, pk=None):
+        user = request.user
+
+        try:
+            account = Account.objects.get(user=user)
+        except models.Account.DoesNotExist:
+            return Response({"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(account)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], url_path="items")
     def get_items(self, request, pk=None):
