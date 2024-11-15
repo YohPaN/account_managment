@@ -36,7 +36,7 @@ class Layout extends StatelessWidget {
           // Navigate to different routes based on button index
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/');
+              // Navigator.pushNamed(context, '/');
               break;
             case 1:
               Navigator.pushNamed(
@@ -46,7 +46,7 @@ class Layout extends StatelessWidget {
               );
               break;
             case 2:
-              Navigator.pushNamed(context, '/settings');
+              // Navigator.pushNamed(context, '/settings');
               break;
           }
         },

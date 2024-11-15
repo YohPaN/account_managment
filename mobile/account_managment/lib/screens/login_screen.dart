@@ -47,7 +47,7 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/profile');
+                Navigator.pushNamed(context, '/profile');
               },
               child: const Text("Create account"),
             ),

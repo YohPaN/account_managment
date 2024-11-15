@@ -22,7 +22,6 @@ class AccountScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Account Details')),
       body: accountViewModel.account == null || itemViewModel.items == null
           ? const Center(child: CircularProgressIndicator())
           : Column(
