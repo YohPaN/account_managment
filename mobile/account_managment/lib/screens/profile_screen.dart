@@ -28,21 +28,22 @@ class ProfileScreen extends StatelessWidget {
     final action =
         (args != null && args['update'] == true) ? 'update' : 'create';
 
-    if ((profile == null || user == null) && action == "update") {
-      profileViewModel.get();
-      user = profileViewModel.user;
-      profile = profileViewModel.profile;
-    }
+    if (action == "update") {
+      if ((profile == null || user == null)) {
+        profileViewModel.get();
+        user = profileViewModel.user;
+        profile = profileViewModel.profile;
+      }
 
-    if (profile != null && user != null) {
-      usernameController.text = user.username;
-      firstNameController.text = profile.firstName;
-      lastNameController.text = profile.lastName;
-      emailController.text = user.email;
-      salaryController.text = profile.salary.toString();
-      passwordController.text = user.password;
+      if (profile != null && user != null) {
+        usernameController.text = user.username;
+        firstNameController.text = profile.firstName;
+        lastNameController.text = profile.lastName;
+        emailController.text = user.email;
+        salaryController.text = profile.salary.toString();
+        passwordController.text = user.password;
+      }
     }
-
     createOrUpdate() async {
       late Function(String, String, String, String, String, String)
           actionFunction;
@@ -73,28 +74,28 @@ class ProfileScreen extends StatelessWidget {
             children: [
               TextFormField(
                 controller: firstNameController,
-                maxLength: 50,
+                maxLength: 15,
                 decoration: const InputDecoration(labelText: 'First name'),
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull", "validTextOnly"]),
               ),
               TextFormField(
                 controller: lastNameController,
-                maxLength: 50,
+                maxLength: 15,
                 decoration: const InputDecoration(labelText: 'Last name'),
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull", "validTextOnly"]),
               ),
               TextFormField(
                 controller: usernameController,
-                maxLength: 50,
+                maxLength: 15,
                 decoration: const InputDecoration(labelText: 'Username'),
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
               ),
               TextFormField(
                   controller: emailController,
-                  maxLength: 100,
+                  maxLength: 50,
                   decoration: const InputDecoration(labelText: 'Email'),
                   validator: (value) => ValidationHelper.validateInput(
                       value, ["notEmpty", "notNull", "validEmail"])),
@@ -102,8 +103,8 @@ class ProfileScreen extends StatelessWidget {
                 controller: salaryController,
                 maxLength: 15,
                 decoration: const InputDecoration(labelText: 'Salary'),
-                validator: (value) => ValidationHelper.validateInput(
-                    value, ["notEmpty", "notNull", "validDouble"]),
+                validator: (value) =>
+                    ValidationHelper.validateInput(value, ["validDouble"]),
               ),
               //TODO: add max length when password will be manage
               TextFormField(
