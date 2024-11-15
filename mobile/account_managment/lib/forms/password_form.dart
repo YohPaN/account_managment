@@ -1,5 +1,5 @@
+import 'package:account_managment/components/icon_visibility.dart';
 import 'package:account_managment/helpers/pwd_validation_helper.dart';
-import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,10 +20,21 @@ class _PasswordFormState extends State<PasswordForm> {
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController retypePasswordController =
       TextEditingController();
+  final Map<String, bool> _passwordVisibility = {
+    "old": true,
+    "new": true,
+    "retype": true,
+  };
 
   @override
   Widget build(BuildContext context) {
     final profileViewModel = Provider.of<ProfileViewModel>(context);
+
+    void togglePasswordVisibility(String key) {
+      setState(() {
+        _passwordVisibility[key] = !_passwordVisibility[key]!;
+      });
+    }
 
     return Form(
       key: _formKey,
@@ -32,9 +43,15 @@ class _PasswordFormState extends State<PasswordForm> {
           if (widget.action == "update")
             TextFormField(
               controller: oldPasswordController,
-              decoration: const InputDecoration(labelText: 'Old password'),
+              decoration: InputDecoration(
+                labelText: 'Old password',
+                suffixIcon: IconButton(
+                    onPressed: () => togglePasswordVisibility("old"),
+                    icon: IconVisibility(
+                        visibility: _passwordVisibility["old"]!)),
+              ),
               maxLength: 50,
-              obscureText: true,
+              obscureText: _passwordVisibility["old"]!,
               validator: (value) => PwdValidationHelper.validatePassword(
                 password: value!,
               ),
@@ -42,9 +59,15 @@ class _PasswordFormState extends State<PasswordForm> {
           const SizedBox(height: 16),
           TextFormField(
             controller: newPasswordController,
-            decoration: const InputDecoration(labelText: 'New password'),
+            decoration: InputDecoration(
+              labelText: 'New password',
+              suffixIcon: IconButton(
+                onPressed: () => togglePasswordVisibility("new"),
+                icon: IconVisibility(visibility: _passwordVisibility["new"]!),
+              ),
+            ),
             maxLength: 50,
-            obscureText: true,
+            obscureText: _passwordVisibility["new"]!,
             validator: (value) => PwdValidationHelper.validatePassword(
               password: value!,
               comparisonDifferent: oldPasswordController.text,
@@ -53,9 +76,15 @@ class _PasswordFormState extends State<PasswordForm> {
           const SizedBox(height: 16),
           TextFormField(
             controller: retypePasswordController,
-            decoration: const InputDecoration(labelText: 'Retype password'),
+            decoration: InputDecoration(
+                labelText: 'Retype password',
+                suffixIcon: IconButton(
+                  onPressed: () => togglePasswordVisibility("retype"),
+                  icon: IconVisibility(
+                      visibility: _passwordVisibility["retype"]!),
+                )),
             maxLength: 50,
-            obscureText: true,
+            obscureText: _passwordVisibility["retype"]!,
             validator: (value) => PwdValidationHelper.validatePassword(
                 password: value!, comparisonSame: newPasswordController.text),
           ),
