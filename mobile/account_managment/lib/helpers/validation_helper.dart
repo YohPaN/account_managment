@@ -1,20 +1,56 @@
 class ValidationHelper {
-  static String? notNullAndNotEmpty(value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter some text';
+  static final Map<String, Function> rulesFunction = {
+    "notEmpty": notEmpty,
+    "notNull": notNull,
+    "validTextOnly": validTextOnly,
+    "validEmail": validEmail,
+    "validDouble": validDouble,
+    "validTextOrDigitOnly": validTextOrDigitOnly,
+  };
+
+  static String? validateInput(dynamic value, List<String> rules) {
+    for (var rule in rules) {
+      Function ruleFunction = rulesFunction[rule]!;
+
+      final result = ruleFunction(value);
+
+      if (result != null) {
+        return result;
+      }
+    }
+  }
+
+  static String? notEmpty(value) {
+    if (value.isEmpty) {
+      return 'This field can\'t be empty';
     }
     return null;
   }
 
-  static String? valideTextOnly(value) {
+  static String? notNull(value) {
+    if (value == null) {
+      return 'The value can\'t be null';
+    }
+    return null;
+  }
+
+  static String? validTextOnly(value) {
     RegExp regExp = RegExp(r'^[a-zA-Z]+$');
-    if (!regExp.hasMatch(value) && (value != null || !value.isEmpty)) {
+    if (!regExp.hasMatch(value)) {
       return 'Please enter only text';
     }
     return null;
   }
 
-  static String? valideEmail(value) {
+  static String? validTextOrDigitOnly(value) {
+    RegExp regExp = RegExp(r'^[a-zA-Z0-9]+$');
+    if (!regExp.hasMatch(value)) {
+      return 'Please enter only text or numbers';
+    }
+    return null;
+  }
+
+  static String? validEmail(value) {
     RegExp regExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!regExp.hasMatch(value)) {
       return 'Please enter valid email';
@@ -30,8 +66,4 @@ class ValidationHelper {
       return "It must be a valid number";
     }
   }
-
-  //TODO: validate number and digit for name for exemple
-  //TODO: validation for username because it could have special char ? and digit
-  //TODO: can chain validation method
 }

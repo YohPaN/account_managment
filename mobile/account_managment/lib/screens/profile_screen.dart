@@ -75,41 +75,42 @@ class ProfileScreen extends StatelessWidget {
                 controller: firstNameController,
                 maxLength: 50,
                 decoration: const InputDecoration(labelText: 'First name'),
-                validator: (value) => ValidationHelper.valideTextOnly(value),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOnly"]),
               ),
               TextFormField(
                 controller: lastNameController,
                 maxLength: 50,
                 decoration: const InputDecoration(labelText: 'Last name'),
-                validator: (value) =>
-                    ValidationHelper.notNullAndNotEmpty(value),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOnly"]),
               ),
               TextFormField(
                 controller: usernameController,
                 maxLength: 50,
                 decoration: const InputDecoration(labelText: 'Username'),
-                validator: (value) =>
-                    ValidationHelper.notNullAndNotEmpty(value),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
               ),
               TextFormField(
-                controller: emailController,
-                maxLength: 100,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) => ValidationHelper.valideEmail(value),
-              ),
+                  controller: emailController,
+                  maxLength: 100,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (value) => ValidationHelper.validateInput(
+                      value, ["notEmpty", "notNull", "validEmail"])),
               TextFormField(
                 controller: salaryController,
                 maxLength: 15,
                 decoration: const InputDecoration(labelText: 'Salary'),
-                validator: (value) => ValidationHelper.validDouble(value),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validDouble"]),
               ),
               //TODO: add max length when password will be manage
               TextFormField(
                 controller: passwordController,
                 decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
-                validator: (value) =>
-                    ValidationHelper.notNullAndNotEmpty(value),
+                // validator: (value) => {}
               ),
               const SizedBox(height: 16),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
