@@ -20,9 +20,9 @@ class AuthRepository {
         'password': password,
       }),
     );
-
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
+
       accessToken = responseData['access'];
       refreshToken = responseData['refresh'];
 

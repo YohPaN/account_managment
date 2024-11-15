@@ -31,13 +31,24 @@ class AccountRepository {
     return accounts;
   }
 
-  Future<Account?> getAccount(int accountId) async {
-    final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/accounts/$accountId/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${authViewModel.accessToken}'
-        });
+  Future<Account?> getAccount(int? accountId) async {
+    var response;
+
+    if (accountId != null) {
+      response = await http.get(
+          Uri.parse('http://10.0.2.2:8000/api/accounts/$accountId/'),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${authViewModel.accessToken}'
+          });
+    } else {
+      response = await http.get(
+          Uri.parse('http://10.0.2.2:8000/api/accounts/me/'),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${authViewModel.accessToken}'
+          });
+    }
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);

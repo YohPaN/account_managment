@@ -14,7 +14,7 @@ class AccountScreen extends StatelessWidget {
     final itemViewModel = Provider.of<ItemViewModel>(context);
 
     if (accountViewModel.account == null) {
-      accountViewModel.fetchAccount(1);
+      accountViewModel.fetchAccount();
     }
 
     if (accountViewModel.account != null && itemViewModel.items == null) {
