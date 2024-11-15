@@ -3,6 +3,7 @@ import 'package:account_managment/models/user.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:account_managment/helpers/validation_helper.dart';
 
 class ProfileScreen extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -17,6 +18,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profileViewModel = Provider.of<ProfileViewModel>(context);
+    final _formKey = GlobalKey<FormState>();
 
     User? user = profileViewModel.user;
     Profile? profile = profileViewModel.profile;
@@ -65,57 +67,77 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(title: Text("$action your account")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: firstNameController,
-              decoration: const InputDecoration(labelText: 'First name'),
-            ),
-            TextField(
-              controller: lastNameController,
-              decoration: const InputDecoration(labelText: 'Last name'),
-            ),
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: salaryController,
-              decoration: const InputDecoration(labelText: 'Salary'),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/');
-                },
-                child: const Text("Back"),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: firstNameController,
+                maxLength: 50,
+                decoration: const InputDecoration(labelText: 'First name'),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOnly"]),
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  await createOrUpdate();
-
-                  if (profileViewModel.profile != null) {
+              TextFormField(
+                controller: lastNameController,
+                maxLength: 50,
+                decoration: const InputDecoration(labelText: 'Last name'),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOnly"]),
+              ),
+              TextFormField(
+                controller: usernameController,
+                maxLength: 50,
+                decoration: const InputDecoration(labelText: 'Username'),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
+              ),
+              TextFormField(
+                  controller: emailController,
+                  maxLength: 100,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (value) => ValidationHelper.validateInput(
+                      value, ["notEmpty", "notNull", "validEmail"])),
+              TextFormField(
+                controller: salaryController,
+                maxLength: 15,
+                decoration: const InputDecoration(labelText: 'Salary'),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validDouble"]),
+              ),
+              //TODO: add max length when password will be manage
+              TextFormField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                // validator: (value) => {}
+              ),
+              const SizedBox(height: 16),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                ElevatedButton(
+                  onPressed: () {
                     Navigator.pushReplacementNamed(context, '/');
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Can't $action profile")),
-                    );
-                  }
-                },
-                child: Text("$action my account"),
-              ),
-            ])
-          ],
+                  },
+                  child: const Text("Back"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      await createOrUpdate();
+                      if (profileViewModel.profile != null) {
+                        Navigator.pushReplacementNamed(context, '/');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Can't $action profile")),
+                        );
+                      }
+                    }
+                  },
+                  child: Text("$action my account"),
+                ),
+              ])
+            ],
+          ),
         ),
       ),
     );
