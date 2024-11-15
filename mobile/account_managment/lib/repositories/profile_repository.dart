@@ -97,4 +97,19 @@ class ProfileRepository {
 
     return null;
   }
+
+  Future<Map<String, dynamic>?> updatePassword(
+      String oldPassword, String newPassword) async {
+    final response = await http.patch(
+      Uri.parse('http://10.0.2.2:8000/api/users/password/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${authViewModel.accessToken}'
+      },
+      body: jsonEncode(<String, String>{
+        'old_password': oldPassword,
+        'new_password': newPassword,
+      }),
+    );
+  }
 }
