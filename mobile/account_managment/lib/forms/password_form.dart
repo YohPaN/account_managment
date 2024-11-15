@@ -77,12 +77,13 @@ class _PasswordFormState extends State<PasswordForm> {
           TextFormField(
             controller: retypePasswordController,
             decoration: InputDecoration(
-                labelText: 'Retype password',
-                suffixIcon: IconButton(
-                  onPressed: () => togglePasswordVisibility("retype"),
-                  icon: IconVisibility(
-                      visibility: _passwordVisibility["retype"]!),
-                )),
+              labelText: 'Retype password',
+              suffixIcon: IconButton(
+                onPressed: () => togglePasswordVisibility("retype"),
+                icon:
+                    IconVisibility(visibility: _passwordVisibility["retype"]!),
+              ),
+            ),
             maxLength: 50,
             obscureText: _passwordVisibility["retype"]!,
             validator: (value) => PwdValidationHelper.validatePassword(
