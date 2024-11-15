@@ -71,79 +71,66 @@ class ProfileScreen extends StatelessWidget {
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: firstNameController,
-                  maxLength: 15,
-                  decoration: const InputDecoration(labelText: 'First name'),
-                  validator: (value) => ValidationHelper.validateInput(
-                      value, ["notEmpty", "notNull", "validTextOnly"]),
-                ),
-                TextFormField(
-                  controller: lastNameController,
-                  maxLength: 15,
-                  decoration: const InputDecoration(labelText: 'Last name'),
-                  validator: (value) => ValidationHelper.validateInput(
-                      value, ["notEmpty", "notNull", "validTextOnly"]),
-                ),
-                TextFormField(
-                  controller: usernameController,
-                  maxLength: 15,
-                  decoration: const InputDecoration(labelText: 'Username'),
-                  validator: (value) => ValidationHelper.validateInput(
-                      value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
-                ),
-                TextFormField(
-                    controller: emailController,
-                    maxLength: 50,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (value) => ValidationHelper.validateInput(
-                        value, ["notEmpty", "notNull", "validEmail"])),
-                TextFormField(
-                  controller: salaryController,
-                  maxLength: 15,
-                  decoration: const InputDecoration(labelText: 'Salary'),
-                  validator: (value) => ValidationHelper.validateInput(
-                      value, ["validDouble", "twoDigitMax"]),
-                ),
-                //TODO: add max length when password will be manage
-                TextFormField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  // validator: (value) => {}
-                ),
-                const SizedBox(height: 16),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/');
-                        },
-                        child: const Text("Back"),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            await createOrUpdate();
-                            if (profileViewModel.profile != null) {
-                              Navigator.pushReplacementNamed(context, '/');
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text("Can't $action profile")),
-                              );
-                            }
-                          }
-                        },
-                        child: Text("$action my account"),
-                      ),
-                    ])
-              ],
+              child: Column(children: [
+            TextFormField(
+              controller: firstNameController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'First name'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["notEmpty", "notNull", "validTextOnly"]),
             ),
-          ),
+            TextFormField(
+              controller: lastNameController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'Last name'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["notEmpty", "notNull", "validTextOnly"]),
+            ),
+            TextFormField(
+              controller: usernameController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'Username'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
+            ),
+            TextFormField(
+                controller: emailController,
+                maxLength: 50,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validEmail"])),
+            TextFormField(
+              controller: salaryController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'Salary'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["validDouble", "twoDigitMax"]),
+            ),
+            //TODO: add max length when password will be manage
+            TextFormField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+              // validator: (value) => {}
+            ),
+            const SizedBox(height: 16),
+
+            ElevatedButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  await createOrUpdate();
+                  if (profileViewModel.profile != null) {
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Can't $action profile")),
+                    );
+                  }
+                }
+              },
+              child: Text("$action my account"),
+            ),
+          ])),
         ),
       ),
     );
