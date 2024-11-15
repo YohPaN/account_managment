@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from back_account_managment.serializers import ManageAccountSerializer
 from rest_framework.decorators import action
 from back_account_managment.models import Account
-
+from django.contrib.auth.hashers import check_password, make_password
 User = get_user_model()
 
 class UserView(ModelViewSet):
@@ -40,6 +40,21 @@ class UserView(ModelViewSet):
         serializer = self.serializer_class(user)
 
         return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+    @action(detail=False, methods=['patch'], url_path='password')
+    def update_password(self, request):
+        user = request.user
+        old_password = request.data["old_password"]
+        new_password = request.data["new_password"]
+
+        if(check_password(old_password, user.password)):
+            user.password = make_password(new_password)
+            user.save()
+
+            return Response(status=status.HTTP_200_OK)
+        
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 class ProfileView(ModelViewSet):
     queryset = models.Profile.objects.all()
