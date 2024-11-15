@@ -1,3 +1,5 @@
+import 'package:account_managment/components/password_drawer.dart';
+import 'package:account_managment/helpers/pwd_validation_helper.dart';
 import 'package:account_managment/models/profile.dart';
 import 'package:account_managment/models/user.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
@@ -11,7 +13,9 @@ class ProfileScreen extends StatelessWidget {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController salaryController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController retypePasswordController =
+      TextEditingController();
 
   ProfileScreen({super.key});
 
@@ -41,7 +45,6 @@ class ProfileScreen extends StatelessWidget {
         lastNameController.text = profile.lastName;
         emailController.text = user.email;
         salaryController.text = profile.salary.toString();
-        passwordController.text = user.password;
       }
     }
     createOrUpdate() async {
@@ -60,7 +63,7 @@ class ProfileScreen extends StatelessWidget {
         lastNameController.text,
         emailController.text,
         salaryController.text,
-        passwordController.text,
+        newPasswordController.text,
       );
     }
 
@@ -106,15 +109,46 @@ class ProfileScreen extends StatelessWidget {
               validator: (value) => ValidationHelper.validateInput(
                   value, ["validDouble", "twoDigitMax"]),
             ),
-            //TODO: add max length when password will be manage
-            TextFormField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-              // validator: (value) => {}
-            ),
+            if (action == "create")
+              TextFormField(
+                controller: newPasswordController,
+                decoration: const InputDecoration(labelText: 'New password'),
+                maxLength: 50,
+                obscureText: true,
+                validator: (value) =>
+                    PwdValidationHelper.validatePassword(password: value!),
+              ),
             const SizedBox(height: 16),
-
+            if (action == "create")
+              TextFormField(
+                controller: retypePasswordController,
+                decoration: const InputDecoration(labelText: 'Retype password'),
+                maxLength: 50,
+                obscureText: true,
+                validator: (value) => PwdValidationHelper.validatePassword(
+                    password: value!,
+                    comparisonSame: newPasswordController.text),
+              ),
+            const SizedBox(height: 16),
+            if (action == "update")
+              ElevatedButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (BuildContext context) {
+                      return PasswordDrawerState(
+                        action: action,
+                      );
+                    },
+                  );
+                },
+                child: const Text("Update my password"),
+              ),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {

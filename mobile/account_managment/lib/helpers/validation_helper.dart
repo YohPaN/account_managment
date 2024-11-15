@@ -60,12 +60,15 @@ class ValidationHelper {
   }
 
   static String? validDouble(value) {
-    try {
-      double.parse(value);
-      return null;
-    } catch (e) {
-      return "It must be a valid number";
+    if (value != null && value != "") {
+      try {
+        double.parse(value);
+      } catch (e) {
+        return "It must be a valid number";
+      }
     }
+
+    return null;
   }
 
   static String? twoDigitMax(value) {
