@@ -84,24 +84,28 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   value, ["notEmpty", "notNull", "validDouble", "twoDigitMax"]),
             ),
             const SizedBox(height: 16),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    await createOrUpdate();
-                    widget.closeCallback();
-                  }
-                },
-                child: Text('${widget.action} Item'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  await itemViewModel.delete(widget.item!.id);
-                  widget.closeCallback();
-                },
-                child: const Text('Delete Item'),
-              ),
-            ]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      await createOrUpdate();
+                      widget.closeCallback();
+                    }
+                  },
+                  child: Text('${widget.action} Item'),
+                ),
+                if (widget.action == "update")
+                  ElevatedButton(
+                    onPressed: () async {
+                      await itemViewModel.delete(widget.item!.id);
+                      widget.closeCallback();
+                    },
+                    child: const Text('Delete Item'),
+                  )
+              ],
+            ),
           ],
         ),
       ),
