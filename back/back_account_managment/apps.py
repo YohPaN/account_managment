@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class BackAccountManagmentConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'back_account_managment'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "back_account_managment"

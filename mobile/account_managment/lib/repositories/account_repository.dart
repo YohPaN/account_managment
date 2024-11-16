@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 
@@ -33,11 +34,26 @@ class AccountRepository {
               valuation: double.parse(item["valuation"])));
         }
 
-        accounts.add(Account(
+        final List<Contributor> contributors = [];
+
+        for (var contributor in account["contributors"]) {
+          contributors.add(
+            Contributor(
+              username: contributor["user"]["username"],
+              state: contributor["state"],
+            ),
+          );
+        }
+
+        accounts.add(
+          Account(
             id: account["id"],
             name: account["name"],
+            items: items,
+            contributor: contributors,
             total: account["total"]["total_sum"],
-            items: items));
+          ),
+        );
       }
     }
 
@@ -74,17 +90,37 @@ class AccountRepository {
             description: item["description"],
             valuation: double.parse(item["valuation"])));
       }
+
+      final List<Contributor> contributors = [];
+
+      for (var contributor in responseData["contributor"]) {
+        contributors.add(
+          Contributor(
+            username: contributor["user"]["username"],
+            state: contributor["state"],
+          ),
+        );
+      }
+
       return Account(
-          id: responseData["id"],
-          name: responseData["name"],
-          total: responseData["valuation"],
-          items: items);
+        id: responseData["id"],
+        name: responseData["name"],
+        items: items,
+        contributor: contributors,
+        total: responseData["valuation"],
+      );
     }
 
     return null;
   }
 
-  Future<bool?> create(String name) async {
+  Future<bool?> create(String name, List<Contributor> contributors) async {
+    final List<String> contributorSerializable = [];
+
+    for (var contributor in contributors) {
+      contributorSerializable.add(contributor.username);
+    }
+
     final response =
         await http.post(Uri.parse('http://10.0.2.2:8000/api/accounts/'),
             headers: <String, String>{
@@ -93,6 +129,7 @@ class AccountRepository {
             },
             body: jsonEncode(<String, String>{
               'name': name,
+              'contributors': jsonEncode(contributorSerializable),
             }));
 
     if (response.statusCode == 201) {
@@ -102,7 +139,14 @@ class AccountRepository {
     return null;
   }
 
-  Future<bool?> update(int accountId, String name) async {
+  Future<bool?> update(
+      int accountId, String name, List<Contributor> contributors) async {
+    final List<String> contributorSerializable = [];
+
+    for (var contributor in contributors) {
+      contributorSerializable.add(contributor.username);
+    }
+
     final response = await http.patch(
         Uri.parse('http://10.0.2.2:8000/api/accounts/$accountId/'),
         headers: <String, String>{
@@ -111,6 +155,7 @@ class AccountRepository {
         },
         body: jsonEncode(<String, String>{
           'name': name,
+          'contributors': jsonEncode(contributorSerializable)
         }));
 
     if (response.statusCode == 200) {

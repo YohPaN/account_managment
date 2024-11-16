@@ -1,6 +1,7 @@
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/account.dart';
+import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,33 @@ class AccountDrawer extends StatefulWidget {
 class _AccountDrawerState extends State<AccountDrawer> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController userToAddController = TextEditingController();
+
+  final List<Contributor> _usersToAdd = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.action == "update") {
+      for (var contributor in widget.account!.contributor) {
+        _usersToAdd.add(contributor);
+      }
+    }
+  }
+
+  _addUser() {
+    setState(() {
+      _usersToAdd.add(Contributor(username: userToAddController.text));
+      userToAddController.text = "";
+    });
+  }
+
+  _removeUser(int index) {
+    setState(() {
+      _usersToAdd.removeAt(index);
+      userToAddController.text = "";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +57,10 @@ class _AccountDrawerState extends State<AccountDrawer> {
 
     createOrUpdate() async {
       if (widget.action == "create") {
-        await accountViewModel.createAccount(
-          nameController.text,
-        );
+        await accountViewModel.createAccount(nameController.text, _usersToAdd);
       } else if (widget.action == "update") {
         await accountViewModel.updateAccount(
-          widget.account!.id,
-          nameController.text,
-        );
+            widget.account!.id, nameController.text, _usersToAdd);
       }
     }
 
@@ -59,6 +83,75 @@ class _AccountDrawerState extends State<AccountDrawer> {
                   value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
             ),
             const SizedBox(height: 16),
+            TextFormField(
+              controller: userToAddController,
+              decoration: InputDecoration(
+                labelText: 'User to add',
+                suffixIcon: IconButton(
+                  onPressed: () => _addUser(),
+                  icon: const Icon(Icons.add),
+                ),
+              ),
+              maxLength: 15,
+            ),
+            const SizedBox(height: 16),
+            if (_usersToAdd.isNotEmpty)
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 300,
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _usersToAdd.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16, right: 16, top: 8, bottom: 8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5.0),
+                          color: Colors.white,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black,
+                              offset: Offset(0.0, 1.0),
+                              blurRadius: 4.0,
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          title: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  size: 16,
+                                  color: _usersToAdd[index].state != "APPROVED"
+                                      ? Colors.orange[500]
+                                      : Colors.green,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  child: Text(_usersToAdd[index].username),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () => _removeUser(index),
+                                          icon: const Icon(Icons.remove),
+                                        ),
+                                      ]),
+                                ),
+                              ]),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [

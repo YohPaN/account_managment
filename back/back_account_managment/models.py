@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Sum
 import uuid
 
+
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=15, unique=True)
@@ -11,12 +12,16 @@ class User(AbstractUser):
     first_name = None
     last_name = None
 
+
 class Profile(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="profile"
+    )
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=15)
     salary = models.DecimalField(max_digits=15, decimal_places=2)
+
 
 class Account(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -28,9 +33,15 @@ class Account(models.Model):
     def items(self):
         return Item.objects.filter(account=self.pk)
 
+    def contributors(self):
+        return AccountUser.objects.filter(account=self.pk)
+
     def total(self):
-        return Item.objects.filter(account=self.pk).aggregate(total_sum=Sum('valuation'))
-    
+        return Item.objects.filter(account=self.pk).aggregate(
+            total_sum=Sum("valuation")
+        )
+
+
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
 
@@ -41,3 +52,19 @@ class Item(models.Model):
     valuation = models.DecimalField(max_digits=15, decimal_places=2)
 
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+
+class AccountUser(models.Model):
+    class AccountUserState(models.TextChoices):
+        PENDING = "PENDING"
+        APPROVED = "APPROVED"
+        DISAPPROVED = "DISAPPROVED"
+
+    id = models.BigAutoField(primary_key=True)
+    state = models.CharField(
+        choices=AccountUserState,
+        default=AccountUserState.PENDING,
+        max_length=15,
+    )
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

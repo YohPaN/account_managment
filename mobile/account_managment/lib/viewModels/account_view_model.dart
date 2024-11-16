@@ -1,4 +1,5 @@
 import 'package:account_managment/models/account.dart';
+import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/repositories/account_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -23,13 +24,15 @@ class AccountViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createAccount(String accountName) async {
-    await accountRepository.create(accountName);
+  Future<void> createAccount(
+      String accountName, List<Contributor> usersToAdd) async {
+    await accountRepository.create(accountName, usersToAdd);
     listAccount();
   }
 
-  Future<void> updateAccount(int accountId, String accountName) async {
-    await accountRepository.update(accountId, accountName);
+  Future<void> updateAccount(
+      int accountId, String accountName, List<Contributor> contributors) async {
+    await accountRepository.update(accountId, accountName, contributors);
     listAccount();
   }
 
