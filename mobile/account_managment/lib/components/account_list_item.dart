@@ -32,12 +32,11 @@ class AccountListItem extends StatelessWidget {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              isScrollControlled:
-                  true, // Makes the bottom sheet full-screen if needed
+              isScrollControlled: true,
               builder: (BuildContext context) {
                 return AccountDrawer(
                   closeCallback: () {
-                    Navigator.pop(context); // Close the bottom sheet
+                    Navigator.pop(context);
                   },
                   action: "update",
                   account: account,

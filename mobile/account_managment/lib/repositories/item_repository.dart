@@ -21,6 +21,8 @@ class ItemRepository {
       },
     );
 
+    print(response.body);
+
     if (response.statusCode == 200) {
       for (var item in jsonDecode(response.body)) {
         items.add(Item(
