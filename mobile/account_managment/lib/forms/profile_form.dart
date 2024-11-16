@@ -119,7 +119,7 @@ class _ProfileFormState extends State<ProfileForm> {
           maxLength: 15,
           decoration: const InputDecoration(labelText: 'Salary'),
           validator: (value) => ValidationHelper.validateInput(
-              value, ["validDouble", "twoDigitMax"]),
+              value, ["validPositifDouble", "twoDigitMax"]),
         ),
         if (widget.action == "create")
           TextFormField(
