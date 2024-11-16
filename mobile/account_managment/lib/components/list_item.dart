@@ -37,12 +37,11 @@ class ListItem extends StatelessWidget {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              isScrollControlled:
-                  true, // Makes the bottom sheet full-screen if needed
+              isScrollControlled: true,
               builder: (BuildContext context) {
                 return ItemDrawer(
                   closeCallback: () {
-                    Navigator.pop(context); // Close the bottom sheet
+                    Navigator.pop(context);
                   },
                   action: "update",
                   item: item,

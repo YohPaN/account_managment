@@ -1,3 +1,4 @@
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
@@ -68,7 +69,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                       widget.closeCallback();
                     }
                   },
-                  child: Text('${widget.action} account'),
+                  child: Text('${widget.action} account'.capitalize()),
                 ),
                 if (widget.action == "update")
                   ElevatedButton(

@@ -1,3 +1,4 @@
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/item_view_model.dart';
@@ -94,7 +95,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                       widget.closeCallback();
                     }
                   },
-                  child: Text('${widget.action} Item'),
+                  child: Text('${widget.action} Item'.capitalize()),
                 ),
                 if (widget.action == "update")
                   ElevatedButton(
