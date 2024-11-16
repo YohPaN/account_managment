@@ -2,7 +2,7 @@ class Item {
   int id;
   String title;
   String description;
-  String valuation;
+  double valuation;
 
   Item(
       {required this.id,

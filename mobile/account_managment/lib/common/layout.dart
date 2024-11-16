@@ -18,10 +18,15 @@ class Layout extends StatelessWidget {
       ),
       body: child,
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.euro),
+            label: 'Accounts',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
@@ -33,7 +38,6 @@ class Layout extends StatelessWidget {
           ),
         ],
         onTap: (index) {
-          // Navigate to different routes based on button index
           switch (index) {
             case 0:
               // Navigator.pushNamed(context, '/');
@@ -41,11 +45,17 @@ class Layout extends StatelessWidget {
             case 1:
               Navigator.pushNamed(
                 context,
+                '/account_managment',
+              );
+              break;
+            case 2:
+              Navigator.pushNamed(
+                context,
                 '/profile',
                 arguments: {'update': true},
               );
               break;
-            case 2:
+            case 3:
               Navigator.pushNamed(context, '/settings');
               break;
           }

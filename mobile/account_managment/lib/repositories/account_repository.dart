@@ -23,8 +23,21 @@ class AccountRepository {
 
     if (response.statusCode == 200) {
       for (var account in jsonDecode(response.body)) {
+        final List<Item> items = [];
+
+        for (var item in account["items"]) {
+          items.add(Item(
+              id: item["id"],
+              title: item["title"],
+              description: item["description"],
+              valuation: item["valuation"]));
+        }
+
         accounts.add(Account(
-            id: account["id"], name: account["name"], items: account["items"]));
+            id: account["id"],
+            name: account["name"],
+            total: account["total"]["total_sum"],
+            items: items));
       }
     }
 
@@ -68,7 +81,55 @@ class AccountRepository {
     return null;
   }
 
-  Future<void> addAccount(Account account) async {
-    // Simulate adding an account
+  Future<bool?> create(String name) async {
+    final response =
+        await http.post(Uri.parse('http://10.0.2.2:8000/api/accounts/'),
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ${authViewModel.accessToken}'
+            },
+            body: jsonEncode(<String, String>{
+              'name': name,
+            }));
+
+    if (response.statusCode == 201) {
+      return true;
+    }
+
+    return null;
+  }
+
+  Future<bool?> update(int accountId, String name) async {
+    final response = await http.patch(
+        Uri.parse('http://10.0.2.2:8000/api/accounts/$accountId/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${authViewModel.accessToken}'
+        },
+        body: jsonEncode(<String, String>{
+          'name': name,
+        }));
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    return null;
+  }
+
+  Future<bool?> delete(int accountId) async {
+    final response = await http.delete(
+      Uri.parse('http://10.0.2.2:8000/api/accounts/$accountId/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${authViewModel.accessToken}'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    return null;
   }
 }

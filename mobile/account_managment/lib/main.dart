@@ -23,9 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Core Repository Providers
         Provider<AuthRepository>(create: (_) => AuthRepository()),
-        // Auth ViewModel
         ChangeNotifierProvider<AuthViewModel>(
           create: (context) => AuthViewModel(
             authRepository: Provider.of<AuthRepository>(context, listen: false),
@@ -34,22 +32,16 @@ class MyApp extends StatelessWidget {
         ProxyProvider<AuthViewModel, ProfileRepository>(
             update: (context, authViewModel, _) =>
                 ProfileRepository(authViewModel: authViewModel)),
-
-        // Account Repository depends on AuthViewModel
         ProxyProvider<AuthViewModel, AccountRepository>(
           update: (context, authViewModel, _) =>
               AccountRepository(authViewModel: authViewModel),
         ),
-
-        // Account ViewModel depends on AccountRepository
         ChangeNotifierProvider<AccountViewModel>(
           create: (context) => AccountViewModel(
             accountRepository:
                 Provider.of<AccountRepository>(context, listen: false),
           ),
         ),
-
-        // Item Repository depends on AuthViewModel and AccountViewModel
         ProxyProvider2<AuthViewModel, AccountViewModel, ItemRepository>(
           update: (context, authViewModel, accountViewModel, _) =>
               ItemRepository(
@@ -57,8 +49,6 @@ class MyApp extends StatelessWidget {
             accountViewModel: accountViewModel,
           ),
         ),
-
-        // Item ViewModel depends on ItemRepository
         ChangeNotifierProvider<ItemViewModel>(
           create: (context) => ItemViewModel(
             itemRepository: Provider.of<ItemRepository>(context, listen: false),
@@ -66,8 +56,6 @@ class MyApp extends StatelessWidget {
                 Provider.of<AccountViewModel>(context, listen: false),
           ),
         ),
-
-        // Profile ViewModel
         ChangeNotifierProvider<ProfileViewModel>(
           create: (context) => ProfileViewModel(
             profileRepository:
