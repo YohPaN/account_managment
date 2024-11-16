@@ -93,7 +93,7 @@ class AccountRepository {
 
       final List<Contributor> contributors = [];
 
-      for (var contributor in responseData["contributor"]) {
+      for (var contributor in responseData["contributors"]) {
         contributors.add(
           Contributor(
             username: contributor["user"]["username"],

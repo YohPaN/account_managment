@@ -201,6 +201,7 @@ class AccountView(ModelViewSet):
         account = Account.objects.get(pk=pk)
 
         account.name = data["name"]
+        account.save()
 
         user_contributors = User.objects.filter(
             username__in=json.loads(data["contributors"])
