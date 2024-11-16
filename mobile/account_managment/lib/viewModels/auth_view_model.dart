@@ -21,6 +21,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   void logout() {
+    authRepository.logout();
     _accessToken = null;
     _refreshToken = null;
     notifyListeners();
