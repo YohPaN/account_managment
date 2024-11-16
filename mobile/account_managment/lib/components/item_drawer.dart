@@ -50,7 +50,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
     if (widget.action == "update" && widget.item != null) {
       titleController.text = widget.item!.title;
       descriptionController.text = widget.item!.description;
-      valuationController.text = widget.item!.valuation;
+      valuationController.text = widget.item!.valuation.toString();
     }
 
     return Padding(

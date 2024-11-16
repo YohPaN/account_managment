@@ -4,7 +4,7 @@ class Account {
   int id;
   String name;
   List<Item> items;
-  String? total;
+  double? total;
 
   Account({
     required this.id,

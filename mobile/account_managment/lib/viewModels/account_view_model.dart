@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 class AccountViewModel extends ChangeNotifier {
   final AccountRepository accountRepository;
 
-  List<Account> _accounts = [];
-  List<Account> get accounts => _accounts;
+  List<Account>? _accounts;
+  List<Account>? get accounts => _accounts;
 
   Account? _account;
   Account? get account => _account;
@@ -23,8 +23,18 @@ class AccountViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addAccount(Account account) async {
-    await accountRepository.addAccount(account);
+  Future<void> createAccount(String accountName) async {
+    await accountRepository.create(accountName);
+    fetchAccounts();
+  }
+
+  Future<void> updateAccount(int accountId, String accountName) async {
+    await accountRepository.update(accountId, accountName);
+    fetchAccounts();
+  }
+
+  Future<void> deleteAccount(int accountId) async {
+    await accountRepository.delete(accountId);
     fetchAccounts();
   }
 }

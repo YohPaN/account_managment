@@ -1,14 +1,10 @@
-import 'package:account_managment/components/item_drawer.dart';
-import 'package:account_managment/models/item.dart';
+import 'package:account_managment/components/account_drawer.dart';
+import 'package:account_managment/models/account.dart';
 import 'package:flutter/material.dart';
 
-class ListItem extends StatelessWidget {
-  final Item item;
-
-  const ListItem({
-    super.key,
-    required this.item,
-  });
+class AccountListItem extends StatelessWidget {
+  final Account account;
+  const AccountListItem({super.key, required this.account});
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +16,14 @@ class ListItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.title),
-                Text(item.description),
+                Text(account.name),
               ],
             ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: Text("${item.valuation.toStringAsFixed(2)}€"),
+          child: Text("${(account.total ?? 0).toStringAsFixed(2)}€"),
         ),
         IconButton(
           onPressed: () {
@@ -40,12 +35,12 @@ class ListItem extends StatelessWidget {
               isScrollControlled:
                   true, // Makes the bottom sheet full-screen if needed
               builder: (BuildContext context) {
-                return ItemDrawer(
+                return AccountDrawer(
                   closeCallback: () {
                     Navigator.pop(context); // Close the bottom sheet
                   },
                   action: "update",
-                  item: item,
+                  account: account,
                 );
               },
             );
