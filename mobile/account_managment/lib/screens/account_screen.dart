@@ -14,11 +14,11 @@ class AccountScreen extends StatelessWidget {
     final itemViewModel = Provider.of<ItemViewModel>(context);
 
     if (accountViewModel.account == null) {
-      accountViewModel.fetchAccount();
+      accountViewModel.getAccount();
     }
 
     if (accountViewModel.account != null && itemViewModel.items == null) {
-      itemViewModel.list();
+      itemViewModel.listItem();
     }
 
     return Scaffold(
@@ -28,7 +28,7 @@ class AccountScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: RefreshIndicator(
-                    onRefresh: () async => {await itemViewModel.list()},
+                    onRefresh: () async => {await itemViewModel.listItem()},
                     child: ListView.builder(
                       itemCount: itemViewModel.items?.length ?? 0,
                       itemBuilder: (context, index) {

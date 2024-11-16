@@ -10,30 +10,6 @@ class ProfileRepository {
 
   ProfileRepository({required this.authViewModel});
 
-  Future<bool> create(String username, String firstName, String lastName,
-      String email, String salary, String password) async {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/register/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(<String, String>{
-        'username': username,
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'salary': salary,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      return true;
-    }
-
-    return false;
-  }
-
   Future<Map<String, dynamic>?> get() async {
     final response = await http.get(
       Uri.parse('http://10.0.2.2:8000/api/users/me/'),
@@ -60,6 +36,30 @@ class ProfileRepository {
     }
 
     return null;
+  }
+
+  Future<bool> create(String username, String firstName, String lastName,
+      String email, String salary, String password) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8000/api/register/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, String>{
+        'username': username,
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'salary': salary,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return true;
+    }
+
+    return false;
   }
 
   Future<Map<String, dynamic>?> update(String username, String firstName,

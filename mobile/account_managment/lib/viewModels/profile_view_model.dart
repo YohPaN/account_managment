@@ -14,7 +14,17 @@ class ProfileViewModel extends ChangeNotifier {
 
   ProfileViewModel({required this.profileRepository});
 
-  Future<void> create(String username, String firstName, String lastName,
+  Future<void> getProfile() async {
+    final response = await profileRepository.get();
+    if (response != null) {
+      _user = response["user"];
+      _profile = response["profile"];
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> createProfile(String username, String firstName, String lastName,
       String email, String salary, String password) async {
     bool success = await profileRepository.create(
         username, firstName, lastName, email, salary, password);
@@ -29,7 +39,7 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> update(String username, String firstName, String lastName,
+  Future<void> updateProfile(String username, String firstName, String lastName,
       String email, String salary, String password) async {
     Map<String, dynamic>? response = await profileRepository.update(
         username, firstName, lastName, email, salary, password);
@@ -43,16 +53,6 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> updatePassword(String oldPassword, String newPassword) async {
     await profileRepository.updatePassword(oldPassword, newPassword);
-    notifyListeners();
-  }
-
-  Future<void> get() async {
-    final response = await profileRepository.get();
-    if (response != null) {
-      _user = response["user"];
-      _profile = response["profile"];
-    }
-
     notifyListeners();
   }
 }
