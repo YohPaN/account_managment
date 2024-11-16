@@ -46,7 +46,7 @@ class Layout extends StatelessWidget {
               );
               break;
             case 2:
-              // Navigator.pushNamed(context, '/settings');
+              Navigator.pushNamed(context, '/settings');
               break;
           }
         },
