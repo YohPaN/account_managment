@@ -7,6 +7,7 @@ class ValidationHelper {
     "validDouble": validDouble,
     "validTextOrDigitOnly": validTextOrDigitOnly,
     "twoDigitMax": twoDigitMax,
+    "validPositifDouble": validPositifDouble,
   };
 
   static String? validateInput(dynamic value, List<String> rules) {
@@ -71,6 +72,16 @@ class ValidationHelper {
     }
 
     return null;
+  }
+
+  static String? validPositifDouble(value) {
+    final validDoubleValue = validDouble(value);
+    if (validDoubleValue != null) {
+      return validDoubleValue;
+    }
+    if (double.parse(value) < 0) {
+      return "It must be a positif number";
+    }
   }
 
   static String? twoDigitMax(value) {

@@ -135,7 +135,7 @@ class AccountView(ModelViewSet):
         user = request.user
 
         try:
-            account = Account.objects.get(user=user)
+            account = Account.objects.filter(user=user).first()
         except models.Account.DoesNotExist:
             return Response({"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
 
