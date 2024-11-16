@@ -55,6 +55,7 @@ class _LoginFormState extends State<LoginForm> {
               if (authViewModel.accessToken != null) {
                 Navigator.pushReplacementNamed(context, '/accounts');
               } else {
+                passwordController.text = "";
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Invalid credentials")),
                 );
