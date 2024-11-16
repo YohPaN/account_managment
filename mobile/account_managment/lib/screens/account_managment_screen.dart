@@ -12,7 +12,7 @@ class AccountManagmentScreen extends StatelessWidget {
     final accountViewModel = Provider.of<AccountViewModel>(context);
 
     if (accountViewModel.accounts == null) {
-      accountViewModel.fetchAccounts();
+      accountViewModel.listAccount();
     }
 
     return Scaffold(
@@ -23,7 +23,7 @@ class AccountManagmentScreen extends StatelessWidget {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async =>
-                        {await accountViewModel.fetchAccounts()},
+                        {await accountViewModel.listAccount()},
                     child: ListView.builder(
                       itemCount: accountViewModel.accounts?.length ?? 0,
                       itemBuilder: (context, index) {

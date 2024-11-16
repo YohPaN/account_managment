@@ -11,7 +11,7 @@ class AccountRepository {
 
   AccountRepository({required this.authViewModel});
 
-  Future<List<Account>> listAccounts() async {
+  Future<List<Account>> list() async {
     final List<Account> accounts = [];
 
     final response = await http.get(
@@ -44,7 +44,7 @@ class AccountRepository {
     return accounts;
   }
 
-  Future<Account?> getAccount(int? accountId) async {
+  Future<Account?> get(int? accountId) async {
     http.Response response;
 
     if (accountId != null) {

@@ -13,28 +13,28 @@ class AccountViewModel extends ChangeNotifier {
 
   AccountViewModel({required this.accountRepository});
 
-  Future<void> fetchAccounts() async {
-    _accounts = await accountRepository.listAccounts();
+  Future<void> listAccount() async {
+    _accounts = await accountRepository.list();
     notifyListeners();
   }
 
-  Future<void> fetchAccount([int? accountId]) async {
-    _account = await accountRepository.getAccount(accountId);
+  Future<void> getAccount([int? accountId]) async {
+    _account = await accountRepository.get(accountId);
     notifyListeners();
   }
 
   Future<void> createAccount(String accountName) async {
     await accountRepository.create(accountName);
-    fetchAccounts();
+    listAccount();
   }
 
   Future<void> updateAccount(int accountId, String accountName) async {
     await accountRepository.update(accountId, accountName);
-    fetchAccounts();
+    listAccount();
   }
 
   Future<void> deleteAccount(int accountId) async {
     await accountRepository.delete(accountId);
-    fetchAccounts();
+    listAccount();
   }
 }

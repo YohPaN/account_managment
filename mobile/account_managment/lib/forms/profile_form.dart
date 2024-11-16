@@ -49,7 +49,7 @@ class _ProfileFormState extends State<ProfileForm> {
 
     if (widget.action == "update") {
       if ((profile == null || user == null)) {
-        profileViewModel.get();
+        profileViewModel.getProfile();
         user = profileViewModel.user;
         profile = profileViewModel.profile;
       }
@@ -59,7 +59,7 @@ class _ProfileFormState extends State<ProfileForm> {
         firstNameController.text = profile.firstName;
         lastNameController.text = profile.lastName;
         emailController.text = user.email;
-        salaryController.text = profile.salary.toString();
+        salaryController.text = profile.salary!.toStringAsFixed(2);
       }
     }
 
@@ -68,9 +68,9 @@ class _ProfileFormState extends State<ProfileForm> {
           actionFunction;
 
       if (widget.action == "create") {
-        actionFunction = profileViewModel.create;
+        actionFunction = profileViewModel.createProfile;
       } else if (widget.action == "update") {
-        actionFunction = profileViewModel.update;
+        actionFunction = profileViewModel.updateProfile;
       }
 
       await actionFunction(

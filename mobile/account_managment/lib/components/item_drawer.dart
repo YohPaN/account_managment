@@ -33,13 +33,13 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
     createOrUpdate() async {
       if (widget.action == "create") {
-        await itemViewModel.create(
+        await itemViewModel.createItem(
           titleController.text,
           descriptionController.text,
           valuationController.text,
         );
       } else if (widget.action == "update") {
-        await itemViewModel.update(
+        await itemViewModel.updateItem(
           widget.item!.id,
           titleController.text,
           descriptionController.text,
@@ -100,7 +100,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                 if (widget.action == "update")
                   ElevatedButton(
                     onPressed: () async {
-                      await itemViewModel.delete(widget.item!.id);
+                      await itemViewModel.deleteItem(widget.item!.id);
                       widget.closeCallback();
                     },
                     child: const Text('Delete Item'),
