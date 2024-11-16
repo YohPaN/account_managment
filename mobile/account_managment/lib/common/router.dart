@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 
 router(BuildContext context) {
   return {
-    '/': (context) => LoginScreen(),
-    '/profile': (context) => ProfileScreen(),
-    '/accounts': (context) => Layout(title: 'Account', child: AccountScreen()),
-    '/settings': (context) => Layout(title: 'Settings', child: SettingScreen()),
+    '/': (context) => const LoginScreen(),
+    '/profile': (context) => const ProfileScreen(),
+    '/accounts': (context) =>
+        const Layout(title: 'Account', child: AccountScreen()),
+    '/settings': (context) =>
+        const Layout(title: 'Settings', child: SettingScreen()),
   };
 }

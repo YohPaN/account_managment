@@ -176,8 +176,10 @@ class _ProfileFormState extends State<ProfileForm> {
             if (_formKey.currentState!.validate()) {
               await createOrUpdate();
               if (profileViewModel.profile != null) {
+                if (!context.mounted) return;
                 Navigator.pop(context);
               } else {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Can't ${widget.action} profile")),
                 );

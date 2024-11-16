@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class ListItem extends StatelessWidget {
   final Item item;
 
-  ListItem({
+  const ListItem({
     super.key,
     required this.item,
   });

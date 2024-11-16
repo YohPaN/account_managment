@@ -19,6 +19,8 @@ class ValidationHelper {
         return result;
       }
     }
+
+    return null;
   }
 
   static String? notEmpty(value) {

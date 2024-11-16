@@ -42,14 +42,8 @@ class ProfileViewModel extends ChangeNotifier {
   }
 
   Future<void> updatePassword(String oldPassword, String newPassword) async {
-    Map<String, dynamic>? response =
-        await profileRepository.updatePassword(oldPassword, newPassword);
-
-    if (response != null) {
-      _user = response["user"];
-      _profile = response["profile"];
-      notifyListeners();
-    }
+    await profileRepository.updatePassword(oldPassword, newPassword);
+    notifyListeners();
   }
 
   Future<void> get() async {

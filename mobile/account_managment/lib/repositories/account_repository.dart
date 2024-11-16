@@ -32,7 +32,7 @@ class AccountRepository {
   }
 
   Future<Account?> getAccount(int? accountId) async {
-    var response;
+    http.Response response;
 
     if (accountId != null) {
       response = await http.get(

@@ -42,7 +42,7 @@ class _LoginFormState extends State<LoginForm> {
                 labelText: 'Password',
                 suffixIcon: IconButton(
                     onPressed: () => togglePasswordVisibility(),
-                    icon: IconVisibility(visibility: _passwordVisibility!))),
+                    icon: IconVisibility(visibility: _passwordVisibility))),
             obscureText: _passwordVisibility,
           ),
           const SizedBox(height: 16),
@@ -53,9 +53,11 @@ class _LoginFormState extends State<LoginForm> {
                 passwordController.text,
               );
               if (authViewModel.accessToken != null) {
+                if (!context.mounted) return;
                 Navigator.pushReplacementNamed(context, '/accounts');
               } else {
                 passwordController.text = "";
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Invalid credentials")),
                 );

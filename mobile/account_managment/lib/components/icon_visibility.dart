@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class IconVisibility extends StatefulWidget {
-  bool visibility;
+  final bool visibility;
 
-  IconVisibility({super.key, required this.visibility});
+  const IconVisibility({super.key, required this.visibility});
 
   @override
   _IconVisibilityState createState() => _IconVisibilityState();
