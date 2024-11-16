@@ -70,7 +70,7 @@ class ItemRepository {
             id: item["id"],
             title: item["title"],
             description: item["description"],
-            valuation: item["valuation"]));
+            valuation: double.parse(item["valuation"])));
       }
 
       return items;

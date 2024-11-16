@@ -1,4 +1,5 @@
 import 'package:account_managment/forms/profile_form.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -12,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
         (args != null && args['update'] == true) ? 'update' : 'create';
 
     return Scaffold(
-      appBar: AppBar(title: Text("$action your account")),
+      appBar: AppBar(title: Text("$action your account".capitalize())),
       body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ProfileForm(

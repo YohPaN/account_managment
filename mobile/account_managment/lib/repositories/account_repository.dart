@@ -30,7 +30,7 @@ class AccountRepository {
               id: item["id"],
               title: item["title"],
               description: item["description"],
-              valuation: item["valuation"]));
+              valuation: double.parse(item["valuation"])));
         }
 
         accounts.add(Account(
@@ -72,10 +72,13 @@ class AccountRepository {
             id: item["id"],
             title: item["title"],
             description: item["description"],
-            valuation: item["valuation"]));
+            valuation: double.parse(item["valuation"])));
       }
       return Account(
-          id: responseData["id"], name: responseData["name"], items: items);
+          id: responseData["id"],
+          name: responseData["name"],
+          total: responseData["valuation"],
+          items: items);
     }
 
     return null;

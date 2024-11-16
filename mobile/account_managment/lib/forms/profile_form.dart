@@ -1,5 +1,6 @@
 import 'package:account_managment/components/icon_visibility.dart';
 import 'package:account_managment/components/password_drawer.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/pwd_validation_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/profile.dart';
@@ -186,7 +187,7 @@ class _ProfileFormState extends State<ProfileForm> {
               }
             }
           },
-          child: Text("${widget.action} my account"),
+          child: Text("${widget.action} my account".capitalize()),
         ),
       ])),
     );

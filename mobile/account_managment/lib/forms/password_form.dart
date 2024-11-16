@@ -1,4 +1,5 @@
 import 'package:account_managment/components/icon_visibility.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/pwd_validation_helper.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
@@ -109,7 +110,7 @@ class _PasswordFormState extends State<PasswordForm> {
                     Navigator.pop(context);
                   }
                 },
-                child: Text('${widget.action} password'),
+                child: Text('${widget.action} password'.capitalize()),
               ),
             ],
           ),
