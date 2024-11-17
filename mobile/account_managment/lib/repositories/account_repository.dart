@@ -12,9 +12,7 @@ class AccountRepository {
 
   AccountRepository({required this.authViewModel});
 
-  Future<List<Account>> list() async {
-    final List<Account> accounts = [];
-
+  Future<Map<String, List<Account>>> list() async {
     final response = await http.get(
         Uri.parse('http://10.0.2.2:8000/api/accounts/'),
         headers: <String, String>{
@@ -22,8 +20,13 @@ class AccountRepository {
           'Authorization': 'Bearer ${authViewModel.accessToken}'
         });
 
+    final List<Account> accounts = [];
+    final List<Account> contributorAccounts = [];
+
     if (response.statusCode == 200) {
-      for (var account in jsonDecode(response.body)) {
+      final responseData = jsonDecode(response.body);
+
+      for (var account in responseData["own"]) {
         final List<Item> items = [];
 
         for (var item in account["items"]) {
@@ -55,9 +58,41 @@ class AccountRepository {
           ),
         );
       }
+
+      for (var contributorAccount in responseData["contributor_account"]) {
+        final List<Item> items = [];
+
+        for (var item in contributorAccount["items"]) {
+          items.add(Item(
+              id: item["id"],
+              title: item["title"],
+              description: item["description"],
+              valuation: double.parse(item["valuation"])));
+        }
+
+        final List<Contributor> contributors = [];
+        for (var contributor in contributorAccount["contributors"]) {
+          contributors.add(
+            Contributor(
+              username: contributor["user"]["username"],
+              state: contributor["state"],
+            ),
+          );
+        }
+
+        contributorAccounts.add(
+          Account(
+            id: contributorAccount["id"],
+            name: contributorAccount["name"],
+            items: items,
+            contributor: contributors,
+            total: contributorAccount["total"]["total_sum"],
+          ),
+        );
+      }
     }
 
-    return accounts;
+    return {"accounts": accounts, "contributorAccounts": contributorAccounts};
   }
 
   Future<Account?> get(int? accountId) async {

@@ -1,20 +1,21 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from back_account_managment.serializers import (
-    UserSerializer,
-    ItemSerializer,
-    AccountSerializer,
-)
-from back_account_managment import models
-from rest_framework import status, permissions
-from django.contrib.auth import get_user_model
-from back_account_managment.serializers import ManageAccountSerializer
-from rest_framework.decorators import action
-from back_account_managment.models import Account
-from django.contrib.auth.hashers import check_password, make_password
-from back_account_managment.models import AccountUser
 import json
+
+from back_account_managment import models
+from back_account_managment.models import Account, AccountUser
+from back_account_managment.serializers import (
+    AccountSerializer,
+    ItemSerializer,
+    ManageAccountSerializer,
+    UserSerializer,
+)
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password, make_password
+from django.db.models import Exists, OuterRef
+from rest_framework import permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
 User = get_user_model()
 
@@ -143,9 +144,28 @@ class AccountView(ModelViewSet):
     serializer_class = AccountSerializer
 
     def list(self, request):
-        own_account = Account.objects.filter(user=request.user)
-        serializer = self.serializer_class(own_account, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        contributor_account_user = AccountUser.objects.filter(
+            account=OuterRef("pk"), user=request.user
+        )
+
+        own_accounts = Account.objects.filter(user=request.user)
+
+        contributor_accounts = Account.objects.filter(
+            Exists(contributor_account_user)
+        )
+
+        own_account_serialized = self.serializer_class(own_accounts, many=True)
+        contributor_account_serialized = self.serializer_class(
+            contributor_accounts, many=True
+        )
+
+        return Response(
+            data={
+                "own": own_account_serialized.data,
+                "contributor_account": contributor_account_serialized.data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user_account(self, request, pk=None):
