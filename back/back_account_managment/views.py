@@ -209,10 +209,11 @@ class AccountView(ModelViewSet):
             contributors = json.loads(request.data["contributors"])
 
             for contributor in contributors:
-                AccountUser.objects.create(
-                    account=account,
-                    user=User.objects.get(username=contributor),
-                )
+                if contributor != request.user.username:
+                    AccountUser.objects.create(
+                        account=account,
+                        user=User.objects.get(username=contributor),
+                    )
 
             return Response(status=status.HTTP_201_CREATED)
 
