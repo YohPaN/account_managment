@@ -9,13 +9,21 @@ class AccountViewModel extends ChangeNotifier {
   List<Account>? _accounts;
   List<Account>? get accounts => _accounts;
 
+  List<Account>? _contributorAccounts;
+  List<Account>? get contributorAccounts => _contributorAccounts;
+
   Account? _account;
   Account? get account => _account;
 
   AccountViewModel({required this.accountRepository});
 
   Future<void> listAccount() async {
-    _accounts = await accountRepository.list();
+    final Map<String, List<Account>> allAccounts =
+        await accountRepository.list();
+
+    _accounts = allAccounts["accounts"];
+    _contributorAccounts = allAccounts["contributorAccounts"];
+
     notifyListeners();
   }
 

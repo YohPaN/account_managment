@@ -18,41 +18,90 @@ class AccountManagmentScreen extends StatelessWidget {
     return Scaffold(
       body: accountViewModel.account == null
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
+          : RefreshIndicator(
+              onRefresh: () async => {await accountViewModel.listAccount()},
+              child: Column(children: [
+                const Text("Your accounts"),
                 Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async =>
-                        {await accountViewModel.listAccount()},
-                    child: ListView.builder(
-                      itemCount: accountViewModel.accounts?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16, right: 16, top: 8, bottom: 8),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                              color: Colors.white,
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black,
-                                  offset: Offset(0.0, 1.0),
-                                  blurRadius: 4.0,
+                  child: ListView.builder(
+                    itemCount: accountViewModel.accounts?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                            left: 16, right: 16, top: 8, bottom: 8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Colors.white,
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black,
+                                offset: Offset(0.0, 1.0),
+                                blurRadius: 4.0,
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            title: AccountListItem(
+                                account: accountViewModel.accounts![index]),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const Divider(color: Colors.black),
+                const Text("Associate accounts"),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount:
+                        accountViewModel.contributorAccounts?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                            left: 16, right: 16, top: 8, bottom: 8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Colors.white,
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black,
+                                offset: Offset(0.0, 1.0),
+                                blurRadius: 4.0,
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 16.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(accountViewModel
+                                            .contributorAccounts![index].name),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: Text(
+                                      "${(accountViewModel.contributorAccounts![index].total ?? 0).toStringAsFixed(2)}€"),
                                 ),
                               ],
                             ),
-                            child: ListTile(
-                              title: AccountListItem(
-                                  account: accountViewModel.accounts![index]),
-                            ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ],
+              ]),
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
