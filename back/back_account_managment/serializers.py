@@ -1,6 +1,6 @@
-from rest_framework import serializers
-from back_account_managment.models import Account, Item, Profile, AccountUser
+from back_account_managment.models import Account, AccountUser, Item, Profile
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
 User = get_user_model()
 
@@ -45,7 +45,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ["id", "name", "total", "items", "contributors"]
+        fields = ["id", "name", "total", "is_main", "items", "contributors"]
 
 
 class ManageAccountSerializer(serializers.ModelSerializer):

@@ -197,7 +197,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                   },
                   child: Text('${widget.action} account'.capitalize()),
                 ),
-                if (widget.action == "update")
+                if (widget.action == "update" && !widget.account!.isMain)
                   ElevatedButton(
                     onPressed: () async {
                       await accountViewModel.deleteAccount(widget.account!.id);

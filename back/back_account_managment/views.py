@@ -120,7 +120,7 @@ class RegisterView(APIView):
             )
 
             account = models.Account.objects.create(
-                name="my account", user=user
+                name="my account", user=user, is_main=True
             )
 
             user.save()
@@ -254,3 +254,15 @@ class AccountView(ModelViewSet):
             ).delete()
 
         return Response(status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk):
+        account = Account.objects.filter(pk=pk, is_main=False)
+
+        if account.exists():
+            account.delete()
+            return Response(status=status.HTTP_200_OK)
+
+        return Response(
+            data={"error": "You can't delete your main account"},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
