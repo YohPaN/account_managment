@@ -142,6 +142,11 @@ class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
 
+    def list(self, request):
+        own_account = Account.objects.filter(user=request.user)
+        serializer = self.serializer_class(own_account, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user_account(self, request, pk=None):
         user = request.user
