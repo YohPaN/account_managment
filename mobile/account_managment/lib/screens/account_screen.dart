@@ -1,7 +1,6 @@
 import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
-import 'package:account_managment/viewModels/item_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,26 +10,23 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accountViewModel = Provider.of<AccountViewModel>(context);
-    final itemViewModel = Provider.of<ItemViewModel>(context);
 
     if (accountViewModel.account == null) {
       accountViewModel.getAccount();
     }
 
-    if (accountViewModel.account != null && itemViewModel.items == null) {
-      itemViewModel.listItem();
-    }
-
     return Scaffold(
-      body: accountViewModel.account == null || itemViewModel.items == null
+      body: accountViewModel.account == null
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                Text(accountViewModel.account!.name),
                 Expanded(
                   child: RefreshIndicator(
-                    onRefresh: () async => {await itemViewModel.listItem()},
+                    onRefresh: () async =>
+                        {await accountViewModel.refreshAccount()},
                     child: ListView.builder(
-                      itemCount: itemViewModel.items?.length ?? 0,
+                      itemCount: accountViewModel.account!.items.length ?? 0,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(
@@ -48,8 +44,8 @@ class AccountScreen extends StatelessWidget {
                               ],
                             ),
                             child: ListTile(
-                              title:
-                                  ListItem(item: itemViewModel.items![index]),
+                              title: ListItem(
+                                  item: accountViewModel.account!.items[index]),
                             ),
                           ),
                         );
@@ -66,12 +62,11 @@ class AccountScreen extends StatelessWidget {
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            isScrollControlled:
-                true, // Makes the bottom sheet full-screen if needed
+            isScrollControlled: true,
             builder: (BuildContext context) {
               return ItemDrawer(
                 closeCallback: () {
-                  Navigator.pop(context); // Close the bottom sheet
+                  Navigator.pop(context);
                 },
                 action: "create",
               );

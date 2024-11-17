@@ -48,4 +48,9 @@ class AccountViewModel extends ChangeNotifier {
     await accountRepository.delete(accountId);
     listAccount();
   }
+
+  Future<void> refreshAccount() async {
+    await getAccount(account?.id);
+    listAccount();
+  }
 }

@@ -10,34 +10,6 @@ class ItemRepository {
 
   ItemRepository({required this.authViewModel, required this.accountViewModel});
 
-  Future<List<Item>?> list(int accountId) async {
-    final List<Item> items = [];
-
-    final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/accounts/$accountId/items/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${authViewModel.accessToken}'
-      },
-    );
-
-    print(response.body);
-
-    if (response.statusCode == 200) {
-      for (var item in jsonDecode(response.body)) {
-        items.add(Item(
-            id: item["id"],
-            title: item["title"],
-            description: item["description"],
-            valuation: double.parse(item["valuation"])));
-      }
-
-      return items;
-    }
-
-    return null;
-  }
-
   Future<bool?> create(
       String title, String description, String valuation) async {
     final response =
