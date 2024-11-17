@@ -3,6 +3,7 @@ import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -54,6 +55,11 @@ class _AccountDrawerState extends State<AccountDrawer> {
   @override
   Widget build(BuildContext context) {
     final accountViewModel = Provider.of<AccountViewModel>(context);
+    final profileViewModel = Provider.of<ProfileViewModel>(context);
+
+    if (profileViewModel.user == null) {
+      profileViewModel.getProfile();
+    }
 
     createOrUpdate() async {
       if (widget.action == "create") {
@@ -88,7 +94,34 @@ class _AccountDrawerState extends State<AccountDrawer> {
               decoration: InputDecoration(
                 labelText: 'User to add',
                 suffixIcon: IconButton(
-                  onPressed: () => _addUser(),
+                  onPressed: () => {
+                    if (profileViewModel.user!.username !=
+                        userToAddController.text)
+                      {
+                        _addUser(),
+                      }
+                    else
+                      {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Error"),
+                              content: const Text(
+                                  "You can't add yourself to your account"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("OK"),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      }
+                  },
                   icon: const Icon(Icons.add),
                 ),
               ),

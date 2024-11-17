@@ -228,7 +228,7 @@ class AccountView(ModelViewSet):
 
         user_contributors = User.objects.filter(
             username__in=json.loads(data["contributors"])
-        )
+        ).exclude(username=request.user.username)
 
         account_users = AccountUser.objects.filter(account=account)
         account_user_set = set(
