@@ -109,11 +109,12 @@ class _ProfileFormState extends State<ProfileForm> {
               value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
         ),
         TextFormField(
-            controller: emailController,
-            maxLength: 50,
-            decoration: const InputDecoration(labelText: 'Email'),
-            validator: (value) => ValidationHelper.validateInput(
-                value, ["notEmpty", "notNull", "validEmail"])),
+          controller: emailController,
+          maxLength: 50,
+          decoration: const InputDecoration(labelText: 'Email'),
+          // validator: (value) => ValidationHelper.validateInput(
+          //     value, ["notEmpty", "notNull", "validEmail"])
+        ),
         TextFormField(
           controller: salaryController,
           maxLength: 15,
@@ -133,8 +134,8 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             maxLength: 50,
             obscureText: _passwordVisibility["new"]!,
-            validator: (value) =>
-                PwdValidationHelper.validatePassword(password: value!),
+            // validator: (value) =>
+            //     PwdValidationHelper.validatePassword(password: value!),
           ),
         const SizedBox(height: 16),
         if (widget.action == "create")
@@ -150,8 +151,8 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             maxLength: 50,
             obscureText: _passwordVisibility["retype"]!,
-            validator: (value) => PwdValidationHelper.validatePassword(
-                password: value!, comparisonSame: newPasswordController.text),
+            // validator: (value) => PwdValidationHelper.validatePassword(
+            //     password: value!, comparisonSame: newPasswordController.text),
           ),
         const SizedBox(height: 16),
         if (widget.action == "update")
