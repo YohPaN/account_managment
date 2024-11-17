@@ -183,8 +183,6 @@ class AccountView(ModelViewSet):
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["get"], url_path="items")
-    def get_items(self, request, pk=None):
         try:
             account = Account.objects.get(pk=pk)
         except models.Account.DoesNotExist:

@@ -12,11 +12,6 @@ class ItemViewModel extends ChangeNotifier {
   List<Item>? _items;
   List<Item>? get items => _items;
 
-  Future<void> listItem() async {
-    _items = await itemRepository.list(accountViewModel.account!.id);
-    notifyListeners();
-  }
-
   Future<void> createItem(
       String title, String description, String valuation) async {
     bool? success = await itemRepository.create(title, description, valuation);
@@ -24,17 +19,17 @@ class ItemViewModel extends ChangeNotifier {
     if (success == true) {
       await accountViewModel.getAccount(accountViewModel.account!.id);
     }
-    await listItem();
+    await accountViewModel.refreshAccount();
   }
 
   Future<void> updateItem(
       int itemId, String title, String description, String valuation) async {
     await itemRepository.update(itemId, title, description, valuation);
-    await listItem();
+    await accountViewModel.refreshAccount();
   }
 
   Future<void> deleteItem(int itemId) async {
     await itemRepository.delete(itemId);
-    await listItem();
+    await accountViewModel.refreshAccount();
   }
 }
