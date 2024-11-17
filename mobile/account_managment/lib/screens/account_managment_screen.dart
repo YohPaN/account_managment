@@ -31,7 +31,7 @@ class AccountManagmentScreen extends StatelessWidget {
                     itemCount: accountViewModel.accounts?.length ?? 0,
                     itemBuilder: (context, index) {
                       return AccountListItem(
-                        account: accountViewModel.account!,
+                        account: accountViewModel.accounts![index],
                         canManage: true,
                         navigateToAccount: navigateToAccount,
                       );
