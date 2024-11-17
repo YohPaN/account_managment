@@ -1,7 +1,8 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Sum
-import uuid
 
 
 class User(AbstractUser):
@@ -29,6 +30,7 @@ class Account(models.Model):
     name = models.CharField(max_length=50)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_main = models.BooleanField(default=False)
 
     def items(self):
         return Item.objects.filter(account=self.pk)

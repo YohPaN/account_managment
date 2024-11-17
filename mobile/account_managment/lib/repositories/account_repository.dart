@@ -52,6 +52,7 @@ class AccountRepository {
           Account(
             id: account["id"],
             name: account["name"],
+            isMain: account["is_main"],
             items: items,
             contributor: contributors,
             total: account["total"]["total_sum"],
@@ -84,6 +85,7 @@ class AccountRepository {
           Account(
             id: contributorAccount["id"],
             name: contributorAccount["name"],
+            isMain: contributorAccount["is_main"],
             items: items,
             contributor: contributors,
             total: contributorAccount["total"]["total_sum"],
@@ -140,6 +142,7 @@ class AccountRepository {
       return Account(
         id: responseData["id"],
         name: responseData["name"],
+        isMain: responseData["is_main"],
         items: items,
         contributor: contributors,
         total: responseData["valuation"],
