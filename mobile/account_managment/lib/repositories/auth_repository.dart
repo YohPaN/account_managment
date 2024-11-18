@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:account_managment/common/api_config.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,7 +12,7 @@ class AuthRepository {
     var refreshToken = "";
 
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/token/'),
+      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/token/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

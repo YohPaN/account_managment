@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:account_managment/common/api_config.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
@@ -13,7 +14,7 @@ class ItemRepository {
   Future<bool?> create(
       String title, String description, String valuation) async {
     final response =
-        await http.post(Uri.parse('http://10.0.2.2:8000/api/items/'),
+        await http.post(Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/items/'),
             headers: <String, String>{
               'Content-Type': 'application/json',
               'Authorization': 'Bearer ${authViewModel.accessToken}'
@@ -35,7 +36,7 @@ class ItemRepository {
   Future<bool?> update(
       int itemId, String title, String description, String valuation) async {
     final response =
-        await http.patch(Uri.parse('http://10.0.2.2:8000/api/items/$itemId/'),
+        await http.patch(Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/items/$itemId/'),
             headers: <String, String>{
               'Content-Type': 'application/json',
               'Authorization': 'Bearer ${authViewModel.accessToken}'
@@ -55,7 +56,7 @@ class ItemRepository {
 
   Future<bool?> delete(int itemId) async {
     final response = await http.delete(
-      Uri.parse('http://10.0.2.2:8000/api/items/$itemId/'),
+      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/items/$itemId/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${authViewModel.accessToken}'

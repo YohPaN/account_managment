@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:account_managment/common/api_config.dart';
 import 'package:account_managment/models/profile.dart';
 import 'package:account_managment/models/user.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
@@ -12,7 +13,7 @@ class ProfileRepository {
 
   Future<Map<String, dynamic>?> get() async {
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/users/me/'),
+      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/users/me/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${authViewModel.accessToken}'
@@ -41,7 +42,7 @@ class ProfileRepository {
   Future<bool> create(String username, String firstName, String lastName,
       String email, String salary, String password) async {
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/register/'),
+      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/register/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
@@ -65,7 +66,7 @@ class ProfileRepository {
   Future<Map<String, dynamic>?> update(String username, String firstName,
       String lastName, String email, String salary, String password) async {
     final response = await http.patch(
-      Uri.parse('http://10.0.2.2:8000/api/users/me/update/'),
+      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/users/me/update/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${authViewModel.accessToken}'
@@ -100,7 +101,7 @@ class ProfileRepository {
 
   Future<void> updatePassword(String oldPassword, String newPassword) async {
     await http.patch(
-      Uri.parse('http://10.0.2.2:8000/api/users/password/'),
+      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/users/password/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${authViewModel.accessToken}'
