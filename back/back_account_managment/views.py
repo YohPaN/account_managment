@@ -2,6 +2,7 @@ import json
 
 from back_account_managment import models
 from back_account_managment.models import Account, AccountUser
+from back_account_managment.permissions import IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
@@ -72,9 +73,7 @@ class ProfileView(ModelViewSet):
 
     def list(self, request):
         user = request.user
-        serializer = UserSerializer(
-            user
-        )  # Serialize the user with profile data
+        serializer = UserSerializer(user)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -129,9 +128,7 @@ class RegisterView(APIView):
 
             return Response(status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ItemView(ModelViewSet):
@@ -142,6 +139,7 @@ class ItemView(ModelViewSet):
 class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
+    permission_classes = [IsOwner]
 
     def list(self, request):
         contributor_account_user = AccountUser.objects.filter(
@@ -150,9 +148,7 @@ class AccountView(ModelViewSet):
 
         own_accounts = Account.objects.filter(user=request.user)
 
-        contributor_accounts = Account.objects.filter(
-            Exists(contributor_account_user)
-        )
+        contributor_accounts = Account.objects.filter(Exists(contributor_account_user))
 
         own_account_serialized = self.serializer_class(own_accounts, many=True)
         contributor_account_serialized = self.serializer_class(
