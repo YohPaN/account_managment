@@ -2,6 +2,7 @@ import json
 
 from back_account_managment import models
 from back_account_managment.models import Account, AccountUser
+from back_account_managment.permissions import IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
@@ -23,7 +24,7 @@ User = get_user_model()
 class UserView(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user(self, request):
@@ -68,13 +69,11 @@ class UserView(ModelViewSet):
 
 class ProfileView(ModelViewSet):
     queryset = models.Profile.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
     def list(self, request):
         user = request.user
-        serializer = UserSerializer(
-            user
-        )  # Serialize the user with profile data
+        serializer = UserSerializer(user)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -137,11 +136,13 @@ class RegisterView(APIView):
 class ItemView(ModelViewSet):
     queryset = models.Item.objects.all()
     serializer_class = ItemSerializer
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
 
 class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
     def list(self, request):
         contributor_account_user = AccountUser.objects.filter(
@@ -182,20 +183,6 @@ class AccountView(ModelViewSet):
         serializer = self.serializer_class(account)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-        try:
-            account = Account.objects.get(pk=pk)
-        except models.Account.DoesNotExist:
-            return Response(
-                {"detail": "Account not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        items = account.items()
-
-        serializer = ItemSerializer(items, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         data = {"name": request.data["name"], "user": request.user.id}
