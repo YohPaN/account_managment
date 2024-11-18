@@ -1,19 +1,21 @@
-from back_account_managment.models import Account
 from rest_framework import permissions
 
 
 class IsOwner(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
+        model_id = view.kwargs.get("pk", None)
+
+        if request.method not in ["GET", "PATCH", "PUT", "DELETE"]:
             return True
 
-        account_id = view.kwargs.get("pk")
-        if not account_id:
-            return False
+        if request.method == "GET" and model_id is None:
+            return True
 
         try:
-            account = Account.objects.get(pk=account_id)
-        except Account.DoesNotExist:
+            model = view.queryset.model
+
+            ressource = model.objects.get(pk=model_id)
+        except model.DoesNotExist:
             return False
 
-        return account.user == request.user
+        return ressource.user == request.user

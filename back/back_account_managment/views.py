@@ -24,7 +24,7 @@ User = get_user_model()
 class UserView(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user(self, request):
@@ -69,7 +69,7 @@ class UserView(ModelViewSet):
 
 class ProfileView(ModelViewSet):
     queryset = models.Profile.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
     def list(self, request):
         user = request.user
@@ -128,18 +128,21 @@ class RegisterView(APIView):
 
             return Response(status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ItemView(ModelViewSet):
     queryset = models.Item.objects.all()
     serializer_class = ItemSerializer
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
 
 class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
     def list(self, request):
         contributor_account_user = AccountUser.objects.filter(
@@ -148,7 +151,9 @@ class AccountView(ModelViewSet):
 
         own_accounts = Account.objects.filter(user=request.user)
 
-        contributor_accounts = Account.objects.filter(Exists(contributor_account_user))
+        contributor_accounts = Account.objects.filter(
+            Exists(contributor_account_user)
+        )
 
         own_account_serialized = self.serializer_class(own_accounts, many=True)
         contributor_account_serialized = self.serializer_class(
@@ -178,20 +183,6 @@ class AccountView(ModelViewSet):
         serializer = self.serializer_class(account)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-        try:
-            account = Account.objects.get(pk=pk)
-        except models.Account.DoesNotExist:
-            return Response(
-                {"detail": "Account not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        items = account.items()
-
-        serializer = ItemSerializer(items, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         data = {"name": request.data["name"], "user": request.user.id}
