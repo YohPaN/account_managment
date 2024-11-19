@@ -15,7 +15,8 @@ class AccountRepository {
 
   Future<Map<String, List<Account>>> list() async {
     final response = await http.get(
-        Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
+        Uri.parse(
+            'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${authViewModel.accessToken}'
@@ -103,14 +104,16 @@ class AccountRepository {
 
     if (accountId != null) {
       response = await http.get(
-          Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
+          Uri.parse(
+              'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
           headers: <String, String>{
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ${authViewModel.accessToken}'
           });
     } else {
       response = await http.get(
-          Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/me/'),
+          Uri.parse(
+              'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/me/'),
           headers: <String, String>{
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ${authViewModel.accessToken}'
@@ -146,7 +149,7 @@ class AccountRepository {
         isMain: responseData["is_main"],
         items: items,
         contributor: contributors,
-        total: responseData["valuation"],
+        total: responseData["total"]["total_sum"],
       );
     }
 
@@ -160,16 +163,17 @@ class AccountRepository {
       contributorSerializable.add(contributor.username);
     }
 
-    final response =
-        await http.post(Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
-            headers: <String, String>{
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ${authViewModel.accessToken}'
-            },
-            body: jsonEncode(<String, String>{
-              'name': name,
-              'contributors': jsonEncode(contributorSerializable),
-            }));
+    final response = await http.post(
+        Uri.parse(
+            'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${authViewModel.accessToken}'
+        },
+        body: jsonEncode(<String, String>{
+          'name': name,
+          'contributors': jsonEncode(contributorSerializable),
+        }));
 
     if (response.statusCode == 201) {
       return true;
@@ -187,7 +191,8 @@ class AccountRepository {
     }
 
     final response = await http.patch(
-        Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
+        Uri.parse(
+            'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${authViewModel.accessToken}'
@@ -206,7 +211,8 @@ class AccountRepository {
 
   Future<bool?> delete(int accountId) async {
     final response = await http.delete(
-      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
+      Uri.parse(
+          'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${authViewModel.accessToken}'

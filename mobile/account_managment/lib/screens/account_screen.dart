@@ -1,5 +1,6 @@
 import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/components/list_item.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,28 @@ class AccountScreen extends StatelessWidget {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                Text(accountViewModel.account!.name),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16.0, horizontal: 24.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        accountViewModel.account!.name.capitalize(),
+                        style: const TextStyle(
+                            fontSize: 34.0, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "${accountViewModel.account!.total!.toStringAsFixed(2)}€",
+                        style: TextStyle(
+                            fontSize: 24.0,
+                            color: accountViewModel.account!.total! < 0
+                                ? Colors.red[600]
+                                : Colors.green[500]),
+                      ),
+                    ],
+                  ),
+                ),
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async =>
