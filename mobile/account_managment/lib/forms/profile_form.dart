@@ -163,6 +163,7 @@ class _ProfileFormState extends State<ProfileForm> {
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
+                isScrollControlled: true,
                 builder: (BuildContext context) {
                   return PasswordDrawerState(
                     action: widget.action,
