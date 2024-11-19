@@ -96,74 +96,80 @@ class _ItemDrawerState extends State<ItemDrawer> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-              maxLength: 15,
-              validator: (value) => ValidationHelper.validateInput(
-                  value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
-              maxLength: 50,
-              validator: (value) => ValidationHelper.validateInput(
-                  value, ["notEmpty", "notNull"]),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: valuationController,
-              decoration: const InputDecoration(labelText: 'Valuation'),
-              maxLength: 15,
-              validator: (value) => ValidationHelper.validateInput(value,
-                  ["notEmpty", "notNull", "twoDigitMax", "validPositifDouble"]),
-            ),
-            const SizedBox(height: 16),
-            ToggleButtons(
-              onPressed: (int index) => switchButton(index),
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              selectedBorderColor: _buttonStyle["selectedColor"],
-              selectedColor: Colors.white,
-              fillColor: _buttonStyle["fillColor"],
-              color: _buttonStyle["color"],
-              constraints: const BoxConstraints(
-                minHeight: 40.0,
-                minWidth: 80.0,
+      padding: EdgeInsets.only(
+        left: 16.0,
+        right: 16.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 4.0,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+                maxLength: 15,
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
               ),
-              isSelected: _selectButton,
-              children: const [Text("Expense"), Text("Income")],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                if (widget.action == "update")
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                maxLength: 50,
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull"]),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: valuationController,
+                decoration: const InputDecoration(labelText: 'Valuation'),
+                maxLength: 15,
+                validator: (value) => ValidationHelper.validateInput(value,
+                    ["notEmpty", "notNull", "twoDigitMax", "validPositifDouble"]),
+              ),
+              const SizedBox(height: 16),
+              ToggleButtons(
+                onPressed: (int index) => switchButton(index),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: _buttonStyle["selectedColor"],
+                selectedColor: Colors.white,
+                fillColor: _buttonStyle["fillColor"],
+                color: _buttonStyle["color"],
+                constraints: const BoxConstraints(
+                  minHeight: 40.0,
+                  minWidth: 80.0,
+                ),
+                isSelected: _selectButton,
+                children: const [Text("Expense"), Text("Income")],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  if (widget.action == "update")
+                    ElevatedButton(
+                      onPressed: () async {
+                        await itemViewModel.deleteItem(widget.item!.id);
+                        widget.closeCallback();
+                      },
+                      child: const Text('Delete Item'),
+                    ),
                   ElevatedButton(
                     onPressed: () async {
-                      await itemViewModel.deleteItem(widget.item!.id);
-                      widget.closeCallback();
+                      if (_formKey.currentState!.validate()) {
+                        await createOrUpdate();
+                        widget.closeCallback();
+                      }
                     },
-                    child: const Text('Delete Item'),
+                    child: Text('${widget.action} Item'.capitalize()),
                   ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await createOrUpdate();
-                      widget.closeCallback();
-                    }
-                  },
-                  child: Text('${widget.action} Item'.capitalize()),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

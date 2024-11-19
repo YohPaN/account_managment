@@ -75,139 +75,145 @@ class _AccountDrawerState extends State<AccountDrawer> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Title'),
-              maxLength: 30,
-              validator: (value) => ValidationHelper.validateInput(
-                  value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: userToAddController,
-              decoration: InputDecoration(
-                labelText: 'User to add',
-                suffixIcon: IconButton(
-                  onPressed: () => {
-                    if (profileViewModel.user!.username !=
-                        userToAddController.text)
-                      {
-                        _addUser(),
-                      }
-                    else
-                      {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Error"),
-                              content: const Text(
-                                  "You can't add yourself to your account"),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("OK"),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      }
-                  },
-                  icon: const Icon(Icons.add),
-                ),
+            padding: EdgeInsets.only(
+        left: 16.0,
+        right: 16.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 4.0,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Title'),
+                maxLength: 30,
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
               ),
-              maxLength: 15,
-            ),
-            const SizedBox(height: 16),
-            if (_usersToAdd.isNotEmpty)
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 300,
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: userToAddController,
+                decoration: InputDecoration(
+                  labelText: 'User to add',
+                  suffixIcon: IconButton(
+                    onPressed: () => {
+                      if (profileViewModel.user!.username !=
+                          userToAddController.text)
+                        {
+                          _addUser(),
+                        }
+                      else
+                        {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Error"),
+                                content: const Text(
+                                    "You can't add yourself to your account"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("OK"),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        }
+                    },
+                    icon: const Icon(Icons.add),
+                  ),
                 ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _usersToAdd.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                          left: 16, right: 16, top: 8, bottom: 8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5.0),
-                          color: Colors.white,
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black,
-                              offset: Offset(0.0, 1.0),
-                              blurRadius: 4.0,
-                            ),
-                          ],
-                        ),
-                        child: ListTile(
-                          title: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 16,
-                                  color: _usersToAdd[index].state != "APPROVED"
-                                      ? Colors.orange[500]
-                                      : Colors.green,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0),
-                                  child: Text(_usersToAdd[index].username),
-                                ),
-                                Expanded(
-                                  child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () => _removeUser(index),
-                                          icon: const Icon(Icons.remove),
-                                        ),
-                                      ]),
-                                ),
-                              ]),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                maxLength: 15,
               ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await createOrUpdate();
-                      widget.closeCallback();
-                    }
-                  },
-                  child: Text('${widget.action} account'.capitalize()),
+              const SizedBox(height: 16),
+              if (_usersToAdd.isNotEmpty)
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 300,
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _usersToAdd.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                            left: 16, right: 16, top: 8, bottom: 8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Colors.white,
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black,
+                                offset: Offset(0.0, 1.0),
+                                blurRadius: 4.0,
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            title: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.circle,
+                                    size: 16,
+                                    color: _usersToAdd[index].state != "APPROVED"
+                                        ? Colors.orange[500]
+                                        : Colors.green,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0),
+                                    child: Text(_usersToAdd[index].username),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            onPressed: () => _removeUser(index),
+                                            icon: const Icon(Icons.remove),
+                                          ),
+                                        ]),
+                                  ),
+                                ]),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                if (widget.action == "update" && !widget.account!.isMain)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
                   ElevatedButton(
                     onPressed: () async {
-                      await accountViewModel.deleteAccount(widget.account!.id);
-                      widget.closeCallback();
+                      if (_formKey.currentState!.validate()) {
+                        await createOrUpdate();
+                        widget.closeCallback();
+                      }
                     },
-                    child: const Text('Delete account'),
-                  )
-              ],
-            ),
-          ],
+                    child: Text('${widget.action} account'.capitalize()),
+                  ),
+                  if (widget.action == "update" && !widget.account!.isMain)
+                    ElevatedButton(
+                      onPressed: () async {
+                        await accountViewModel.deleteAccount(widget.account!.id);
+                        widget.closeCallback();
+                      },
+                      child: const Text('Delete account'),
+                    )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
