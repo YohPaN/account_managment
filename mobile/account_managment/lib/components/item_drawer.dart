@@ -6,16 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ItemDrawer extends StatefulWidget {
-  final Function closeCallback;
   final String action;
   final Item? item;
 
   @override
-  const ItemDrawer(
-      {super.key,
-      required this.closeCallback,
-      required this.action,
-      this.item});
+  const ItemDrawer({super.key, required this.action, this.item});
 
   @override
   _ItemDrawerState createState() => _ItemDrawerState();
@@ -127,8 +122,12 @@ class _ItemDrawerState extends State<ItemDrawer> {
                 controller: valuationController,
                 decoration: const InputDecoration(labelText: 'Valuation'),
                 maxLength: 15,
-                validator: (value) => ValidationHelper.validateInput(value,
-                    ["notEmpty", "notNull", "twoDigitMax", "validPositifDouble"]),
+                validator: (value) => ValidationHelper.validateInput(value, [
+                  "notEmpty",
+                  "notNull",
+                  "twoDigitMax",
+                  "validPositifDouble"
+                ]),
               ),
               const SizedBox(height: 16),
               ToggleButtons(
@@ -153,7 +152,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                     ElevatedButton(
                       onPressed: () async {
                         await itemViewModel.deleteItem(widget.item!.id);
-                        widget.closeCallback();
+                        Navigator.pop(context);
                       },
                       child: const Text('Delete Item'),
                     ),
@@ -161,7 +160,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         await createOrUpdate();
-                        widget.closeCallback();
+                        Navigator.pop(context);
                       }
                     },
                     child: Text('${widget.action} Item'.capitalize()),

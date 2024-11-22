@@ -40,9 +40,6 @@ class ListItem extends StatelessWidget {
               isScrollControlled: true,
               builder: (BuildContext context) {
                 return ItemDrawer(
-                  closeCallback: () {
-                    Navigator.pop(context);
-                  },
                   action: "update",
                   item: item,
                 );

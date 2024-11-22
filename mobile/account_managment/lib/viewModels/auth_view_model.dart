@@ -1,29 +1,32 @@
+import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthViewModel extends ChangeNotifier {
-  final AuthRepository authRepository;
+  final AuthRepository authRepository = AuthRepository();
+  final _storage = const FlutterSecureStorage();
 
-  AuthViewModel({required this.authRepository});
+  Future<List<dynamic>> login(String username, String password) async {
+    final RepoResponse repoResponse =
+        await authRepository.login(username, password);
 
-  String? _accessToken;
-  String? get accessToken => _accessToken;
+    if (repoResponse.success) {
+      await _storage.write(
+          key: 'accessToken', value: repoResponse.data!['access']);
+      await _storage.write(
+          key: 'refreshToken', value: repoResponse.data!['refresh']);
+    } else {
+      repoResponse.error = repoResponse.data!["detail"];
+    }
 
-  String? _refreshToken;
-  String? get refreshToken => _accessToken;
-
-  Future<void> login(String username, String password) async {
-    final repoResponse = await authRepository.login(username, password);
-    _accessToken = repoResponse?["accessToken"];
-    _refreshToken = repoResponse?["refreshToken"];
-
-    notifyListeners();
+    return [repoResponse.success, repoResponse.error];
   }
 
   void logout() {
     authRepository.logout();
-    _accessToken = null;
-    _refreshToken = null;
-    notifyListeners();
+    // _accessToken = null;
+    // _refreshToken = null;
+    // notifyListeners();
   }
 }

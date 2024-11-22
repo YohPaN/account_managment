@@ -4,19 +4,20 @@ import 'package:account_managment/common/api_config.dart';
 import 'package:account_managment/models/profile.dart';
 import 'package:account_managment/models/user.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ProfileRepository {
-  final AuthViewModel authViewModel;
-
-  ProfileRepository({required this.authViewModel});
+  final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>?> get() async {
+    String? accessToken = await storage.read(key: 'accessToken');
+
     final response = await http.get(
       Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/users/me/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${authViewModel.accessToken}'
+        'Authorization': 'Bearer ${accessToken}'
       },
     );
 
@@ -41,6 +42,8 @@ class ProfileRepository {
 
   Future<bool> create(String username, String firstName, String lastName,
       String email, String salary, String password) async {
+    String? accessToken = await storage.read(key: 'accessToken');
+
     final response = await http.post(
       Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/register/'),
       headers: <String, String>{
@@ -65,12 +68,14 @@ class ProfileRepository {
 
   Future<Map<String, dynamic>?> update(String username, String firstName,
       String lastName, String email, String salary, String password) async {
+    String? accessToken = await storage.read(key: 'accessToken');
+
     final response = await http.patch(
       Uri.parse(
           'http://${APIConfig.base_url}:${APIConfig.port}/api/users/me/update/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${authViewModel.accessToken}'
+        'Authorization': 'Bearer ${accessToken}'
       },
       body: jsonEncode(<String, String>{
         'username': username,
@@ -101,12 +106,14 @@ class ProfileRepository {
   }
 
   Future<void> updatePassword(String oldPassword, String newPassword) async {
+    String? accessToken = await storage.read(key: 'accessToken');
+
     await http.patch(
       Uri.parse(
           'http://${APIConfig.base_url}:${APIConfig.port}/api/users/password/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${authViewModel.accessToken}'
+        'Authorization': 'Bearer ${accessToken}'
       },
       body: jsonEncode(<String, String>{
         'old_password': oldPassword,

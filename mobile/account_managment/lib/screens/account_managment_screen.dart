@@ -15,10 +15,6 @@ class AccountManagmentScreen extends StatelessWidget {
       accountViewModel.listAccount();
     }
 
-    navigateToAccount(accountId) async {
-      await accountViewModel.getAccount(accountId);
-    }
-
     return Scaffold(
       body: accountViewModel.account == null
           ? const Center(child: CircularProgressIndicator())
@@ -33,7 +29,6 @@ class AccountManagmentScreen extends StatelessWidget {
                       return AccountListItem(
                         account: accountViewModel.accounts![index],
                         canManage: true,
-                        navigateToAccount: navigateToAccount,
                       );
                     },
                   ),
@@ -48,7 +43,6 @@ class AccountManagmentScreen extends StatelessWidget {
                       return AccountListItem(
                         account: accountViewModel.contributorAccounts![index],
                         canManage: false,
-                        navigateToAccount: navigateToAccount,
                       );
                     },
                   ),
@@ -65,9 +59,6 @@ class AccountManagmentScreen extends StatelessWidget {
             isScrollControlled: true,
             builder: (BuildContext context) {
               return AccountDrawer(
-                closeCallback: () {
-                  Navigator.pop(context);
-                },
                 action: "create",
               );
             },

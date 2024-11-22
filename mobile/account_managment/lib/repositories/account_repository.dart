@@ -4,22 +4,23 @@ import 'package:account_managment/common/api_config.dart';
 import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/account.dart';
 import 'package:http/http.dart' as http;
 
 class AccountRepository {
-  final AuthViewModel authViewModel;
-
-  AccountRepository({required this.authViewModel});
+  final storage = const FlutterSecureStorage();
 
   Future<Map<String, List<Account>>> list() async {
+    String? accessToken = await storage.read(key: 'accessToken');
+
     final response = await http.get(
         Uri.parse(
             'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${authViewModel.accessToken}'
+          'Authorization': 'Bearer ${accessToken}'
         });
 
     final List<Account> accounts = [];
@@ -100,6 +101,7 @@ class AccountRepository {
   }
 
   Future<Account?> get(int? accountId) async {
+    String? accessToken = await storage.read(key: 'accessToken');
     http.Response response;
 
     if (accountId != null) {
@@ -108,7 +110,7 @@ class AccountRepository {
               'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
           headers: <String, String>{
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${authViewModel.accessToken}'
+            'Authorization': 'Bearer ${accessToken}'
           });
     } else {
       response = await http.get(
@@ -116,7 +118,7 @@ class AccountRepository {
               'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/me/'),
           headers: <String, String>{
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${authViewModel.accessToken}'
+            'Authorization': 'Bearer ${accessToken}'
           });
     }
 
@@ -157,6 +159,7 @@ class AccountRepository {
   }
 
   Future<bool?> create(String name, List<Contributor> contributors) async {
+    String? accessToken = await storage.read(key: 'accessToken');
     final List<String> contributorSerializable = [];
 
     for (var contributor in contributors) {
@@ -168,7 +171,7 @@ class AccountRepository {
             'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${authViewModel.accessToken}'
+          'Authorization': 'Bearer ${accessToken}'
         },
         body: jsonEncode(<String, String>{
           'name': name,
@@ -184,6 +187,7 @@ class AccountRepository {
 
   Future<bool?> update(
       int accountId, String name, List<Contributor> contributors) async {
+    String? accessToken = await storage.read(key: 'accessToken');
     final List<String> contributorSerializable = [];
 
     for (var contributor in contributors) {
@@ -195,7 +199,7 @@ class AccountRepository {
             'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${authViewModel.accessToken}'
+          'Authorization': 'Bearer ${accessToken}'
         },
         body: jsonEncode(<String, String>{
           'name': name,
@@ -210,12 +214,14 @@ class AccountRepository {
   }
 
   Future<bool?> delete(int accountId) async {
+    String? accessToken = await storage.read(key: 'accessToken');
+
     final response = await http.delete(
       Uri.parse(
           'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${authViewModel.accessToken}'
+        'Authorization': 'Bearer ${accessToken}'
       },
     );
 

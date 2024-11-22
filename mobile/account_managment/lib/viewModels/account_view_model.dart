@@ -4,7 +4,7 @@ import 'package:account_managment/repositories/account_repository.dart';
 import 'package:flutter/material.dart';
 
 class AccountViewModel extends ChangeNotifier {
-  final AccountRepository accountRepository;
+  final AccountRepository accountRepository = AccountRepository();
 
   List<Account>? _accounts;
   List<Account>? get accounts => _accounts;
@@ -14,8 +14,6 @@ class AccountViewModel extends ChangeNotifier {
 
   Account? _account;
   Account? get account => _account;
-
-  AccountViewModel({required this.accountRepository});
 
   Future<void> listAccount() async {
     final Map<String, List<Account>> allAccounts =

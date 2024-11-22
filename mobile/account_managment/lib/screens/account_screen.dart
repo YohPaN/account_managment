@@ -1,6 +1,7 @@
 import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -88,9 +89,6 @@ class AccountScreen extends StatelessWidget {
             isScrollControlled: true,
             builder: (BuildContext context) {
               return ItemDrawer(
-                closeCallback: () {
-                  Navigator.pop(context);
-                },
                 action: "create",
               );
             },

@@ -1,3 +1,4 @@
+import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/components/icon_visibility.dart';
 import 'package:account_managment/components/password_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
@@ -183,9 +184,9 @@ class _ProfileFormState extends State<ProfileForm> {
                 Navigator.pop(context);
               } else {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Can't ${widget.action} profile")),
-                );
+                context
+                    .read<InternalNotification>()
+                    .showError("Wrong username or password");
               }
             }
           },

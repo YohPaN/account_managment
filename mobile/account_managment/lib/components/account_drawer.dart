@@ -10,12 +10,11 @@ import 'package:provider/provider.dart';
 class AccountDrawer extends StatefulWidget {
   final Account? account;
   final String action;
-  final Function closeCallback;
-  const AccountDrawer(
-      {super.key,
-      this.account,
-      required this.action,
-      required this.closeCallback});
+  const AccountDrawer({
+    super.key,
+    this.account,
+    required this.action,
+  });
 
   @override
   _AccountDrawerState createState() => _AccountDrawerState();
@@ -75,7 +74,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
     }
 
     return Padding(
-            padding: EdgeInsets.only(
+      padding: EdgeInsets.only(
         left: 16.0,
         right: 16.0,
         bottom: MediaQuery.of(context).viewInsets.bottom + 4.0,
@@ -164,9 +163,10 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                   Icon(
                                     Icons.circle,
                                     size: 16,
-                                    color: _usersToAdd[index].state != "APPROVED"
-                                        ? Colors.orange[500]
-                                        : Colors.green,
+                                    color:
+                                        _usersToAdd[index].state != "APPROVED"
+                                            ? Colors.orange[500]
+                                            : Colors.green,
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -175,7 +175,8 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                   ),
                                   Expanded(
                                     child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           IconButton(
                                             onPressed: () => _removeUser(index),
@@ -197,7 +198,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         await createOrUpdate();
-                        widget.closeCallback();
+                        Navigator.pop(context);
                       }
                     },
                     child: Text('${widget.action} account'.capitalize()),
@@ -205,8 +206,9 @@ class _AccountDrawerState extends State<AccountDrawer> {
                   if (widget.action == "update" && !widget.account!.isMain)
                     ElevatedButton(
                       onPressed: () async {
-                        await accountViewModel.deleteAccount(widget.account!.id);
-                        widget.closeCallback();
+                        await accountViewModel
+                            .deleteAccount(widget.account!.id);
+                        Navigator.pop(context);
                       },
                       child: const Text('Delete account'),
                     )

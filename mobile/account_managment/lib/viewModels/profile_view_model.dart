@@ -4,15 +4,13 @@ import 'package:account_managment/repositories/profile_repository.dart';
 import 'package:flutter/material.dart';
 
 class ProfileViewModel extends ChangeNotifier {
-  final ProfileRepository profileRepository;
+  final ProfileRepository profileRepository = ProfileRepository();
 
   User? _user;
   User? get user => _user;
 
   Profile? _profile;
   Profile? get profile => _profile;
-
-  ProfileViewModel({required this.profileRepository});
 
   Future<void> getProfile() async {
     final response = await profileRepository.get();
