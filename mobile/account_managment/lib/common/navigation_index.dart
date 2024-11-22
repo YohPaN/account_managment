@@ -9,8 +9,6 @@ class NavigationIndex extends ChangeNotifier {
 
   void changeIndex(index) {
     _index = index;
-    print(index);
-    print(_index);
     notifyListeners();
   }
 }

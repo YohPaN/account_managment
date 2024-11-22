@@ -26,18 +26,20 @@ class _LayoutState extends State<Layout> {
   @override
   Widget build(BuildContext context) {
     var currentPageIndex = Provider.of<NavigationIndex>(context).getIndex;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("title"),
+      appBar: AppBar(),
+      body: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (context) => AccountViewModel(),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => ProfileViewModel(),
+          )
+        ],
+        child: allDestinations[currentPageIndex],
       ),
-      body: MultiProvider(providers: [
-        ChangeNotifierProvider(
-          create: (context) => AccountViewModel(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => ProfileViewModel(),
-        )
-      ], child: allDestinations[currentPageIndex]),
       bottomNavigationBar: NavigationBar(
           selectedIndex: currentPageIndex,
           destinations: const [

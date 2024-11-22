@@ -4,17 +4,18 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 
 class ItemViewModel extends ChangeNotifier {
-  final ItemRepository itemRepository;
+  final ItemRepository itemRepository = ItemRepository();
   final AccountViewModel accountViewModel;
 
-  ItemViewModel({required this.itemRepository, required this.accountViewModel});
+  ItemViewModel({required this.accountViewModel});
 
   List<Item>? _items;
   List<Item>? get items => _items;
 
   Future<void> createItem(
       String title, String description, String valuation) async {
-    bool? success = await itemRepository.create(title, description, valuation);
+    bool? success = await itemRepository.create(
+        title, description, valuation, accountViewModel.account!.id);
 
     if (success == true) {
       await accountViewModel.getAccount(accountViewModel.account!.id);

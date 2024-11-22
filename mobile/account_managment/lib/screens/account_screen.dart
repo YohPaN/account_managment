@@ -2,7 +2,9 @@ import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/account.dart';
+import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/item_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +17,27 @@ class AccountScreen extends StatelessWidget {
 
     if (accountViewModel.account == null) {
       accountViewModel.getAccount();
+    }
+
+    showModal(String action, [Item? item]) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled: true,
+        builder: (BuildContext context) {
+          return ChangeNotifierProvider<ItemViewModel>(
+            create: (context) => ItemViewModel(
+              accountViewModel: accountViewModel,
+            ),
+            child: ItemDrawer(
+              item: item,
+              action: action,
+            ),
+          );
+        },
+      );
     }
 
     return Scaffold(
@@ -69,7 +92,9 @@ class AccountScreen extends StatelessWidget {
                             ),
                             child: ListTile(
                               title: ListItem(
-                                  item: accountViewModel.account!.items[index]),
+                                item: accountViewModel.account!.items[index],
+                                callbackFunc: showModal,
+                              ),
                             ),
                           ),
                         );
@@ -80,20 +105,7 @@ class AccountScreen extends StatelessWidget {
               ],
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            isScrollControlled: true,
-            builder: (BuildContext context) {
-              return ItemDrawer(
-                action: "create",
-              );
-            },
-          );
-        },
+        onPressed: () => showModal("create"),
         foregroundColor: Theme.of(context).colorScheme.primary,
         backgroundColor: Theme.of(context).colorScheme.surface,
         child: const Icon(Icons.add),

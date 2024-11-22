@@ -1,6 +1,5 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/components/icon_visibility.dart';
-import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +28,6 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = AuthViewModel();
-    // final internalNotification = Provider.of<InternalNotification>(context);
 
     return Form(
       key: _formKey,

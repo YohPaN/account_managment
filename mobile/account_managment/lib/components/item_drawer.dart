@@ -51,7 +51,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    final itemViewModel = Provider.of<ItemViewModel>(context);
+    final ItemViewModel itemViewModel =
+        Provider.of<ItemViewModel>(context, listen: false);
 
     switchButton(index) {
       setState(() {
@@ -70,10 +71,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
       if (widget.action == "create") {
         await itemViewModel.createItem(
-          titleController.text,
-          descriptionController.text,
-          valuation,
-        );
+            titleController.text, descriptionController.text, valuation);
       } else if (widget.action == "update") {
         await itemViewModel.updateItem(
           widget.item!.id,
