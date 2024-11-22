@@ -1,11 +1,11 @@
 class RepoResponse {
   Map<String, dynamic>? data;
   bool success = false;
-  String? error;
+  String message;
 
   RepoResponse({
     this.data,
     required this.success,
-    this.error,
+    required this.message,
   });
 }

@@ -234,7 +234,7 @@ class AccountRepository {
     return null;
   }
 
-  Future<bool?> createOrUpdateItem(
+  Future<RepoResponse> createOrUpdateItem(
       String title, String description, String valuation, int accountId,
       [int? itemId]) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
@@ -250,16 +250,16 @@ class AccountRepository {
       },
     );
 
-    return null;
+    return repoResponse;
   }
 
-  Future<bool?> deleteItem(int itemId, int accountId) async {
+  Future<RepoResponse> deleteItem(int itemId, int accountId) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "DELETE",
       uri: "$model_url/$accountId/items/$itemId/",
       contentType: 'application/json',
     );
 
-    return null;
+    return repoResponse;
   }
 }

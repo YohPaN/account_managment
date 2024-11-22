@@ -17,10 +17,10 @@ class AuthViewModel extends ChangeNotifier {
       await _storage.write(
           key: 'refreshToken', value: repoResponse.data!['refresh']);
     } else {
-      repoResponse.error = repoResponse.data!["detail"];
+      repoResponse.message = repoResponse.data!["detail"];
     }
 
-    return [repoResponse.success, repoResponse.error];
+    return [repoResponse.success, repoResponse.message];
   }
 
   void logout() {

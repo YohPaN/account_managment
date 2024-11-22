@@ -62,7 +62,7 @@ class _LoginFormState extends State<LoginForm> {
                 } else {
                   passwordController.text = "";
                   Provider.of<InternalNotification>(context, listen: false)
-                      .showError(error);
+                      .showError(error, success);
                 }
               },
               child: const Text("Login"),

@@ -1,6 +1,8 @@
+import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/item.dart';
+import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -68,7 +70,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           ? "-${valuationController.text}"
           : valuationController.text;
 
-      await accountViewModel.createOrUpdateItem(titleController.text,
+      return await accountViewModel.createOrUpdateItem(titleController.text,
           descriptionController.text, valuation, widget.item?.id);
     }
 
@@ -139,7 +141,12 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   if (widget.action == "update")
                     ElevatedButton(
                       onPressed: () async {
-                        await accountViewModel.deleteItem(widget.item!.id);
+                        RepoResponse repoResponse =
+                            await accountViewModel.deleteItem(widget.item!.id);
+                        Provider.of<InternalNotification>(context,
+                                listen: false)
+                            .showError(
+                                repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       },
                       child: const Text('Delete Item'),
@@ -147,7 +154,12 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        await createOrUpdate();
+                        RepoResponse repoResponse = await createOrUpdate();
+
+                        Provider.of<InternalNotification>(context,
+                                listen: false)
+                            .showError(
+                                repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       }
                     },

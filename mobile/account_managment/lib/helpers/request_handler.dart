@@ -22,19 +22,24 @@ class RequestHandler {
       Map<String, dynamic>? body}) async {
     http.Response? response;
     Map<String, dynamic>? data;
-    String? error;
+    String message = "";
+    String action = "";
+
     bool success = false;
 
     try {
       switch (method) {
         case "GET":
+          action = "retrieve";
           response = await http.get(
             buildUri(uri),
-            headers: buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth),
           );
           break;
 
         case "POST":
+          action = "create or update";
+
           if (body == null) {
             break;
           }
@@ -48,6 +53,8 @@ class RequestHandler {
           break;
 
         case "PUT":
+          action = "update";
+
           if (body == null) {
             break;
           }
@@ -60,6 +67,8 @@ class RequestHandler {
           break;
 
         case "PATCH":
+          action = "update";
+
           if (body == null) {
             break;
           }
@@ -72,6 +81,8 @@ class RequestHandler {
           break;
 
         case "DELETE":
+          action = "delete";
+
           response = await http.delete(
             buildUri(uri),
             headers: await buildHeaders(contentType, needAuth),
@@ -79,22 +90,32 @@ class RequestHandler {
           break;
 
         default:
-          error = "Method not handle";
+          message = "Method not handle";
       }
-      if (response != null) {
-        data = jsonDecode(response.body);
-        error = checkFields(data);
+
+      if (response != null && method != "GET") {
+        if (response.body != "") {
+          data = jsonDecode(response.body);
+          message = checkFields(data);
+        }
+
+        if (message == "") {
+          message = "Ressource $action successfully";
+        }
+
         success = SUCCESS_HTTP_CODE.contains(response.statusCode);
       } else {
-        error = "No response";
+        message = "No response";
       }
     } catch (e) {
-      error = e.toString();
+      message = e.toString();
     }
-    return RepoResponse(data: data, success: success, error: error);
+
+    return RepoResponse(data: data, success: success, message: message);
   }
 
-  static buildHeaders(String contentType, bool? needAuth) async {
+  static Future<Map<String, String>> buildHeaders(
+      String contentType, bool? needAuth) async {
     var headers = <String, String>{};
     String? accessToken = await storage.read(key: 'accessToken');
 
@@ -112,11 +133,11 @@ class RequestHandler {
     return headers;
   }
 
-  static buildUri(String uri) {
+  static Uri buildUri(String uri) {
     return Uri.parse("http://${APIConfig.base_url}:${APIConfig.port}/api/$uri");
   }
 
-  static checkFields(data) {
+  static String checkFields(data) {
     if (data["error"] != null) {
       return data["error"];
     }
@@ -127,6 +148,6 @@ class RequestHandler {
       }
     }
 
-    return null;
+    return "";
   }
 }

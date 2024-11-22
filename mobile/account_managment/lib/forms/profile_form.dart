@@ -87,112 +87,116 @@ class _ProfileFormState extends State<ProfileForm> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-          child: Column(children: [
-        TextFormField(
-          controller: firstNameController,
-          maxLength: 15,
-          decoration: const InputDecoration(labelText: 'First name'),
-          validator: (value) => ValidationHelper.validateInput(
-              value, ["notEmpty", "notNull", "validTextOnly"]),
-        ),
-        TextFormField(
-          controller: lastNameController,
-          maxLength: 15,
-          decoration: const InputDecoration(labelText: 'Last name'),
-          validator: (value) => ValidationHelper.validateInput(
-              value, ["notEmpty", "notNull", "validTextOnly"]),
-        ),
-        TextFormField(
-          controller: usernameController,
-          maxLength: 15,
-          decoration: const InputDecoration(labelText: 'Username'),
-          validator: (value) => ValidationHelper.validateInput(
-              value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
-        ),
-        TextFormField(
-          controller: emailController,
-          maxLength: 50,
-          decoration: const InputDecoration(labelText: 'Email'),
-          // validator: (value) => ValidationHelper.validateInput(
-          //     value, ["notEmpty", "notNull", "validEmail"])
-        ),
-        TextFormField(
-          controller: salaryController,
-          maxLength: 15,
-          decoration: const InputDecoration(labelText: 'Salary'),
-          validator: (value) => ValidationHelper.validateInput(
-              value, ["validPositifDouble", "twoDigitMax"]),
-        ),
-        if (widget.action == "create")
-          TextFormField(
-            controller: newPasswordController,
-            decoration: InputDecoration(
-              labelText: 'New password',
-              suffixIcon: IconButton(
-                onPressed: () => togglePasswordVisibility("new"),
-                icon: IconVisibility(visibility: _passwordVisibility["new"]!),
-              ),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: firstNameController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'First name'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["notEmpty", "notNull", "validTextOnly"]),
             ),
-            maxLength: 50,
-            obscureText: _passwordVisibility["new"]!,
-            // validator: (value) =>
-            //     PwdValidationHelper.validatePassword(password: value!),
-          ),
-        const SizedBox(height: 16),
-        if (widget.action == "create")
-          TextFormField(
-            controller: retypePasswordController,
-            decoration: InputDecoration(
-              labelText: 'Retype password',
-              suffixIcon: IconButton(
-                onPressed: () => togglePasswordVisibility("retype"),
-                icon:
-                    IconVisibility(visibility: _passwordVisibility["retype"]!),
-              ),
+            TextFormField(
+              controller: lastNameController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'Last name'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["notEmpty", "notNull", "validTextOnly"]),
             ),
-            maxLength: 50,
-            obscureText: _passwordVisibility["retype"]!,
-            // validator: (value) => PwdValidationHelper.validatePassword(
-            //     password: value!, comparisonSame: newPasswordController.text),
-          ),
-        const SizedBox(height: 16),
-        if (widget.action == "update")
-          ElevatedButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            TextFormField(
+              controller: usernameController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'Username'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
+            ),
+            TextFormField(
+              controller: emailController,
+              maxLength: 50,
+              decoration: const InputDecoration(labelText: 'Email'),
+              // validator: (value) => ValidationHelper.validateInput(
+              //     value, ["notEmpty", "notNull", "validEmail"])
+            ),
+            TextFormField(
+              controller: salaryController,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'Salary'),
+              validator: (value) => ValidationHelper.validateInput(
+                  value, ["validPositifDouble", "twoDigitMax"]),
+            ),
+            if (widget.action == "create")
+              TextFormField(
+                controller: newPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'New password',
+                  suffixIcon: IconButton(
+                    onPressed: () => togglePasswordVisibility("new"),
+                    icon:
+                        IconVisibility(visibility: _passwordVisibility["new"]!),
+                  ),
                 ),
-                isScrollControlled: true,
-                builder: (BuildContext context) {
-                  return PasswordDrawerState(
-                    action: widget.action,
+                maxLength: 50,
+                obscureText: _passwordVisibility["new"]!,
+                // validator: (value) =>
+                //     PwdValidationHelper.validatePassword(password: value!),
+              ),
+            const SizedBox(height: 16),
+            if (widget.action == "create")
+              TextFormField(
+                controller: retypePasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Retype password',
+                  suffixIcon: IconButton(
+                    onPressed: () => togglePasswordVisibility("retype"),
+                    icon: IconVisibility(
+                        visibility: _passwordVisibility["retype"]!),
+                  ),
+                ),
+                maxLength: 50,
+                obscureText: _passwordVisibility["retype"]!,
+                // validator: (value) => PwdValidationHelper.validatePassword(
+                //     password: value!, comparisonSame: newPasswordController.text),
+              ),
+            const SizedBox(height: 16),
+            if (widget.action == "update")
+              ElevatedButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return PasswordDrawerState(
+                        action: widget.action,
+                      );
+                    },
                   );
                 },
-              );
-            },
-            child: const Text("Update my password"),
-          ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              await createOrUpdate();
-              if (profileViewModel.profile != null) {
-                if (!context.mounted) return;
-                Navigator.pop(context);
-              } else {
-                if (!context.mounted) return;
-                context
-                    .read<InternalNotification>()
-                    .showError("Wrong username or password");
-              }
-            }
-          },
-          child: Text("${widget.action} my account".capitalize()),
+                child: const Text("Update my password"),
+              ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  await createOrUpdate();
+
+                  context.read<InternalNotification>().showError(
+                        "Wrong username or password",
+                        false,
+                      );
+                  Navigator.pop(context);
+                }
+              },
+              child: Text(
+                "${widget.action} my account".capitalize(),
+              ),
+            ),
+          ],
         ),
-      ])),
+      ),
     );
   }
 }

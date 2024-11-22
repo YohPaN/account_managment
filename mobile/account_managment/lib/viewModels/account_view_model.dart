@@ -1,5 +1,6 @@
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/models/contributor.dart';
+import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/account_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -52,20 +53,25 @@ class AccountViewModel extends ChangeNotifier {
     listAccount();
   }
 
-  Future<void> createOrUpdateItem(
+  Future<RepoResponse> createOrUpdateItem(
       String title, String description, String valuation,
       [int? itemId]) async {
-    bool? success = await accountRepository.createOrUpdateItem(
-        title, description, valuation, account!.id, itemId);
+    final RepoResponse repoResponse = await accountRepository
+        .createOrUpdateItem(title, description, valuation, account!.id, itemId);
 
-    if (success == true) {
-      await getAccount(account!.id);
+    if (repoResponse.success) {
+      await refreshAccount();
     }
-    await refreshAccount();
+    return repoResponse;
   }
 
-  Future<void> deleteItem(int itemId) async {
-    await accountRepository.deleteItem(itemId, account!.id);
-    await refreshAccount();
+  Future<RepoResponse> deleteItem(int itemId) async {
+    final RepoResponse repoResponse =
+        await accountRepository.deleteItem(itemId, account!.id);
+
+    if (repoResponse.success) {
+      await refreshAccount();
+    }
+    return repoResponse;
   }
 }
