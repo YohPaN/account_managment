@@ -253,3 +253,36 @@ class AccountView(ModelViewSet):
             data={"error": "You can't delete your main account"},
             status=status.HTTP_401_UNAUTHORIZED,
         )
+
+    @action(detail=True, methods=["post"], url_path="items")
+    def create_or_update_item(self, request, pk=None):
+        account = self.get_object()
+
+        data = request.data
+        item_id = data.get("item_id", None)
+
+        if item_id is not None and item_id != "":
+            item = models.Item.objects.get(pk=item_id)
+            item.title = data["title"]
+            item.description = data["description"]
+            item.valuation = data["valuation"]
+            item.save()
+
+        else:
+            models.Item.objects.create(
+                account=account,
+                title=data["title"],
+                description=data["description"],
+                valuation=data["valuation"],
+            )
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=True, methods=["delete"], url_path="items/(?P<item_id>[^/.]+)"
+    )
+    def delete_item(self, request, pk=None, item_id=None):
+        item = models.Item.objects.get(pk=item_id)
+        item.delete()
+
+        return Response(status=status.HTTP_200_OK)

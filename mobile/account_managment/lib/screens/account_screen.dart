@@ -3,7 +3,6 @@ import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
-import 'package:account_managment/viewModels/item_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,20 +11,21 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accountViewModel =
+        Provider.of<AccountViewModel>(context, listen: false);
+
     showModal(String action, [Item? item]) {
-      final accountViewModel =
-          Provider.of<AccountViewModel>(context, listen: false);
       showModalBottomSheet(
         context: context,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         isScrollControlled: true,
-        builder: (BuildContext context) {
-          return ChangeNotifierProvider<ItemViewModel>(
-            create: (context) => ItemViewModel(
-              accountViewModel: accountViewModel,
-            ),
+        builder: (BuildContext drawerContext) {
+          return InheritedProvider<AccountViewModel>(
+            update: (context, value) {
+              return accountViewModel;
+            },
             child: ItemDrawer(
               item: item,
               action: action,

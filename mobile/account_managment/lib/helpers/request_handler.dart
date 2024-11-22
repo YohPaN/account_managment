@@ -53,7 +53,7 @@ class RequestHandler {
           }
           response = await http.put(
             buildUri(uri),
-            headers: buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth),
             body: jsonEncode(body),
           );
 
@@ -65,15 +65,16 @@ class RequestHandler {
           }
           response = await http.patch(
             buildUri(uri),
-            headers: buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth),
             body: jsonEncode(body),
           );
+
           break;
 
         case "DELETE":
           response = await http.delete(
             buildUri(uri),
-            headers: buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth),
           );
           break;
 
@@ -81,8 +82,6 @@ class RequestHandler {
           error = "Method not handle";
       }
       if (response != null) {
-        print(response.body);
-        print(response.statusCode);
         data = jsonDecode(response.body);
         error = checkFields(data);
         success = SUCCESS_HTTP_CODE.contains(response.statusCode);

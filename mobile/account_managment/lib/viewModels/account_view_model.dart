@@ -51,4 +51,21 @@ class AccountViewModel extends ChangeNotifier {
     await getAccount(account?.id);
     listAccount();
   }
+
+  Future<void> createOrUpdateItem(
+      String title, String description, String valuation,
+      [int? itemId]) async {
+    bool? success = await accountRepository.createOrUpdateItem(
+        title, description, valuation, account!.id, itemId);
+
+    if (success == true) {
+      await getAccount(account!.id);
+    }
+    await refreshAccount();
+  }
+
+  Future<void> deleteItem(int itemId) async {
+    await accountRepository.deleteItem(itemId, account!.id);
+    await refreshAccount();
+  }
 }

@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:account_managment/common/api_config.dart';
+import 'package:account_managment/helpers/request_handler.dart';
 import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/models/item.dart';
-import 'package:account_managment/viewModels/auth_view_model.dart';
+import 'package:account_managment/models/repo_reponse.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/account.dart';
@@ -11,6 +12,7 @@ import 'package:http/http.dart' as http;
 
 class AccountRepository {
   final storage = const FlutterSecureStorage();
+  final model_url = "accounts";
 
   Future<Map<String, List<Account>>> list() async {
     String? accessToken = await storage.read(key: 'accessToken');
@@ -228,6 +230,35 @@ class AccountRepository {
     if (response.statusCode == 200) {
       return true;
     }
+
+    return null;
+  }
+
+  Future<bool?> createOrUpdateItem(
+      String title, String description, String valuation, int accountId,
+      [int? itemId]) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$model_url/$accountId/items/",
+      contentType: 'application/json',
+      body: {
+        'item_id': itemId != null ? itemId.toString() : "",
+        'account': accountId.toString(),
+        'title': title,
+        'description': description,
+        'valuation': valuation,
+      },
+    );
+
+    return null;
+  }
+
+  Future<bool?> deleteItem(int itemId, int accountId) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "DELETE",
+      uri: "$model_url/$accountId/items/$itemId/",
+      contentType: 'application/json',
+    );
 
     return null;
   }
