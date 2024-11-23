@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:account_managment/common/api_config.dart';
@@ -31,10 +32,13 @@ class RequestHandler {
       switch (method) {
         case "GET":
           action = "retrieve";
-          response = await http.get(
-            buildUri(uri),
-            headers: await buildHeaders(contentType, needAuth),
-          );
+          response = await http
+              .get(
+                buildUri(uri),
+                headers: await buildHeaders(contentType, needAuth),
+              )
+              .timeout(const Duration(seconds: 5));
+
           break;
 
         case "POST":
@@ -93,7 +97,7 @@ class RequestHandler {
           message = "Method not handle";
       }
 
-      if (response != null && method != "GET") {
+      if (response != null) {
         if (response.body != "") {
           data = jsonDecode(response.body);
           message = checkFields(data);
@@ -107,10 +111,11 @@ class RequestHandler {
       } else {
         message = "No response";
       }
+    } on TimeoutException {
+      message = "Unable to contact server";
     } catch (e) {
       message = e.toString();
     }
-
     return RepoResponse(data: data, success: success, message: message);
   }
 

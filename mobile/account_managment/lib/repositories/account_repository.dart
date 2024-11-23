@@ -14,92 +14,14 @@ class AccountRepository {
   final storage = const FlutterSecureStorage();
   final model_url = "accounts";
 
-  Future<Map<String, List<Account>>> list() async {
-    String? accessToken = await storage.read(key: 'accessToken');
+  Future<RepoResponse> list() async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "GET",
+      uri: "$model_url/",
+      contentType: 'application/json',
+    );
 
-    final response = await http.get(
-        Uri.parse(
-            'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${accessToken}'
-        });
-
-    final List<Account> accounts = [];
-    final List<Account> contributorAccounts = [];
-
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-
-      for (var account in responseData["own"]) {
-        final List<Item> items = [];
-
-        for (var item in account["items"]) {
-          items.add(Item(
-              id: item["id"],
-              title: item["title"],
-              description: item["description"],
-              valuation: double.parse(item["valuation"])));
-        }
-
-        final List<Contributor> contributors = [];
-
-        for (var contributor in account["contributors"]) {
-          contributors.add(
-            Contributor(
-              username: contributor["user"]["username"],
-              state: contributor["state"],
-            ),
-          );
-        }
-
-        accounts.add(
-          Account(
-            id: account["id"],
-            name: account["name"],
-            isMain: account["is_main"],
-            items: items,
-            contributor: contributors,
-            total: account["total"]["total_sum"],
-          ),
-        );
-      }
-
-      for (var contributorAccount in responseData["contributor_account"]) {
-        final List<Item> items = [];
-
-        for (var item in contributorAccount["items"]) {
-          items.add(Item(
-              id: item["id"],
-              title: item["title"],
-              description: item["description"],
-              valuation: double.parse(item["valuation"])));
-        }
-
-        final List<Contributor> contributors = [];
-        for (var contributor in contributorAccount["contributors"]) {
-          contributors.add(
-            Contributor(
-              username: contributor["user"]["username"],
-              state: contributor["state"],
-            ),
-          );
-        }
-
-        contributorAccounts.add(
-          Account(
-            id: contributorAccount["id"],
-            name: contributorAccount["name"],
-            isMain: contributorAccount["is_main"],
-            items: items,
-            contributor: contributors,
-            total: contributorAccount["total"]["total_sum"],
-          ),
-        );
-      }
-    }
-
-    return {"accounts": accounts, "contributorAccounts": contributorAccounts};
+    return repoResponse;
   }
 
   Future<Account?> get(int? accountId) async {

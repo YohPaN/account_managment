@@ -1,5 +1,6 @@
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/models/contributor.dart';
+import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/account_repository.dart';
 import 'package:flutter/material.dart';
@@ -16,19 +17,69 @@ class AccountViewModel extends ChangeNotifier {
   Account? _account;
   Account? get account => _account;
 
-  Future<void> listAccount() async {
-    final Map<String, List<Account>> allAccounts =
-        await accountRepository.list();
+  Future<RepoResponse> listAccount() async {
+    final RepoResponse repoResponse = await accountRepository.list();
+    final List<Account> accounts = [];
+    final List<Account> contributorAccounts = [];
 
-    _accounts = allAccounts["accounts"];
-    _contributorAccounts = allAccounts["contributorAccounts"];
+    if (repoResponse.success && repoResponse.data != null) {
+      for (var account in repoResponse.data!["own"]) {
+        final List<Item> items = [];
 
-    notifyListeners();
+        for (var item in account["items"]) {
+          items.add(Item.deserialize(item));
+        }
+
+        final List<Contributor> contributors = [];
+
+        for (var contributor in account["contributors"]) {
+          contributors.add(
+            Contributor.deserialize(contributor),
+          );
+        }
+
+        final accountToAdd = Account.deserialize(account);
+        accountToAdd.items = items;
+        accountToAdd.contributor = contributors;
+        accounts.add(
+          accountToAdd,
+        );
+      }
+
+      for (var contributorAccount
+          in repoResponse.data!["contributor_account"]) {
+        final List<Item> items = [];
+
+        for (var item in contributorAccount["items"]) {
+          items.add(Item.deserialize(item));
+        }
+
+        final List<Contributor> contributors = [];
+
+        for (var contributor in contributorAccount["contributors"]) {
+          contributors.add(
+            Contributor.deserialize(contributor),
+          );
+        }
+
+        final accountToAdd = Account.deserialize(contributorAccount);
+        accountToAdd.items = items;
+        accountToAdd.contributor = contributors;
+        contributorAccounts.add(
+          accountToAdd,
+        );
+      }
+    }
+
+    _accounts = accounts;
+    _contributorAccounts = contributorAccounts;
+
+    return repoResponse;
   }
 
   Future<void> getAccount([int? accountId]) async {
     _account = await accountRepository.get(accountId);
-    notifyListeners();
+    // notifyListeners();
   }
 
   Future<RepoResponse> createAccount(
