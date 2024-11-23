@@ -38,8 +38,8 @@ class ProfileViewModel extends ChangeNotifier {
         username, firstName, lastName, email, salary, password);
 
     if (repoResponse.success) {
-      _user = User.deserialize(repoResponse.data);
-      _profile = Profile.deserialize(repoResponse.data);
+      _user = User.updateData(repoResponse.data, user!);
+      _profile = Profile.updateData(repoResponse.data, profile!);
     }
 
     return repoResponse;

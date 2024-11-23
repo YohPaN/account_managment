@@ -13,4 +13,11 @@ class User {
       email: jsonUser["email"],
     );
   }
+
+  static User updateData(jsonUser, User user) {
+    return User(
+      username: jsonUser["username"] ?? user.username,
+      email: jsonUser["email"] ?? user.email,
+    );
+  }
 }
