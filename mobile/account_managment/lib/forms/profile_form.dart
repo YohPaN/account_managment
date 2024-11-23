@@ -21,15 +21,6 @@ class ProfileForm extends StatefulWidget {
 class _ProfileFormState extends State<ProfileForm> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController salaryController = TextEditingController();
-  final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController retypePasswordController =
-      TextEditingController();
-
   final Map<String, bool> _passwordVisibility = {
     "new": true,
     "retype": true,
@@ -44,25 +35,9 @@ class _ProfileFormState extends State<ProfileForm> {
   @override
   Widget build(BuildContext context) {
     final profileViewModel = Provider.of<ProfileViewModel>(context);
-
+    final Map<String, String> _formData = {};
     User? user = profileViewModel.user;
     Profile? profile = profileViewModel.profile;
-
-    // if (widget.action == "update") {
-    //   if ((profile == null || user == null)) {
-    //     profileViewModel.getProfile();
-    //     user = profileViewModel.user;
-    //     profile = profileViewModel.profile;
-    //   }
-
-    //   if (profile != null && user != null) {
-    //     usernameController.text = user.username;
-    //     firstNameController.text = profile.firstName;
-    //     lastNameController.text = profile.lastName;
-    //     emailController.text = user.email;
-    //     salaryController.text = profile.salary!.toStringAsFixed(2);
-    //   }
-    // }
 
     createOrUpdate() async {
       late Function(String, String, String, String, String, String)
@@ -75,70 +50,86 @@ class _ProfileFormState extends State<ProfileForm> {
       }
 
       return actionFunction(
-        usernameController.text,
-        firstNameController.text,
-        lastNameController.text,
-        emailController.text,
-        salaryController.text,
-        newPasswordController.text,
+        _formData["username"]!,
+        _formData["firstName"]!,
+        _formData["lastName"]!,
+        _formData["email"]!,
+        _formData["salary"] ?? "",
+        _formData["newPassword"] ?? "",
       );
+    }
+
+    Future<void> saveForm() async {
+      _formKey.currentState!.save();
     }
 
     return FutureBuilder(
       future: profileViewModel.getProfile(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          if (snapshot.data!.success) {
+          //TODO: pas fan car ca leve une erreur
+          if (snapshot.data!.success || widget.action == "create") {
             return Form(
               key: _formKey,
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     TextFormField(
-                      initialValue: profileViewModel.profile!.firstName,
-                      // controller: firstNameController,
+                      initialValue: profileViewModel.profile?.firstName,
                       maxLength: 15,
                       decoration:
                           const InputDecoration(labelText: 'First name'),
+                      onSaved: (value) {
+                        _formData['firstName'] = value ?? '';
+                      },
                       validator: (value) => ValidationHelper.validateInput(
                           value, ["notEmpty", "notNull", "validTextOnly"]),
                     ),
                     TextFormField(
-                      initialValue: profileViewModel.profile!.lastName,
-                      // controller: lastNameController,
+                      initialValue: profileViewModel.profile?.lastName,
                       maxLength: 15,
                       decoration: const InputDecoration(labelText: 'Last name'),
+                      onSaved: (value) {
+                        _formData['lastName'] = value ?? '';
+                      },
                       validator: (value) => ValidationHelper.validateInput(
                           value, ["notEmpty", "notNull", "validTextOnly"]),
                     ),
                     TextFormField(
-                      initialValue: profileViewModel.user!.username,
-                      // controller: usernameController,
+                      initialValue: profileViewModel.user?.username,
                       maxLength: 15,
                       decoration: const InputDecoration(labelText: 'Username'),
+                      onSaved: (value) {
+                        _formData['username'] = value ?? '';
+                      },
                       validator: (value) => ValidationHelper.validateInput(
                           value,
                           ["notEmpty", "notNull", "validTextOrDigitOnly"]),
                     ),
                     TextFormField(
-                      initialValue: profileViewModel.user!.email,
-                      // controller: emailController,
+                      initialValue: profileViewModel.user?.email,
                       maxLength: 50,
                       decoration: const InputDecoration(labelText: 'Email'),
+                      onSaved: (value) {
+                        _formData['email'] = value ?? '';
+                      },
                       // validator: (value) => ValidationHelper.validateInput(
                       //     value, ["notEmpty", "notNull", "validEmail"])
                     ),
                     TextFormField(
-                      initialValue: profileViewModel.profile!.salary.toString(),
-                      // controller: salaryController,
+                      initialValue: profileViewModel.profile?.salary.toString(),
                       maxLength: 15,
                       decoration: const InputDecoration(labelText: 'Salary'),
+                      onSaved: (value) {
+                        print(value);
+                        _formData['salary'] = value ?? '';
+                      },
                       validator: (value) => ValidationHelper.validateInput(
                           value, ["validPositifDouble", "twoDigitMax"]),
                     ),
                     if (widget.action == "create")
                       TextFormField(
-                        controller: newPasswordController,
+                        // controller: newPasswordController,
                         decoration: InputDecoration(
                           labelText: 'New password',
                           suffixIcon: IconButton(
@@ -149,13 +140,16 @@ class _ProfileFormState extends State<ProfileForm> {
                         ),
                         maxLength: 50,
                         obscureText: _passwordVisibility["new"]!,
+                        onSaved: (value) {
+                          _formData['newPassword'] = value ?? '';
+                        },
                         // validator: (value) =>
                         //     PwdValidationHelper.validatePassword(password: value!),
                       ),
                     const SizedBox(height: 16),
                     if (widget.action == "create")
                       TextFormField(
-                        controller: retypePasswordController,
+                        // controller: retypePasswordController,
                         decoration: InputDecoration(
                           labelText: 'Retype password',
                           suffixIcon: IconButton(
@@ -193,6 +187,7 @@ class _ProfileFormState extends State<ProfileForm> {
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
+                          await saveForm();
                           final RepoResponse repoResponse =
                               await createOrUpdate();
                           Provider.of<InternalNotification>(context,

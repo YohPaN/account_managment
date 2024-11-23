@@ -21,7 +21,9 @@ class Profile(models.Model):
     )
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=15)
-    salary = models.DecimalField(max_digits=15, decimal_places=2)
+    salary = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
 
 
 class Account(models.Model):

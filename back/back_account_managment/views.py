@@ -114,7 +114,9 @@ class RegisterView(APIView):
             profile = models.Profile.objects.create(
                 first_name=data["first_name"],
                 last_name=data["last_name"],
-                salary=data["salary"],
+                salary=(
+                    float(data["salary"]) if data["salary"] != "" else None
+                ),
                 user=user,
             )
 
