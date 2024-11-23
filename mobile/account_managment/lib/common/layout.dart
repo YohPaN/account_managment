@@ -19,7 +19,7 @@ class _LayoutState extends State<Layout> {
   final List<Widget> allDestinations = [
     const AccountScreen(),
     const AccountManagmentScreen(),
-    const ProfileScreen(),
+    ProfileScreen(action: "update"),
     const SettingScreen(),
   ];
 
@@ -27,45 +27,44 @@ class _LayoutState extends State<Layout> {
   Widget build(BuildContext context) {
     var currentPageIndex = Provider.of<NavigationIndex>(context).getIndex;
 
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       appBar: AppBar(),
       body: MultiProvider(
         providers: [
           ChangeNotifierProvider(
             create: (context) => AccountViewModel(),
           ),
-          ChangeNotifierProvider(
-            create: (context) => ProfileViewModel(),
-          )
         ],
         child: allDestinations[currentPageIndex],
       ),
       bottomNavigationBar: NavigationBar(
-          selectedIndex: currentPageIndex,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.euro),
-              label: 'Accounts',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-          onDestinationSelected: (index) {
-            setState(() {
-              Provider.of<NavigationIndex>(context, listen: false)
-                  .changeIndex(index);
-            });
-          }),
-    );
+        selectedIndex: currentPageIndex,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.euro),
+            label: 'Accounts',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.account_circle),
+            label: 'Profile',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        onDestinationSelected: (index) {
+          setState(() {
+            Provider.of<NavigationIndex>(context, listen: false)
+                .changeIndex(index);
+          });
+        },
+      ),
+    ));
   }
 }

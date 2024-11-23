@@ -48,66 +48,66 @@ class AccountManagmentScreen extends StatelessWidget {
       builder: (context, accountViewModel, child) {
         return Scaffold(
           body: FutureBuilder(
-              future: accountViewModel.listAccount(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  if (snapshot.data!.success) {
-                    return RefreshIndicator(
-                      onRefresh: () async =>
-                          {await accountViewModel.listAccount()},
-                      child: Column(children: [
-                        const Text("Your accounts"),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: accountViewModel.accounts?.length ?? 0,
-                            itemBuilder: (context, index) {
-                              return AccountListItem(
-                                account: accountViewModel.accounts![index],
-                                callbackFunc: showModal,
-                                canManage: true,
-                              );
-                            },
-                          ),
-                        ),
-                        const Divider(color: Colors.black),
-                        const Text("Associate accounts"),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount:
-                                accountViewModel.contributorAccounts?.length ??
-                                    0,
-                            itemBuilder: (context, index) {
-                              return AccountListItem(
-                                account: accountViewModel
-                                    .contributorAccounts![index],
-                                callbackFunc: showModal,
-                                canManage: false,
-                              );
-                            },
-                          ),
-                        ),
-                      ]),
-                    );
-                  } else {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(36.0),
-                        child: Text(
-                          snapshot.data!.message,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 34.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red[700],
-                          ),
+            future: accountViewModel.listAccount(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data!.success) {
+                  return RefreshIndicator(
+                    onRefresh: () async =>
+                        {await accountViewModel.listAccount()},
+                    child: Column(children: [
+                      const Text("Your accounts"),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: accountViewModel.accounts?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return AccountListItem(
+                              account: accountViewModel.accounts![index],
+                              callbackFunc: showModal,
+                              canManage: true,
+                            );
+                          },
                         ),
                       ),
-                    );
-                  }
+                      const Divider(color: Colors.black),
+                      const Text("Associate accounts"),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount:
+                              accountViewModel.contributorAccounts?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return AccountListItem(
+                              account:
+                                  accountViewModel.contributorAccounts![index],
+                              callbackFunc: showModal,
+                              canManage: false,
+                            );
+                          },
+                        ),
+                      ),
+                    ]),
+                  );
                 } else {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(36.0),
+                      child: Text(
+                        snapshot.data!.message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 34.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[700],
+                        ),
+                      ),
+                    ),
+                  );
                 }
-              }),
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               showModal("create");

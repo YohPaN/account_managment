@@ -1,14 +1,7 @@
-import 'dart:convert';
-
-import 'package:account_managment/common/api_config.dart';
 import 'package:account_managment/helpers/request_handler.dart';
-import 'package:account_managment/models/contributor.dart';
-import 'package:account_managment/models/item.dart';
+
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import '../models/account.dart';
-import 'package:http/http.dart' as http;
 
 class AccountRepository {
   final storage = const FlutterSecureStorage();

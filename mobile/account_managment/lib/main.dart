@@ -2,6 +2,7 @@ import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/common/router.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -20,7 +21,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => NavigationIndex()),
         ChangeNotifierProvider(create: (context) => InternalNotification()),
         ChangeNotifierProvider<AuthViewModel>(
-            create: (context) => AuthViewModel()),
+          create: (context) => AuthViewModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ProfileViewModel(),
+        )
       ],
       child: ToastificationWrapper(
         child: MaterialApp(

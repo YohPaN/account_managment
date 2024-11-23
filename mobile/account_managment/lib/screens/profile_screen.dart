@@ -3,15 +3,12 @@ import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  String action;
+
+  ProfileScreen({super.key, required this.action});
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final action =
-        (args != null && args['update'] == true) ? 'update' : 'create';
-
     return Scaffold(
       appBar: AppBar(title: Text("$action your account".capitalize())),
       body: Padding(

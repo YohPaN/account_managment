@@ -9,10 +9,14 @@ class Profile {
     this.salary,
   });
 
-  // factory RepoResponse.fromJson(Map<String, dynamic> parsedJson) {
-  //   return RepoResponse(
-  //       data: parsedJson['data'],
-  //       success: parsedJson['success'],
-  //       error: parsedJson['error']);
-  // }
+// TODO: use factory ?
+  static Profile deserialize(jsonProfile) {
+    return Profile(
+      firstName: jsonProfile["first_name"],
+      lastName: jsonProfile["last_name"],
+      salary: double.parse(
+        jsonProfile["salary"],
+      ),
+    );
+  }
 }

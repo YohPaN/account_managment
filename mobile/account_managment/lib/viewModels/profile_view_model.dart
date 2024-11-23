@@ -1,4 +1,5 @@
 import 'package:account_managment/models/profile.dart';
+import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/models/user.dart';
 import 'package:account_managment/repositories/profile_repository.dart';
 import 'package:flutter/material.dart';
@@ -12,45 +13,43 @@ class ProfileViewModel extends ChangeNotifier {
   Profile? _profile;
   Profile? get profile => _profile;
 
-  Future<void> getProfile() async {
-    final response = await profileRepository.get();
-    if (response != null) {
-      _user = response["user"];
-      _profile = response["profile"];
+  Future<RepoResponse> getProfile() async {
+    final RepoResponse repoResponse = await profileRepository.get();
+
+    if (repoResponse.success) {
+      _user = User.deserialize(repoResponse.data);
+      _profile = Profile.deserialize(repoResponse.data!["profile"]);
     }
 
-    notifyListeners();
+    return repoResponse;
   }
 
-  Future<void> createProfile(String username, String firstName, String lastName,
-      String email, String salary, String password) async {
-    bool success = await profileRepository.create(
+  Future<RepoResponse> createProfile(String username, String firstName,
+      String lastName, String email, String salary, String password) async {
+    final RepoResponse repoResponse = await profileRepository.create(
         username, firstName, lastName, email, salary, password);
 
-    if (success) {
-      _profile = Profile(
-        firstName: firstName,
-        lastName: lastName,
-        salary: double.parse(salary),
-      );
-      notifyListeners();
-    }
+    return repoResponse;
   }
 
-  Future<void> updateProfile(String username, String firstName, String lastName,
-      String email, String salary, String password) async {
-    Map<String, dynamic>? response = await profileRepository.update(
+  Future<RepoResponse> updateProfile(String username, String firstName,
+      String lastName, String email, String salary, String password) async {
+    final RepoResponse repoResponse = await profileRepository.update(
         username, firstName, lastName, email, salary, password);
 
-    if (response != null) {
-      _user = response["user"];
-      _profile = response["profile"];
-      notifyListeners();
+    if (repoResponse.success) {
+      _user = User.deserialize(repoResponse.data);
+      _profile = Profile.deserialize(repoResponse.data);
     }
+
+    return repoResponse;
   }
 
-  Future<void> updatePassword(String oldPassword, String newPassword) async {
-    await profileRepository.updatePassword(oldPassword, newPassword);
-    notifyListeners();
+  Future<RepoResponse> updatePassword(
+      String oldPassword, String newPassword) async {
+    final RepoResponse repoResponse =
+        await profileRepository.updatePassword(oldPassword, newPassword);
+
+    return repoResponse;
   }
 }
