@@ -1,6 +1,8 @@
 import 'package:account_managment/components/account_drawer.dart';
 import 'package:account_managment/components/account_list_item.dart';
+import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,9 +12,40 @@ class AccountManagmentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accountViewModel = Provider.of<AccountViewModel>(context);
+    final profileViewModel = Provider.of<ProfileViewModel>(context);
 
     if (accountViewModel.accounts == null) {
       accountViewModel.listAccount();
+    }
+
+    showModal(String action, [Account? account]) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled: true,
+        builder: (BuildContext drawerContext) {
+          return MultiProvider(
+            providers: [
+              InheritedProvider<AccountViewModel>(
+                update: (context, value) {
+                  return accountViewModel;
+                },
+              ),
+              InheritedProvider<ProfileViewModel>(
+                update: (context, value) {
+                  return profileViewModel;
+                },
+              ),
+            ],
+            child: AccountDrawer(
+              account: account,
+              action: action,
+            ),
+          );
+        },
+      );
     }
 
     return Scaffold(
@@ -28,6 +61,7 @@ class AccountManagmentScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       return AccountListItem(
                         account: accountViewModel.accounts![index],
+                        callbackFunc: showModal,
                         canManage: true,
                       );
                     },
@@ -42,6 +76,7 @@ class AccountManagmentScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       return AccountListItem(
                         account: accountViewModel.contributorAccounts![index],
+                        callbackFunc: showModal,
                         canManage: false,
                       );
                     },
@@ -51,18 +86,7 @@ class AccountManagmentScreen extends StatelessWidget {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            isScrollControlled: true,
-            builder: (BuildContext context) {
-              return AccountDrawer(
-                action: "create",
-              );
-            },
-          );
+          showModal("create");
         },
         foregroundColor: Theme.of(context).colorScheme.primary,
         backgroundColor: Theme.of(context).colorScheme.surface,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
 class InternalNotification extends ChangeNotifier {
-  void showError(String title, bool success, [String? description]) {
+  void showMessage(String title, bool success, [String? description]) {
     toastification.show(
         type: success ? ToastificationType.success : ToastificationType.error,
         style: ToastificationStyle.fillColored,

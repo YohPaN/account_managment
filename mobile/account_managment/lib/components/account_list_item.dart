@@ -8,11 +8,13 @@ import 'package:provider/provider.dart';
 
 class AccountListItem extends StatelessWidget {
   final Account account;
+  final Function callbackFunc;
   final bool canManage;
 
   const AccountListItem({
     super.key,
     required this.account,
+    required this.callbackFunc,
     required this.canManage,
   });
 
@@ -51,20 +53,7 @@ class AccountListItem extends StatelessWidget {
             if (canManage)
               IconButton(
                 onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
-                      return AccountDrawer(
-                        action: "update",
-                        account: account,
-                      );
-                    },
-                  );
+                  callbackFunc("update", account);
                 },
                 icon: const Icon(Icons.mode),
               ),

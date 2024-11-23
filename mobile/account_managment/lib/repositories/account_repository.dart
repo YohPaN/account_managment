@@ -160,78 +160,50 @@ class AccountRepository {
     return null;
   }
 
-  Future<bool?> create(String name, List<Contributor> contributors) async {
-    String? accessToken = await storage.read(key: 'accessToken');
+  Future<RepoResponse> create(
+      String name, List<Contributor> contributors) async {
     final List<String> contributorSerializable = [];
 
     for (var contributor in contributors) {
       contributorSerializable.add(contributor.username);
     }
 
-    final response = await http.post(
-        Uri.parse(
-            'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${accessToken}'
-        },
-        body: jsonEncode(<String, String>{
-          'name': name,
-          'contributors': jsonEncode(contributorSerializable),
-        }));
-
-    if (response.statusCode == 201) {
-      return true;
-    }
-
-    return null;
-  }
-
-  Future<bool?> update(
-      int accountId, String name, List<Contributor> contributors) async {
-    String? accessToken = await storage.read(key: 'accessToken');
-    final List<String> contributorSerializable = [];
-
-    for (var contributor in contributors) {
-      contributorSerializable.add(contributor.username);
-    }
-
-    final response = await http.patch(
-        Uri.parse(
-            'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${accessToken}'
-        },
-        body: jsonEncode(<String, String>{
-          'name': name,
-          'contributors': jsonEncode(contributorSerializable)
-        }));
-
-    if (response.statusCode == 200) {
-      return true;
-    }
-
-    return null;
-  }
-
-  Future<bool?> delete(int accountId) async {
-    String? accessToken = await storage.read(key: 'accessToken');
-
-    final response = await http.delete(
-      Uri.parse(
-          'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${accessToken}'
-      },
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$model_url/",
+      contentType: 'application/json',
+      body: {'name': name, 'contributors': contributorSerializable},
     );
 
-    if (response.statusCode == 200) {
-      return true;
+    return repoResponse;
+  }
+
+  Future<RepoResponse> update(
+      int accountId, String name, List<Contributor> contributors) async {
+    final List<String> contributorSerializable = [];
+
+    for (var contributor in contributors) {
+      contributorSerializable.add(contributor.username);
     }
 
-    return null;
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "PATCH",
+      uri: "$model_url/$accountId/",
+      contentType: 'application/json',
+      body: {'name': name, 'contributors': contributorSerializable},
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> delete(int accountId) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "DELETE",
+      uri: "$model_url/$accountId/",
+      contentType: 'application/json',
+    );
+
+    return repoResponse;
   }
 
   Future<RepoResponse> createOrUpdateItem(

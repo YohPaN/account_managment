@@ -47,7 +47,7 @@ class RequestHandler {
           response = await http.post(
             buildUri(uri),
             headers: await buildHeaders(contentType, needAuth),
-            body: jsonEncode(body),
+            body: serializeBody(body),
           );
 
           break;
@@ -61,7 +61,7 @@ class RequestHandler {
           response = await http.put(
             buildUri(uri),
             headers: await buildHeaders(contentType, needAuth),
-            body: jsonEncode(body),
+            body: serializeBody(body),
           );
 
           break;
@@ -75,7 +75,7 @@ class RequestHandler {
           response = await http.patch(
             buildUri(uri),
             headers: await buildHeaders(contentType, needAuth),
-            body: jsonEncode(body),
+            body: serializeBody(body),
           );
 
           break;
@@ -149,5 +149,15 @@ class RequestHandler {
     }
 
     return "";
+  }
+
+  static String serializeBody(Map<String, dynamic> body) {
+    for (var element in body.entries) {
+      if (element.value.runtimeType != String) {
+        body[element.key] = jsonEncode(element.value);
+      }
+    }
+
+    return jsonEncode(body);
   }
 }

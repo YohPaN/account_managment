@@ -145,7 +145,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                             await accountViewModel.deleteItem(widget.item!.id);
                         Provider.of<InternalNotification>(context,
                                 listen: false)
-                            .showError(
+                            .showMessage(
                                 repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       },
@@ -158,7 +158,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
                         Provider.of<InternalNotification>(context,
                                 listen: false)
-                            .showError(
+                            .showMessage(
                                 repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       }

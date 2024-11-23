@@ -23,10 +23,8 @@ class AuthViewModel extends ChangeNotifier {
     return [repoResponse.success, repoResponse.message];
   }
 
-  void logout() {
-    authRepository.logout();
-    // _accessToken = null;
-    // _refreshToken = null;
-    // notifyListeners();
+  void logout() async {
+    await _storage.delete(key: 'accessToken');
+    await _storage.delete(key: 'refreshToken');
   }
 }

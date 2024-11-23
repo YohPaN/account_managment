@@ -31,21 +31,35 @@ class AccountViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createAccount(
+  Future<RepoResponse> createAccount(
       String accountName, List<Contributor> usersToAdd) async {
-    await accountRepository.create(accountName, usersToAdd);
-    listAccount();
+    final RepoResponse repoResponse =
+        await accountRepository.create(accountName, usersToAdd);
+
+    if (repoResponse.success) {
+      await listAccount();
+    }
+    return repoResponse;
   }
 
-  Future<void> updateAccount(
+  Future<RepoResponse> updateAccount(
       int accountId, String accountName, List<Contributor> contributors) async {
-    await accountRepository.update(accountId, accountName, contributors);
-    listAccount();
+    final RepoResponse repoResponse =
+        await accountRepository.update(accountId, accountName, contributors);
+
+    if (repoResponse.success) {
+      await listAccount();
+    }
+    return repoResponse;
   }
 
-  Future<void> deleteAccount(int accountId) async {
-    await accountRepository.delete(accountId);
-    listAccount();
+  Future<RepoResponse> deleteAccount(int accountId) async {
+    final RepoResponse repoResponse = await accountRepository.delete(accountId);
+
+    if (repoResponse.success) {
+      await listAccount();
+    }
+    return repoResponse;
   }
 
   Future<void> refreshAccount() async {

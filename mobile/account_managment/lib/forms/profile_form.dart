@@ -183,7 +183,7 @@ class _ProfileFormState extends State<ProfileForm> {
                 if (_formKey.currentState!.validate()) {
                   await createOrUpdate();
 
-                  context.read<InternalNotification>().showError(
+                  context.read<InternalNotification>().showMessage(
                         "Wrong username or password",
                         false,
                       );
