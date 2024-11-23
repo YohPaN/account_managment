@@ -1,9 +1,7 @@
 import 'package:account_managment/common/navigation_index.dart';
-import 'package:account_managment/components/account_drawer.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 class AccountListItem extends StatelessWidget {

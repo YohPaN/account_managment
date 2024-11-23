@@ -1,4 +1,5 @@
 import 'package:account_managment/common/internal_notification.dart';
+import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/components/icon_visibility.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,8 @@ class _LoginFormState extends State<LoginForm> {
                   passwordController.text,
                 );
                 if (success == true) {
+                  Provider.of<NavigationIndex>(context, listen: false)
+                      .changeIndex(0);
                   if (!context.mounted) return;
                   Navigator.pushNamedAndRemoveUntil(
                       context, '/home', (route) => false);

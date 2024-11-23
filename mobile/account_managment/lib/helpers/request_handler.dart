@@ -116,6 +116,7 @@ class RequestHandler {
     } catch (e) {
       message = e.toString();
     }
+
     return RepoResponse(data: data, success: success, message: message);
   }
 
@@ -148,8 +149,10 @@ class RequestHandler {
     }
 
     for (var field in data.entries) {
-      if (field.value[0] == "This field may not be blank.") {
-        return "The field ${field.key} may not be blank.";
+      if (field.value.runtimeType == Iterable) {
+        if (field.value[0] == "This field may not be blank.") {
+          return "The field ${field.key} may not be blank.";
+        }
       }
     }
 

@@ -24,95 +24,34 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<Account?> get(int? accountId) async {
-    String? accessToken = await storage.read(key: 'accessToken');
-    http.Response response;
+  Future<RepoResponse> get(int? accountId) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "GET",
+      uri: "$model_url/${accountId ?? "me"}/",
+      contentType: 'application/json',
+    );
 
-    if (accountId != null) {
-      response = await http.get(
-          Uri.parse(
-              'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/$accountId/'),
-          headers: <String, String>{
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${accessToken}'
-          });
-    } else {
-      response = await http.get(
-          Uri.parse(
-              'http://${APIConfig.base_url}:${APIConfig.port}/api/accounts/me/'),
-          headers: <String, String>{
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${accessToken}'
-          });
-    }
-
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      final List<Item> items = [];
-
-      for (var item in responseData["items"]) {
-        items.add(Item(
-            id: item["id"],
-            title: item["title"],
-            description: item["description"],
-            valuation: double.parse(item["valuation"])));
-      }
-
-      final List<Contributor> contributors = [];
-
-      for (var contributor in responseData["contributors"]) {
-        contributors.add(
-          Contributor(
-            username: contributor["user"]["username"],
-            state: contributor["state"],
-          ),
-        );
-      }
-
-      return Account(
-        id: responseData["id"],
-        name: responseData["name"],
-        isMain: responseData["is_main"],
-        items: items,
-        contributor: contributors,
-        total: responseData["total"]["total_sum"],
-      );
-    }
-
-    return null;
+    return repoResponse;
   }
 
-  Future<RepoResponse> create(
-      String name, List<Contributor> contributors) async {
-    final List<String> contributorSerializable = [];
-
-    for (var contributor in contributors) {
-      contributorSerializable.add(contributor.username);
-    }
-
+  Future<RepoResponse> create(String name, List<String> contributors) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$model_url/",
       contentType: 'application/json',
-      body: {'name': name, 'contributors': contributorSerializable},
+      body: {'name': name, 'contributors': contributors},
     );
 
     return repoResponse;
   }
 
   Future<RepoResponse> update(
-      int accountId, String name, List<Contributor> contributors) async {
-    final List<String> contributorSerializable = [];
-
-    for (var contributor in contributors) {
-      contributorSerializable.add(contributor.username);
-    }
-
+      int accountId, String name, List<String> contributors) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
       uri: "$model_url/$accountId/",
       contentType: 'application/json',
-      body: {'name': name, 'contributors': contributorSerializable},
+      body: {'name': name, 'contributors': contributors},
     );
 
     return repoResponse;
