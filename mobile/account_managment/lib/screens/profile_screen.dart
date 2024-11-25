@@ -1,3 +1,4 @@
+import 'package:account_managment/common/profile_form_future_builder.dart';
 import 'package:account_managment/forms/profile_form.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +13,13 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("$action your account".capitalize())),
       body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ProfileForm(
-            action: action,
-          )),
+        padding: const EdgeInsets.all(16.0),
+        child: action == "create"
+            ? ProfileForm(action: action)
+            : ProfileFormFutureBuilder(
+                child: ProfileForm(action: action),
+              ),
+      ),
     );
   }
 }
