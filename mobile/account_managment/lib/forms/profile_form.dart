@@ -10,7 +10,6 @@ import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-//TODO: update password correctly
 class ProfileForm extends StatefulWidget {
   final String action;
   const ProfileForm({super.key, required this.action});
