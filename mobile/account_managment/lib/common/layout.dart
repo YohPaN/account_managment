@@ -1,66 +1,70 @@
+import 'package:account_managment/common/navigation_index.dart';
+import 'package:account_managment/screens/account_managment_screen.dart';
+import 'package:account_managment/screens/account_screen.dart';
+import 'package:account_managment/screens/profile_screen.dart';
+import 'package:account_managment/screens/setting_screen.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class Layout extends StatelessWidget {
-  final Widget child;
-  final String title;
+class Layout extends StatefulWidget {
+  const Layout({super.key});
 
-  const Layout({
-    super.key,
-    required this.child,
-    required this.title,
-  });
+  @override
+  _LayoutState createState() => _LayoutState();
+}
+
+class _LayoutState extends State<Layout> {
+  final List<Widget> allDestinations = [
+    const AccountScreen(),
+    const AccountManagmentScreen(),
+    ProfileScreen(action: "update"),
+    const SettingScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
+    var currentPageIndex = Provider.of<NavigationIndex>(context).getIndex;
+
+    return SafeArea(
+        child: Scaffold(
+      appBar: AppBar(),
+      body: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (context) => AccountViewModel(),
+          ),
+        ],
+        child: allDestinations[currentPageIndex],
       ),
-      body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentPageIndex,
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.euro),
             label: 'Accounts',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.account_circle),
             label: 'Profile',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.settings),
             label: 'Settings',
           ),
         ],
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Navigator.pushNamed(context, '/');
-              break;
-            case 1:
-              Navigator.pushNamed(
-                context,
-                '/account_managment',
-              );
-              break;
-            case 2:
-              Navigator.pushNamed(
-                context,
-                '/profile',
-                arguments: {'update': true},
-              );
-              break;
-            case 3:
-              Navigator.pushNamed(context, '/settings');
-              break;
-          }
+        onDestinationSelected: (index) {
+          setState(() {
+            Provider.of<NavigationIndex>(context, listen: false)
+                .changeIndex(index);
+          });
         },
       ),
-    );
+    ));
   }
 }

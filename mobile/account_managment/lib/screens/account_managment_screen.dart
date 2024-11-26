@@ -1,6 +1,8 @@
 import 'package:account_managment/components/account_drawer.dart';
 import 'package:account_managment/components/account_list_item.dart';
+import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,73 +12,112 @@ class AccountManagmentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accountViewModel = Provider.of<AccountViewModel>(context);
+    final profileViewModel = Provider.of<ProfileViewModel>(context);
 
-    if (accountViewModel.accounts == null) {
-      accountViewModel.listAccount();
-    }
-
-    navigateToAccount(accountId) async {
-      await accountViewModel.getAccount(accountId);
-    }
-
-    return Scaffold(
-      body: accountViewModel.account == null
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () async => {await accountViewModel.listAccount()},
-              child: Column(children: [
-                const Text("Your accounts"),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: accountViewModel.accounts?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      return AccountListItem(
-                        account: accountViewModel.accounts![index],
-                        canManage: true,
-                        navigateToAccount: navigateToAccount,
-                      );
-                    },
-                  ),
-                ),
-                const Divider(color: Colors.black),
-                const Text("Associate accounts"),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount:
-                        accountViewModel.contributorAccounts?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      return AccountListItem(
-                        account: accountViewModel.contributorAccounts![index],
-                        canManage: false,
-                        navigateToAccount: navigateToAccount,
-                      );
-                    },
-                  ),
-                ),
-              ]),
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            isScrollControlled: true,
-            builder: (BuildContext context) {
-              return AccountDrawer(
-                closeCallback: () {
-                  Navigator.pop(context);
+    showModal(String action, [Account? account]) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled: true,
+        builder: (BuildContext drawerContext) {
+          return MultiProvider(
+            providers: [
+              InheritedProvider<AccountViewModel>(
+                update: (context, value) {
+                  return accountViewModel;
                 },
-                action: "create",
-              );
-            },
+              ),
+              InheritedProvider<ProfileViewModel>(
+                update: (context, value) {
+                  return profileViewModel;
+                },
+              ),
+            ],
+            child: AccountDrawer(
+              account: account,
+              action: action,
+            ),
           );
         },
-        foregroundColor: Theme.of(context).colorScheme.primary,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        child: const Icon(Icons.add),
-      ),
+      );
+    }
+
+    return Consumer<AccountViewModel>(
+      builder: (context, accountViewModel, child) {
+        return Scaffold(
+          body: FutureBuilder(
+            future: accountViewModel.listAccount(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data!.success) {
+                  return RefreshIndicator(
+                    onRefresh: () async =>
+                        {await accountViewModel.listAccount()},
+                    child: Column(children: [
+                      const Text("Your accounts"),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: accountViewModel.accounts?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return AccountListItem(
+                              account: accountViewModel.accounts![index],
+                              callbackFunc: showModal,
+                              canManage: true,
+                            );
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.black),
+                      const Text("Associate accounts"),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount:
+                              accountViewModel.contributorAccounts?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return AccountListItem(
+                              account:
+                                  accountViewModel.contributorAccounts![index],
+                              callbackFunc: showModal,
+                              canManage: false,
+                            );
+                          },
+                        ),
+                      ),
+                    ]),
+                  );
+                } else {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(36.0),
+                      child: Text(
+                        snapshot.data!.message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 34.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[700],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              showModal("create");
+            },
+            foregroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 }

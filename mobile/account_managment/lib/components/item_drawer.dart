@@ -1,21 +1,18 @@
+import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/item.dart';
-import 'package:account_managment/viewModels/item_view_model.dart';
+import 'package:account_managment/models/repo_reponse.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ItemDrawer extends StatefulWidget {
-  final Function closeCallback;
   final String action;
   final Item? item;
 
   @override
-  const ItemDrawer(
-      {super.key,
-      required this.closeCallback,
-      required this.action,
-      this.item});
+  const ItemDrawer({super.key, required this.action, this.item});
 
   @override
   _ItemDrawerState createState() => _ItemDrawerState();
@@ -56,8 +53,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    final itemViewModel = Provider.of<ItemViewModel>(context);
-
+    final AccountViewModel accountViewModel =
+        Provider.of<AccountViewModel>(context, listen: false);
     switchButton(index) {
       setState(() {
         for (int i = 0; i < _selectButton.length; i++) {
@@ -73,20 +70,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
           ? "-${valuationController.text}"
           : valuationController.text;
 
-      if (widget.action == "create") {
-        await itemViewModel.createItem(
-          titleController.text,
-          descriptionController.text,
-          valuation,
-        );
-      } else if (widget.action == "update") {
-        await itemViewModel.updateItem(
-          widget.item!.id,
-          titleController.text,
-          descriptionController.text,
-          valuation,
-        );
-      }
+      return await accountViewModel.createOrUpdateItem(titleController.text,
+          descriptionController.text, valuation, widget.item?.id);
     }
 
     if (widget.action == "update" && widget.item != null) {
@@ -127,8 +112,12 @@ class _ItemDrawerState extends State<ItemDrawer> {
                 controller: valuationController,
                 decoration: const InputDecoration(labelText: 'Valuation'),
                 maxLength: 15,
-                validator: (value) => ValidationHelper.validateInput(value,
-                    ["notEmpty", "notNull", "twoDigitMax", "validPositifDouble"]),
+                validator: (value) => ValidationHelper.validateInput(value, [
+                  "notEmpty",
+                  "notNull",
+                  "twoDigitMax",
+                  "validPositifDouble"
+                ]),
               ),
               const SizedBox(height: 16),
               ToggleButtons(
@@ -152,16 +141,26 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   if (widget.action == "update")
                     ElevatedButton(
                       onPressed: () async {
-                        await itemViewModel.deleteItem(widget.item!.id);
-                        widget.closeCallback();
+                        RepoResponse repoResponse =
+                            await accountViewModel.deleteItem(widget.item!.id);
+                        Provider.of<InternalNotification>(context,
+                                listen: false)
+                            .showMessage(
+                                repoResponse.message, repoResponse.success);
+                        Navigator.pop(context);
                       },
                       child: const Text('Delete Item'),
                     ),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        await createOrUpdate();
-                        widget.closeCallback();
+                        RepoResponse repoResponse = await createOrUpdate();
+
+                        Provider.of<InternalNotification>(context,
+                                listen: false)
+                            .showMessage(
+                                repoResponse.message, repoResponse.success);
+                        Navigator.pop(context);
                       }
                     },
                     child: Text('${widget.action} Item'.capitalize()),

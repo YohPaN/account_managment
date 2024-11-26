@@ -1,13 +1,14 @@
-import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:flutter/material.dart';
 
 class ListItem extends StatelessWidget {
   final Item item;
+  final Function(String, Item) callbackFunc;
 
   const ListItem({
     super.key,
     required this.item,
+    required this.callbackFunc,
   });
 
   @override
@@ -32,22 +33,7 @@ class ListItem extends StatelessWidget {
         ),
         IconButton(
           onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              isScrollControlled: true,
-              builder: (BuildContext context) {
-                return ItemDrawer(
-                  closeCallback: () {
-                    Navigator.pop(context);
-                  },
-                  action: "update",
-                  item: item,
-                );
-              },
-            );
+            callbackFunc("update", item);
           },
           icon: const Icon(Icons.mode),
         ),

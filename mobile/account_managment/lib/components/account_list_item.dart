@@ -1,18 +1,20 @@
-import 'package:account_managment/components/account_drawer.dart';
+import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/models/account.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 class AccountListItem extends StatelessWidget {
   final Account account;
+  final Function callbackFunc;
   final bool canManage;
-  final Function navigateToAccount;
 
-  const AccountListItem(
-      {super.key,
-      required this.account,
-      required this.canManage,
-      required this.navigateToAccount});
+  const AccountListItem({
+    super.key,
+    required this.account,
+    required this.callbackFunc,
+    required this.canManage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +27,9 @@ class AccountListItem extends StatelessWidget {
           ),
         ),
         onPressed: () async => {
-          navigateToAccount(account.id),
-          Navigator.pop(context, '/accounts')
+          await Provider.of<AccountViewModel>(context, listen: false)
+              .getAccount(account.id),
+          Provider.of<NavigationIndex>(context, listen: false).changeIndex(0)
         },
         child: Row(
           children: [
@@ -48,23 +51,7 @@ class AccountListItem extends StatelessWidget {
             if (canManage)
               IconButton(
                 onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
-                      return AccountDrawer(
-                        closeCallback: () {
-                          Navigator.pop(context);
-                        },
-                        action: "update",
-                        account: account,
-                      );
-                    },
-                  );
+                  callbackFunc("update", account);
                 },
                 icon: const Icon(Icons.mode),
               ),

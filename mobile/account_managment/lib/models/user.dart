@@ -1,11 +1,23 @@
 class User {
   String username;
   String email;
-  String password;
 
   User({
     required this.username,
     required this.email,
-    required this.password,
   });
+
+  static User deserialize(jsonUser) {
+    return User(
+      username: jsonUser["username"],
+      email: jsonUser["email"],
+    );
+  }
+
+  static User updateData(jsonUser, User user) {
+    return User(
+      username: jsonUser["username"] ?? user.username,
+      email: jsonUser["email"] ?? user.email,
+    );
+  }
 }

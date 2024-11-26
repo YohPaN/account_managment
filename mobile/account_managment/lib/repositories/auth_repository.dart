@@ -1,44 +1,18 @@
-import 'dart:convert';
-
-import 'package:account_managment/common/api_config.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:account_managment/helpers/request_handler.dart';
+import 'package:account_managment/models/repo_reponse.dart';
 
 class AuthRepository {
-  final _storage = const FlutterSecureStorage();
+  Future<RepoResponse> login(String username, String password) async {
+    final RepoResponse responseData = await RequestHandler.handleRequest(
+        method: "POST",
+        uri: "token/",
+        contentType: "application/json",
+        needAuth: false,
+        body: {
+          'username': username,
+          'password': password,
+        });
 
-  Future<Map<String, String>?> login(String username, String password) async {
-    var accessToken = "";
-    var refreshToken = "";
-
-    final response = await http.post(
-      Uri.parse('http://${APIConfig.base_url}:${APIConfig.port}/api/token/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'username': username,
-        'password': password,
-      }),
-    );
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-
-      accessToken = responseData['access'];
-      refreshToken = responseData['refresh'];
-
-      // Store the token securely
-      await _storage.write(key: 'accessToken', value: accessToken);
-      await _storage.write(key: 'refreshToken', value: refreshToken);
-
-      return {"accessToken": accessToken, "refreshToken": refreshToken};
-    }
-
-    return null;
-  }
-
-  Future<void> logout() async {
-    await _storage.delete(key: 'accessToken');
-    await _storage.delete(key: 'refreshToken');
+    return responseData;
   }
 }

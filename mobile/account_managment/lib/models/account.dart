@@ -17,4 +17,15 @@ class Account {
     required this.contributor,
     this.total,
   });
+
+  static Account deserialize(jsonAccount) {
+    return Account(
+      id: jsonAccount["id"],
+      name: jsonAccount["name"],
+      isMain: jsonAccount["is_main"],
+      items: [],
+      contributor: [],
+      total: jsonAccount["total"]["total_sum"],
+    );
+  }
 }

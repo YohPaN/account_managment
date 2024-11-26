@@ -1,7 +1,9 @@
+import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/models/contributor.dart';
+import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +12,11 @@ import 'package:provider/provider.dart';
 class AccountDrawer extends StatefulWidget {
   final Account? account;
   final String action;
-  final Function closeCallback;
-  const AccountDrawer(
-      {super.key,
-      this.account,
-      required this.action,
-      required this.closeCallback});
+  const AccountDrawer({
+    super.key,
+    this.account,
+    required this.action,
+  });
 
   @override
   _AccountDrawerState createState() => _AccountDrawerState();
@@ -55,19 +56,23 @@ class _AccountDrawerState extends State<AccountDrawer> {
   @override
   Widget build(BuildContext context) {
     final accountViewModel = Provider.of<AccountViewModel>(context);
-    final profileViewModel = Provider.of<ProfileViewModel>(context);
+    final profileViewModel =
+        Provider.of<ProfileViewModel>(context, listen: false);
 
     if (profileViewModel.user == null) {
       profileViewModel.getProfile();
     }
 
     createOrUpdate() async {
+      var response;
       if (widget.action == "create") {
-        await accountViewModel.createAccount(nameController.text, _usersToAdd);
+        response =
+            accountViewModel.createAccount(nameController.text, _usersToAdd);
       } else if (widget.action == "update") {
-        await accountViewModel.updateAccount(
+        response = await accountViewModel.updateAccount(
             widget.account!.id, nameController.text, _usersToAdd);
       }
+      return response;
     }
 
     if (widget.action == "update" && widget.account != null) {
@@ -75,7 +80,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
     }
 
     return Padding(
-            padding: EdgeInsets.only(
+      padding: EdgeInsets.only(
         left: 16.0,
         right: 16.0,
         bottom: MediaQuery.of(context).viewInsets.bottom + 4.0,
@@ -164,9 +169,10 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                   Icon(
                                     Icons.circle,
                                     size: 16,
-                                    color: _usersToAdd[index].state != "APPROVED"
-                                        ? Colors.orange[500]
-                                        : Colors.green,
+                                    color:
+                                        _usersToAdd[index].state != "APPROVED"
+                                            ? Colors.orange[500]
+                                            : Colors.green,
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -175,7 +181,8 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                   ),
                                   Expanded(
                                     child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           IconButton(
                                             onPressed: () => _removeUser(index),
@@ -196,8 +203,12 @@ class _AccountDrawerState extends State<AccountDrawer> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        await createOrUpdate();
-                        widget.closeCallback();
+                        RepoResponse repoResponse = await createOrUpdate();
+                        Provider.of<InternalNotification>(context,
+                                listen: false)
+                            .showMessage(
+                                repoResponse.message, repoResponse.success);
+                        Navigator.pop(context);
                       }
                     },
                     child: Text('${widget.action} account'.capitalize()),
@@ -205,8 +216,14 @@ class _AccountDrawerState extends State<AccountDrawer> {
                   if (widget.action == "update" && !widget.account!.isMain)
                     ElevatedButton(
                       onPressed: () async {
-                        await accountViewModel.deleteAccount(widget.account!.id);
-                        widget.closeCallback();
+                        final RepoResponse repoResponse = await accountViewModel
+                            .deleteAccount(widget.account!.id);
+
+                        Provider.of<InternalNotification>(context,
+                                listen: false)
+                            .showMessage(
+                                repoResponse.message, repoResponse.success);
+                        Navigator.pop(context);
                       },
                       child: const Text('Delete account'),
                     )
