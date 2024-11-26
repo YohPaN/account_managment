@@ -52,4 +52,9 @@ class ProfileViewModel extends ChangeNotifier {
 
     return repoResponse;
   }
+
+  void clear() {
+    _user = null;
+    _profile = null;
+  }
 }
