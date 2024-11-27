@@ -1,6 +1,5 @@
-import 'package:account_managment/components/icon_visibility.dart';
+import 'package:account_managment/components/password_field.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/helpers/pwd_validation_helper.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,81 +15,37 @@ class PasswordForm extends StatefulWidget {
 
 class _PasswordFormState extends State<PasswordForm> {
   final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController oldPasswordController = TextEditingController();
-  final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController retypePasswordController =
-      TextEditingController();
-  final Map<String, bool> _passwordVisibility = {
-    "old": true,
-    "new": true,
-    "retype": true,
-  };
+  final Map<String, String> _formData = {};
 
   @override
   Widget build(BuildContext context) {
     final profileViewModel = Provider.of<ProfileViewModel>(context);
 
-    void togglePasswordVisibility(String key) {
-      setState(() {
-        _passwordVisibility[key] = !_passwordVisibility[key]!;
-      });
+    Future<void> saveForm() async {
+      _formKey.currentState!.save();
     }
 
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          if (widget.action == "update")
-            TextFormField(
-              controller: oldPasswordController,
-              decoration: InputDecoration(
-                labelText: 'Old password',
-                suffixIcon: IconButton(
-                    onPressed: () => togglePasswordVisibility("old"),
-                    icon: IconVisibility(
-                        visibility: _passwordVisibility["old"]!)),
-              ),
-              maxLength: 50,
-              obscureText: _passwordVisibility["old"]!,
-              validator: (value) => PwdValidationHelper.validatePassword(
-                password: value!,
-              ),
-            ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: newPasswordController,
-            decoration: InputDecoration(
-              labelText: 'New password',
-              suffixIcon: IconButton(
-                onPressed: () => togglePasswordVisibility("new"),
-                icon: IconVisibility(visibility: _passwordVisibility["new"]!),
-              ),
-            ),
-            maxLength: 50,
-            obscureText: _passwordVisibility["new"]!,
-            validator: (value) => PwdValidationHelper.validatePassword(
-              password: value!,
-              comparisonDifferent: oldPasswordController.text,
-            ),
+          PasswordField(
+            label: "Old password",
+            index: "oldPassword",
+            formData: _formData,
           ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: retypePasswordController,
-            decoration: InputDecoration(
-              labelText: 'Retype password',
-              suffixIcon: IconButton(
-                onPressed: () => togglePasswordVisibility("retype"),
-                icon:
-                    IconVisibility(visibility: _passwordVisibility["retype"]!),
-              ),
-            ),
-            maxLength: 50,
-            obscureText: _passwordVisibility["retype"]!,
-            validator: (value) => PwdValidationHelper.validatePassword(
-                password: value!, comparisonSame: newPasswordController.text),
+          PasswordField(
+            label: "New password",
+            index: "newPassword",
+            formData: _formData,
+            comparisonDiff: "oldPassword",
           ),
-          const SizedBox(height: 16),
+          PasswordField(
+            label: "Retype password",
+            index: "retypePassword",
+            formData: _formData,
+            comparisonSame: "newPassword",
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -102,10 +57,11 @@ class _PasswordFormState extends State<PasswordForm> {
               ),
               ElevatedButton(
                 onPressed: () async {
+                  await saveForm();
                   if (_formKey.currentState!.validate()) {
                     profileViewModel.updatePassword(
-                      oldPasswordController.text,
-                      newPasswordController.text,
+                      _formData["oldPassword"]!,
+                      _formData["newPassword"]!,
                     );
                     Navigator.pop(context);
                   }
