@@ -2,7 +2,7 @@ import json
 
 from back_account_managment import models
 from back_account_managment.models import Account, AccountUser
-from back_account_managment.permissions import IsOwner
+from back_account_managment.permissions import IsContributor, IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
@@ -144,7 +144,10 @@ class ItemView(ModelViewSet):
 class AccountView(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = AccountSerializer
-    permission_classes = [IsOwner, permissions.IsAuthenticated]
+    permission_classes = [
+        (IsOwner | IsContributor),
+        permissions.IsAuthenticated,
+    ]
 
     def list(self, request):
         contributor_account_user = AccountUser.objects.filter(
