@@ -101,20 +101,20 @@ class RequestHandler {
       if (response != null) {
         if (response.body != "") {
           data = jsonDecode(response.body);
-          // TODO: faire un truc plus propre
-          if (data?["code"] == "token_not_valid") {
+
+          if (data!["code"] == "token_not_valid") {
             final RepoResponse repoResponse =
                 await AuthRepository().refreshToken();
 
             if (repoResponse.success) {
               await storage.write(
                   key: 'accessToken', value: repoResponse.data!['access']);
-            } else {
-              repoResponse.message = repoResponse.data!["detail"];
-            }
 
-            return handleRequest(
-                method: method, uri: uri, contentType: contentType);
+              return handleRequest(
+                  method: method, uri: uri, contentType: contentType);
+            } else {
+              message = repoResponse.data!["detail"];
+            }
           }
 
           message = checkFields(data);
