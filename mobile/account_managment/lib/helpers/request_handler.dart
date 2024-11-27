@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:account_managment/common/api_config.dart';
 import 'package:account_managment/models/repo_reponse.dart';
+import 'package:account_managment/repositories/auth_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -100,6 +101,22 @@ class RequestHandler {
       if (response != null) {
         if (response.body != "") {
           data = jsonDecode(response.body);
+
+          if (data!["code"] == "token_not_valid") {
+            final RepoResponse repoResponse =
+                await AuthRepository().refreshToken();
+
+            if (repoResponse.success) {
+              await storage.write(
+                  key: 'accessToken', value: repoResponse.data!['access']);
+
+              return handleRequest(
+                  method: method, uri: uri, contentType: contentType);
+            } else {
+              message = repoResponse.data!["detail"];
+            }
+          }
+
           message = checkFields(data);
         }
 
