@@ -1,6 +1,6 @@
 import 'package:account_managment/common/internal_notification.dart';
-import 'package:account_managment/components/icon_visibility.dart';
 import 'package:account_managment/components/password_drawer.dart';
+import 'package:account_managment/components/password_field.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/profile.dart';
@@ -113,49 +113,26 @@ class _ProfileFormState extends State<ProfileForm> {
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Salary'),
               onSaved: (value) {
-                print(value);
                 _formData['salary'] = value ?? '';
               },
               validator: (value) => ValidationHelper.validateInput(
                   value, ["validPositifDouble", "twoDigitMax"]),
             ),
             if (widget.action == "create")
-              TextFormField(
-                // controller: newPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'New password',
-                  suffixIcon: IconButton(
-                    onPressed: () => togglePasswordVisibility("new"),
-                    icon:
-                        IconVisibility(visibility: _passwordVisibility["new"]!),
-                  ),
+              Column(children: [
+                PasswordField(
+                  label: "New password",
+                  index: "newPassword",
+                  formData: _formData,
                 ),
-                maxLength: 50,
-                obscureText: _passwordVisibility["new"]!,
-                onSaved: (value) {
-                  _formData['newPassword'] = value ?? '';
-                },
-                // validator: (value) =>
-                //     PwdValidationHelper.validatePassword(password: value!),
-              ),
-            const SizedBox(height: 16),
-            if (widget.action == "create")
-              TextFormField(
-                // controller: retypePasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Retype password',
-                  suffixIcon: IconButton(
-                    onPressed: () => togglePasswordVisibility("retype"),
-                    icon: IconVisibility(
-                        visibility: _passwordVisibility["retype"]!),
-                  ),
+                const SizedBox(height: 16),
+                PasswordField(
+                  label: "Retype password",
+                  index: "retypePassword",
+                  formData: _formData,
+                  comparisonSame: "newPassword",
                 ),
-                maxLength: 50,
-                obscureText: _passwordVisibility["retype"]!,
-                // validator: (value) => PwdValidationHelper.validatePassword(
-                //     password: value!, comparisonSame: newPasswordController.text),
-              ),
-            const SizedBox(height: 16),
+              ]),
             if (widget.action == "update")
               ElevatedButton(
                 onPressed: () {
@@ -178,8 +155,8 @@ class _ProfileFormState extends State<ProfileForm> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
+                await saveForm();
                 if (_formKey.currentState!.validate()) {
-                  await saveForm();
                   final RepoResponse repoResponse = await createOrUpdate();
                   Provider.of<InternalNotification>(context, listen: false)
                       .showMessage(repoResponse.message, repoResponse.success);
