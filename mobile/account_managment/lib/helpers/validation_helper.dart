@@ -82,6 +82,7 @@ class ValidationHelper {
     if (double.parse(value) < 0) {
       return "It must be a positif number";
     }
+    return null;
   }
 
   static String? twoDigitMax(value) {

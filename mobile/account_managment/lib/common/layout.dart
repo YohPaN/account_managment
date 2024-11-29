@@ -4,7 +4,6 @@ import 'package:account_managment/screens/account_screen.dart';
 import 'package:account_managment/screens/profile_screen.dart';
 import 'package:account_managment/screens/setting_screen.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
-import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

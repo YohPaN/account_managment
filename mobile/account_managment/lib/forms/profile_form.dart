@@ -35,7 +35,7 @@ class _ProfileFormState extends State<ProfileForm> {
   @override
   Widget build(BuildContext context) {
     final profileViewModel = Provider.of<ProfileViewModel>(context);
-    final Map<String, String> _formData = {};
+    final Map<String, String> formData = {};
     User? user = profileViewModel.user;
     Profile? profile = profileViewModel.profile;
 
@@ -50,12 +50,12 @@ class _ProfileFormState extends State<ProfileForm> {
       }
 
       return actionFunction(
-        _formData["username"]!,
-        _formData["firstName"]!,
-        _formData["lastName"]!,
-        _formData["email"]!,
-        _formData["salary"] ?? "",
-        _formData["newPassword"] ?? "",
+        formData["username"]!,
+        formData["firstName"]!,
+        formData["lastName"]!,
+        formData["email"]!,
+        formData["salary"] ?? "",
+        formData["newPassword"] ?? "",
       );
     }
 
@@ -73,7 +73,7 @@ class _ProfileFormState extends State<ProfileForm> {
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'First name'),
               onSaved: (value) {
-                _formData['firstName'] = value ?? '';
+                formData['firstName'] = value ?? '';
               },
               validator: (value) => ValidationHelper.validateInput(
                   value, ["notEmpty", "notNull", "validTextOnly"]),
@@ -83,7 +83,7 @@ class _ProfileFormState extends State<ProfileForm> {
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Last name'),
               onSaved: (value) {
-                _formData['lastName'] = value ?? '';
+                formData['lastName'] = value ?? '';
               },
               validator: (value) => ValidationHelper.validateInput(
                   value, ["notEmpty", "notNull", "validTextOnly"]),
@@ -93,7 +93,7 @@ class _ProfileFormState extends State<ProfileForm> {
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Username'),
               onSaved: (value) {
-                _formData['username'] = value ?? '';
+                formData['username'] = value ?? '';
               },
               validator: (value) => ValidationHelper.validateInput(
                   value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
@@ -103,7 +103,7 @@ class _ProfileFormState extends State<ProfileForm> {
               maxLength: 50,
               decoration: const InputDecoration(labelText: 'Email'),
               onSaved: (value) {
-                _formData['email'] = value ?? '';
+                formData['email'] = value ?? '';
               },
               // validator: (value) => ValidationHelper.validateInput(
               //     value, ["notEmpty", "notNull", "validEmail"])
@@ -113,7 +113,7 @@ class _ProfileFormState extends State<ProfileForm> {
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Salary'),
               onSaved: (value) {
-                _formData['salary'] = value ?? '';
+                formData['salary'] = value ?? '';
               },
               validator: (value) => ValidationHelper.validateInput(
                   value, ["validPositifDouble", "twoDigitMax"]),
@@ -123,13 +123,13 @@ class _ProfileFormState extends State<ProfileForm> {
                 PasswordField(
                   label: "New password",
                   index: "newPassword",
-                  formData: _formData,
+                  formData: formData,
                 ),
                 const SizedBox(height: 16),
                 PasswordField(
                   label: "Retype password",
                   index: "retypePassword",
-                  formData: _formData,
+                  formData: formData,
                   comparisonSame: "newPassword",
                 ),
               ]),

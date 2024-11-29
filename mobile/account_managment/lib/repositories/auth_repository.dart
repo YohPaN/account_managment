@@ -24,7 +24,8 @@ class AuthRepository {
         contentType: "application/json",
         needAuth: false,
         body: {
-          'refresh': await FlutterSecureStorage().read(key: "refreshToken"),
+          'refresh':
+              await const FlutterSecureStorage().read(key: "refreshToken"),
         });
 
     return repoResponse;
