@@ -98,6 +98,9 @@ class AccountScreen extends StatelessWidget {
                                       item: accountViewModel
                                           .account!.items[index],
                                       callbackFunc: showModal,
+                                      canManage: ["owner", "change_account"]
+                                          .any(accountViewModel
+                                              .account!.permissions.contains),
                                     ),
                                   ),
                                 ),

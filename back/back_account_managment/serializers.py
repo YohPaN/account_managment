@@ -6,7 +6,6 @@ from back_account_managment.models import (
     Profile,
 )
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
 from rest_framework import serializers
 
 User = get_user_model()
@@ -67,23 +66,23 @@ class AccountSerializer(serializers.ModelSerializer):
     def get_permissions(self, account):
         user = self.context["request"].user
 
-        if account.user != user:
-            account_user = AccountUser.objects.get(user=user, account=account)
+        if account.user == user:
+            return ["owner"]
 
-            account_user_permissions = AccountUserPermission.objects.filter(
-                account_user=account_user
-            )
+        account_user = AccountUser.objects.get(user=user, account=account)
 
-            serializer = AccountUserPermissionsSerializer(
-                account_user_permissions, many=True
-            )
+        account_user_permissions = AccountUserPermission.objects.filter(
+            account_user=account_user
+        )
 
-            return [
-                permission["permissions_codename"]
-                for permission in serializer.data
-            ]
+        serializer = AccountUserPermissionsSerializer(
+            account_user_permissions, many=True
+        )
 
-        return []
+        return [
+            permission["permissions_codename"]
+            for permission in serializer.data
+        ]
 
 
 class ManageAccountSerializer(serializers.ModelSerializer):

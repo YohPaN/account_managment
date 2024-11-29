@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class ListItem extends StatelessWidget {
   final Item item;
   final Function(String, Item) callbackFunc;
+  bool canManage = false;
 
-  const ListItem({
+  ListItem({
     super.key,
     required this.item,
     required this.callbackFunc,
+    required this.canManage,
   });
 
   @override
@@ -31,12 +33,13 @@ class ListItem extends StatelessWidget {
           padding: const EdgeInsets.only(right: 16),
           child: Text("${item.valuation.toStringAsFixed(2)}€"),
         ),
-        IconButton(
-          onPressed: () {
-            callbackFunc("update", item);
-          },
-          icon: const Icon(Icons.mode),
-        ),
+        if (canManage)
+          IconButton(
+            onPressed: () {
+              callbackFunc("update", item);
+            },
+            icon: const Icon(Icons.mode),
+          ),
       ],
     );
   }

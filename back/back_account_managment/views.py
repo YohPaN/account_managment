@@ -149,6 +149,11 @@ class AccountView(ModelViewSet):
         permissions.IsAuthenticated,
     ]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
     def list(self, request):
         contributor_account_user = AccountUser.objects.filter(
             account=OuterRef("pk"), user=request.user
@@ -160,11 +165,9 @@ class AccountView(ModelViewSet):
             Exists(contributor_account_user)
         )
 
-        own_account_serialized = self.serializer_class(
-            own_accounts, context={"request": request}, many=True
-        )
-        contributor_account_serialized = self.serializer_class(
-            contributor_accounts, context={"request": request}, many=True
+        own_account_serialized = self.get_serializer(own_accounts, many=True)
+        contributor_account_serialized = self.get_serializer(
+            contributor_accounts, many=True
         )
 
         return Response(
@@ -187,7 +190,7 @@ class AccountView(ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = self.serializer_class(account)
+        serializer = self.get_serializer(account)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
