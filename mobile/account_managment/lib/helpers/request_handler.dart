@@ -161,12 +161,8 @@ class RequestHandler {
   }
 
   static String checkFields(data) {
-    if (data["error"] != null) {
-      return data["error"];
-    }
-
     for (var field in data.entries) {
-      if (field.value.runtimeType == Iterable) {
+      if (field.value is Iterable) {
         if (field.value[0] == "This field may not be blank.") {
           return "The field ${field.key} may not be blank.";
         }

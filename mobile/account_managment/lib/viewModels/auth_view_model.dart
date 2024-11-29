@@ -16,8 +16,9 @@ class AuthViewModel extends ChangeNotifier {
           key: 'accessToken', value: repoResponse.data!['access']);
       await _storage.write(
           key: 'refreshToken', value: repoResponse.data!['refresh']);
-    } else {
-      repoResponse.message = repoResponse.data!["detail"];
+    } else if (repoResponse.message == "" ||
+        repoResponse.data?["detail"] != null) {
+      repoResponse.message = repoResponse.data?["detail"] ?? "";
     }
 
     return [repoResponse.success, repoResponse.message];
