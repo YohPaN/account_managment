@@ -74,6 +74,7 @@ class _LoginFormState extends State<LoginForm> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
+              usernameController.text = "";
               Navigator.pushNamed(context, '/register');
             },
             child: const Text("Create account"),
