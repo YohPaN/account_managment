@@ -142,7 +142,7 @@ class ItemView(ModelViewSet):
 
 
 class AccountView(ModelViewSet):
-    queryset = models.Account.objects.all()
+    queryset = Account.objects.all()
     serializer_class = AccountSerializer
     permission_classes = [
         (IsOwner | IsContributor),
@@ -160,9 +160,11 @@ class AccountView(ModelViewSet):
             Exists(contributor_account_user)
         )
 
-        own_account_serialized = self.serializer_class(own_accounts, many=True)
+        own_account_serialized = self.serializer_class(
+            own_accounts, context={"request": request}, many=True
+        )
         contributor_account_serialized = self.serializer_class(
-            contributor_accounts, many=True
+            contributor_accounts, context={"request": request}, many=True
         )
 
         return Response(

@@ -1,6 +1,6 @@
 import uuid
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
 from django.db.models import Sum
 
@@ -72,3 +72,8 @@ class AccountUser(models.Model):
     )
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class AccountUserPermission(models.Model):
+    account_user = models.ForeignKey(AccountUser, on_delete=models.CASCADE)
+    permissions = models.ForeignKey(Permission, on_delete=models.CASCADE)
