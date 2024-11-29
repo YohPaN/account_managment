@@ -51,11 +51,12 @@ class AccountScreen extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            Flexible(
+                                child: Text(
                               accountViewModel.account!.name.capitalize(),
                               style: const TextStyle(
-                                  fontSize: 34.0, fontWeight: FontWeight.bold),
-                            ),
+                                  fontSize: 24.0, fontWeight: FontWeight.bold),
+                            )),
                             Text(
                               "${accountViewModel.account!.total != null ? accountViewModel.account!.total!.toStringAsFixed(2) : "0.00"}€",
                               style: TextStyle(
