@@ -44,10 +44,17 @@ class _ItemDrawerState extends State<ItemDrawer> {
     super.initState();
     _buttonStyle = buttonStyleChoices[0];
 
-    if (widget.action == "update" && widget.item!.valuation > 0) {
-      _selectButton[0] = false;
-      _selectButton[1] = true;
-      _buttonStyle = buttonStyleChoices[1];
+    if (widget.action == "update") {
+      if (widget.item!.valuation > 0) {
+        _selectButton[0] = false;
+        _selectButton[1] = true;
+        _buttonStyle = buttonStyleChoices[1];
+      }
+      if (widget.item != null) {
+        titleController.text = widget.item!.title;
+        descriptionController.text = widget.item!.description;
+        valuationController.text = widget.item!.valuation.abs().toString();
+      }
     }
   }
 
@@ -72,12 +79,6 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
       return await accountViewModel.createOrUpdateItem(titleController.text,
           descriptionController.text, valuation, widget.item?.id);
-    }
-
-    if (widget.action == "update" && widget.item != null) {
-      titleController.text = widget.item!.title;
-      descriptionController.text = widget.item!.description;
-      valuationController.text = widget.item!.valuation.abs().toString();
     }
 
     return Padding(
