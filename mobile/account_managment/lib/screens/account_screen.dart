@@ -1,6 +1,7 @@
 import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
@@ -98,12 +99,12 @@ class AccountScreen extends StatelessWidget {
                                       item: accountViewModel
                                           .account!.items[index],
                                       callbackFunc: showModal,
-                                      canManage: [
-                                        "owner",
-                                        "change_item",
-                                        "delete_item"
-                                      ].any(accountViewModel
-                                          .account!.permissions.contains),
+                                      canManage: HasPermissions.hasPermissions(
+                                          ressource: "item",
+                                          action: "updateOrDelete",
+                                          permissions: accountViewModel
+                                              .account!.permissions,
+                                          strict: false),
                                     ),
                                   ),
                                 ),
@@ -136,8 +137,10 @@ class AccountScreen extends StatelessWidget {
             },
           ),
           floatingActionButton: Visibility(
-            visible: ["owner", "add_item"]
-                .any(accountViewModel.account!.permissions.contains),
+            visible: HasPermissions.hasPermissions(
+                ressource: "item",
+                action: "create",
+                permissions: accountViewModel.account!.permissions),
             child: FloatingActionButton(
               onPressed: () => showModal("create"),
               foregroundColor: Theme.of(context).colorScheme.primary,

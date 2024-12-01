@@ -1,5 +1,6 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
@@ -140,8 +141,10 @@ class _ItemDrawerState extends State<ItemDrawer> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   if (widget.action == "update" &&
-                      ["owner", "delete_item"]
-                          .any(accountViewModel.account!.permissions.contains))
+                      HasPermissions.hasPermissions(
+                          ressource: "item",
+                          action: "delete",
+                          permissions: accountViewModel.account!.permissions))
                     ElevatedButton(
                       onPressed: () async {
                         RepoResponse repoResponse =
@@ -154,8 +157,10 @@ class _ItemDrawerState extends State<ItemDrawer> {
                       },
                       child: const Text('Delete Item'),
                     ),
-                  if (["owner", "change_item"]
-                      .any(accountViewModel.account!.permissions.contains))
+                  if (HasPermissions.hasPermissions(
+                      ressource: "item",
+                      action: widget.action,
+                      permissions: accountViewModel.account!.permissions))
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
