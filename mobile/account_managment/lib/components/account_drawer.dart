@@ -200,20 +200,24 @@ class _AccountDrawerState extends State<AccountDrawer> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        RepoResponse repoResponse = await createOrUpdate();
-                        Provider.of<InternalNotification>(context,
-                                listen: false)
-                            .showMessage(
-                                repoResponse.message, repoResponse.success);
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Text('${widget.action} account'.capitalize()),
-                  ),
-                  if (widget.action == "update" && !widget.account!.isMain)
+                  if (["owner", "change_account"]
+                      .any(accountViewModel.account!.permissions.contains))
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          RepoResponse repoResponse = await createOrUpdate();
+                          Provider.of<InternalNotification>(context,
+                                  listen: false)
+                              .showMessage(
+                                  repoResponse.message, repoResponse.success);
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Text('${widget.action} account'.capitalize()),
+                    ),
+                  if (widget.action == "update" &&
+                      ["owner", "delete_account"]
+                          .any(accountViewModel.account!.permissions.contains))
                     ElevatedButton(
                       onPressed: () async {
                         final RepoResponse repoResponse = await accountViewModel

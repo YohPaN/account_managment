@@ -7,6 +7,7 @@ class Account {
   bool isMain;
   List<Item> items;
   List<Contributor> contributor;
+  List<dynamic> permissions;
   double? total;
 
   Account({
@@ -15,6 +16,7 @@ class Account {
     required this.isMain,
     required this.items,
     required this.contributor,
+    required this.permissions,
     this.total,
   });
 
@@ -25,6 +27,7 @@ class Account {
       isMain: jsonAccount["is_main"],
       items: [],
       contributor: [],
+      permissions: jsonAccount["permissions"],
       total: jsonAccount["total"]["total_sum"],
     );
   }

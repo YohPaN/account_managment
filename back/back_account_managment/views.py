@@ -1,8 +1,13 @@
 import json
 
-from back_account_managment import models
-from back_account_managment.models import Account, AccountUser
-from back_account_managment.permissions import IsContributor, IsOwner
+from back_account_managment.models import Account, AccountUser, Item, Profile
+from back_account_managment.permissions import (
+    CanCreate,
+    CanDelete,
+    CanUpdate,
+    IsContributor,
+    IsOwner,
+)
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
@@ -68,7 +73,7 @@ class UserView(ModelViewSet):
 
 
 class ProfileView(ModelViewSet):
-    queryset = models.Profile.objects.all()
+    queryset = Profile.objects.all()
     permission_classes = [IsOwner, permissions.IsAuthenticated]
 
     def list(self, request):
@@ -87,7 +92,7 @@ class ProfileView(ModelViewSet):
             user.save()
 
             # Update profile fields
-            profile = models.Profile.objects.get(user=user)
+            profile = Profile.objects.get(user=user)
             profile.first_name = data.get("first_name", profile.first_name)
             profile.last_name = data.get("last_name", profile.last_name)
             profile.salary = data.get("salary", profile.salary)
@@ -111,7 +116,7 @@ class RegisterView(APIView):
             )
             user.set_password(data["password"]),
 
-            profile = models.Profile.objects.create(
+            profile = Profile.objects.create(
                 first_name=data["first_name"],
                 last_name=data["last_name"],
                 salary=(
@@ -120,7 +125,7 @@ class RegisterView(APIView):
                 user=user,
             )
 
-            account = models.Account.objects.create(
+            account = Account.objects.create(
                 name="my account", user=user, is_main=True
             )
 
@@ -136,18 +141,37 @@ class RegisterView(APIView):
 
 
 class ItemView(ModelViewSet):
-    queryset = models.Item.objects.all()
+    queryset = Item.objects.all()
     serializer_class = ItemSerializer
     permission_classes = [IsOwner, permissions.IsAuthenticated]
 
 
 class AccountView(ModelViewSet):
-    queryset = models.Account.objects.all()
+    queryset = Account.objects.all()
     serializer_class = AccountSerializer
     permission_classes = [
-        (IsOwner | IsContributor),
         permissions.IsAuthenticated,
     ]
+
+    permission_by_method = {
+        "get": (IsOwner | IsContributor),
+        "post": (IsOwner | CanCreate),
+        "patch": (IsOwner | CanUpdate),
+        "delete": (IsOwner | CanDelete),
+    }
+
+    def get_permissions(self):
+        if self.request.method not in permissions.SAFE_METHODS:
+            self.permission_classes.append(
+                self.permission_by_method[self.request.method.lower()]
+            )
+
+        return [permission() for permission in self.permission_classes]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
     def list(self, request):
         contributor_account_user = AccountUser.objects.filter(
@@ -160,8 +184,8 @@ class AccountView(ModelViewSet):
             Exists(contributor_account_user)
         )
 
-        own_account_serialized = self.serializer_class(own_accounts, many=True)
-        contributor_account_serialized = self.serializer_class(
+        own_account_serialized = self.get_serializer(own_accounts, many=True)
+        contributor_account_serialized = self.get_serializer(
             contributor_accounts, many=True
         )
 
@@ -179,13 +203,13 @@ class AccountView(ModelViewSet):
 
         try:
             account = Account.objects.filter(user=user).first()
-        except models.Account.DoesNotExist:
+        except Account.DoesNotExist:
             return Response(
                 {"detail": "Account not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = self.serializer_class(account)
+        serializer = self.get_serializer(account)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -209,7 +233,6 @@ class AccountView(ModelViewSet):
 
             return Response(status=status.HTTP_201_CREATED)
 
-        # Return errors if validation fails
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk):
@@ -221,7 +244,7 @@ class AccountView(ModelViewSet):
 
         user_contributors = User.objects.filter(
             username__in=json.loads(data["contributors"])
-        ).exclude(username=request.user.username)
+        ).exclude(username=account.user.username)
 
         account_users = AccountUser.objects.filter(account=account)
         account_user_set = set(
@@ -267,14 +290,14 @@ class AccountView(ModelViewSet):
         item_id = data.get("item_id", None)
 
         if item_id is not None and item_id != "":
-            item = models.Item.objects.get(pk=item_id)
+            item = Item.objects.get(pk=item_id)
             item.title = data["title"]
             item.description = data["description"]
             item.valuation = data["valuation"]
             item.save()
 
         else:
-            models.Item.objects.create(
+            Item.objects.create(
                 account=account,
                 title=data["title"],
                 description=data["description"],
@@ -287,7 +310,7 @@ class AccountView(ModelViewSet):
         detail=True, methods=["delete"], url_path="items/(?P<item_id>[^/.]+)"
     )
     def delete_item(self, request, pk=None, item_id=None):
-        item = models.Item.objects.get(pk=item_id)
+        item = Item.objects.get(pk=item_id)
         item.delete()
 
         return Response(status=status.HTTP_200_OK)
