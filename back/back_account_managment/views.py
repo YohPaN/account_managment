@@ -2,7 +2,13 @@ import json
 
 from back_account_managment import models
 from back_account_managment.models import Account, AccountUser
-from back_account_managment.permissions import IsContributor, IsOwner
+from back_account_managment.permissions import (
+    CanCreate,
+    CanDelete,
+    CanUpdate,
+    IsContributor,
+    IsOwner,
+)
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
@@ -145,9 +151,23 @@ class AccountView(ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
     permission_classes = [
-        (IsOwner | IsContributor),
         permissions.IsAuthenticated,
     ]
+
+    permission_by_method = {
+        "get": (IsOwner | IsContributor),
+        "post": (IsOwner | CanCreate),
+        "patch": (IsOwner | CanUpdate),
+        "delete": (IsOwner | CanDelete),
+    }
+
+    def get_permissions(self):
+        if self.request.method not in permissions.SAFE_METHODS:
+            self.permission_classes.append(
+                self.permission_by_method[self.request.method.lower()]
+            )
+
+        return [permission() for permission in self.permission_classes]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -226,7 +246,7 @@ class AccountView(ModelViewSet):
 
         user_contributors = User.objects.filter(
             username__in=json.loads(data["contributors"])
-        ).exclude(username=request.user.username)
+        ).exclude(username=account.user.username)
 
         account_users = AccountUser.objects.filter(account=account)
         account_user_set = set(

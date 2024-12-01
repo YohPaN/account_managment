@@ -80,9 +80,12 @@ class AccountManagmentScreen extends StatelessWidget {
                               account:
                                   accountViewModel.contributorAccounts![index],
                               callbackFunc: showModal,
-                              canManage: ["owner", "change_account"].any(
-                                  accountViewModel.contributorAccounts![index]
-                                      .permissions.contains),
+                              canManage: [
+                                "owner",
+                                "change_account",
+                                "delete_account"
+                              ].any(accountViewModel.contributorAccounts![index]
+                                  .permissions.contains),
                             );
                           },
                         ),

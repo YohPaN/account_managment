@@ -139,7 +139,9 @@ class _ItemDrawerState extends State<ItemDrawer> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (widget.action == "update")
+                  if (widget.action == "update" &&
+                      ["owner", "delete_item"]
+                          .any(accountViewModel.account!.permissions.contains))
                     ElevatedButton(
                       onPressed: () async {
                         RepoResponse repoResponse =
@@ -152,20 +154,22 @@ class _ItemDrawerState extends State<ItemDrawer> {
                       },
                       child: const Text('Delete Item'),
                     ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        RepoResponse repoResponse = await createOrUpdate();
+                  if (["owner", "change_item"]
+                      .any(accountViewModel.account!.permissions.contains))
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          RepoResponse repoResponse = await createOrUpdate();
 
-                        Provider.of<InternalNotification>(context,
-                                listen: false)
-                            .showMessage(
-                                repoResponse.message, repoResponse.success);
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Text('${widget.action} Item'.capitalize()),
-                  ),
+                          Provider.of<InternalNotification>(context,
+                                  listen: false)
+                              .showMessage(
+                                  repoResponse.message, repoResponse.success);
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Text('${widget.action} Item'.capitalize()),
+                    ),
                 ],
               ),
             ],

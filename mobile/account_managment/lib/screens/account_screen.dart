@@ -98,9 +98,12 @@ class AccountScreen extends StatelessWidget {
                                       item: accountViewModel
                                           .account!.items[index],
                                       callbackFunc: showModal,
-                                      canManage: ["owner", "change_account"]
-                                          .any(accountViewModel
-                                              .account!.permissions.contains),
+                                      canManage: [
+                                        "owner",
+                                        "change_item",
+                                        "delete_item"
+                                      ].any(accountViewModel
+                                          .account!.permissions.contains),
                                     ),
                                   ),
                                 ),
@@ -132,11 +135,15 @@ class AccountScreen extends StatelessWidget {
               }
             },
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => showModal("create"),
-            foregroundColor: Theme.of(context).colorScheme.primary,
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            child: const Icon(Icons.add),
+          floatingActionButton: Visibility(
+            visible: ["owner", "add_item"]
+                .any(accountViewModel.account!.permissions.contains),
+            child: FloatingActionButton(
+              onPressed: () => showModal("create"),
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              child: const Icon(Icons.add),
+            ),
           ),
         );
       },
