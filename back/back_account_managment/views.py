@@ -1,13 +1,7 @@
 import json
 
 from back_account_managment.models import Account, AccountUser, Item, Profile
-from back_account_managment.permissions import (
-    CanCreate,
-    CanDelete,
-    CanUpdate,
-    IsContributor,
-    IsOwner,
-)
+from back_account_managment.permissions import CRUDAccountPermission, IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
@@ -149,24 +143,7 @@ class ItemView(ModelViewSet):
 class AccountView(ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-    ]
-
-    permission_by_method = {
-        "get": (IsOwner | IsContributor),
-        "post": (IsOwner | CanCreate),
-        "patch": (IsOwner | CanUpdate),
-        "delete": (IsOwner | CanDelete),
-    }
-
-    def get_permissions(self):
-        if self.request.method not in permissions.SAFE_METHODS:
-            self.permission_classes.append(
-                self.permission_by_method[self.request.method.lower()]
-            )
-
-        return [permission() for permission in self.permission_classes]
+    permission_classes = [permissions.IsAuthenticated, CRUDAccountPermission]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

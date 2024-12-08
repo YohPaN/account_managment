@@ -2,7 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
-from django.db.models import Sum
+from django.db.models import CheckConstraint, Q, Sum
 
 
 class User(AbstractUser):
@@ -28,18 +28,11 @@ class Profile(models.Model):
 
 class Account(models.Model):
     id = models.BigAutoField(primary_key=True)
-
     name = models.CharField(max_length=50)
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
 
-    def items(self):
-        return Item.objects.filter(account=self.pk)
-
-    def contributors(self):
-        return AccountUser.objects.filter(account=self.pk)
-
+    @property
     def total(self):
         return Item.objects.filter(account=self.pk).aggregate(
             total_sum=Sum("valuation")
@@ -48,21 +41,21 @@ class Account(models.Model):
 
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
-
     title = models.CharField(max_length=15)
-
     description = models.CharField(max_length=50)
-
     valuation = models.DecimalField(max_digits=15, decimal_places=2)
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="items"
+    )
 
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+class AccountUserState(models.TextChoices):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    DISAPPROVED = "DISAPPROVED"
 
 
 class AccountUser(models.Model):
-    class AccountUserState(models.TextChoices):
-        PENDING = "PENDING"
-        APPROVED = "APPROVED"
-        DISAPPROVED = "DISAPPROVED"
 
     id = models.BigAutoField(primary_key=True)
     state = models.CharField(
@@ -70,8 +63,20 @@ class AccountUser(models.Model):
         default=AccountUserState.PENDING,
         max_length=15,
     )
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="contributors"
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            CheckConstraint(
+                check=Q(
+                    state__in=[choice.value for choice in AccountUserState]
+                ),
+                name="valid_state_constraint",
+            )
+        ]
 
 
 class AccountUserPermission(models.Model):
