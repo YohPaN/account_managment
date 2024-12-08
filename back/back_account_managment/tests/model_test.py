@@ -15,9 +15,13 @@ class ProfileModelTest(TestCase):
 
 
 class AccountModelTest(TestCase):
-    def setUp(cls):
-        cls.user = User.objects.create(username="JonDoe", email="jon@doe.test")
-        cls.account = Account.objects.create(id=1, name="test", user=cls.user)
+    def setUp(self):
+        self.user = User.objects.create(
+            username="JonDoe", email="jon@doe.test"
+        )
+        self.account = Account.objects.create(
+            id=1, name="test", user=self.user
+        )
 
     def test_total_property(self):
         for i in range(3):
@@ -37,9 +41,13 @@ class ItemModelTest(TestCase):
 
 
 class AccountUserModelTest(TestCase):
-    def setUp(cls):
-        cls.user = User.objects.create(username="JonDoe", email="jon@doe.test")
-        cls.account = Account.objects.create(id=1, name="test", user=cls.user)
+    def setUp(self):
+        self.user = User.objects.create(
+            username="JonDoe", email="jon@doe.test"
+        )
+        self.account = Account.objects.create(
+            id=1, name="test", user=self.user
+        )
 
     def test_create_account_user_with_bad_state(self):
         with self.assertRaises(IntegrityError):
