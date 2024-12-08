@@ -1,6 +1,6 @@
 from back_account_managment.models import AccountUser, AccountUserPermission
 from django.contrib.auth import get_user_model
-from django.db.models import Exists
+from django.contrib.auth.models import Permission
 from rest_framework import permissions
 
 User = get_user_model()
@@ -14,57 +14,38 @@ class IsOwner(permissions.BasePermission):
         return obj.user == request.user
 
 
-class IsContributor(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.method != "GET":
+class CRUDAccountPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, account):
+        method = request.method
+
+        match method:
+            case "GET":
+                codename = "view_account"
+
+            case "POST":
+                codename = "add_account"
+
+            case "PUT" | "PATCH":
+                codename = "change_account"
+
+            case "DELETE":
+                codename = "delete_account"
+
+            case _:
+                return False
+
+        permission = Permission.objects.get(codename=codename)
+
+        account_user = AccountUser.objects.filter(
+            user=request.user, account=account
+        ).first()
+
+        if account_user is None:
             return False
 
-        contributor_user = User.objects.filter(Exists(obj.contributors()))
-
-        return request.user in contributor_user
-
-
-class CanCreate(permissions.BasePermission):
-    def has_object_permission(self, request, view, account):
-        account_user = AccountUser.objects.get(
-            user=request.user, account=account
-        )
-
         account_user_permissions = AccountUserPermission.objects.filter(
-            account_user=account_user, permissions=25
-        )
-
-        if account_user_permissions is not None:
-            return True
-
-        return False
-
-
-class CanUpdate(permissions.BasePermission):
-    def has_object_permission(self, request, view, account):
-        account_user = AccountUser.objects.get(
-            user=request.user, account=account
-        )
-
-        account_user_permissions = AccountUserPermission.objects.filter(
-            account_user=account_user, permissions=26
-        )
-
-        if account_user_permissions is not None:
-            return True
-
-        return False
-
-
-class CanDelete(permissions.BasePermission):
-    def has_object_permission(self, request, view, account):
-        account_user = AccountUser.objects.get(
-            user=request.user, account=account
-        )
-
-        account_user_permissions = AccountUserPermission.objects.filter(
-            account_user=account_user, permissions=27
-        )
+            account_user=account_user, permissions=permission
+        ).first()
 
         if account_user_permissions is not None:
             return True
