@@ -64,12 +64,25 @@ class AccountSerializer(serializers.ModelSerializer):
         ]
 
     def get_permissions(self, account):
-        user = self.context["request"].user
+        try:
+            user = self.context["request"].user
+        except KeyError:
+            raise KeyError("There is no request attach on context")
 
         if account.user == user:
-            return ["owner"]
+            return [
+                "view_account",
+                "add_account",
+                "change_account",
+                "delete_account",
+            ]
 
-        account_user = AccountUser.objects.get(user=user, account=account)
+        try:
+            account_user = AccountUser.objects.get(user=user, account=account)
+        except AccountUser.DoesNotExist:
+            raise AccountUser.DoesNotExist(
+                "The user isn't a contributor of the account"
+            )
 
         account_user_permissions = AccountUserPermission.objects.filter(
             account_user=account_user
