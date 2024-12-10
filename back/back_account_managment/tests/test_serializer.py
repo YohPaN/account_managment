@@ -28,7 +28,6 @@ class UserAccountUserSerializerTest(TestCase):
     """Nothing to test"""
 
 
-# TODO: refactor
 class AccountSerializerTest(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()

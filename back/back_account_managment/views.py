@@ -27,43 +27,33 @@ class UserView(ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user(self, request):
-        user = request.user
-        serializer = self.serializer_class(user)
+        serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
     @action(detail=False, methods=["patch"], url_path="me/update")
     def update_current_user(self, request):
-        user = request.user
-        profile = user.profile
+        serializer = self.get_serializer(
+            request.user, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.validated_data, status=status.HTTP_201_CREATED
+            )
 
-        user.username = request.data["username"]
-        user.password = request.data["password"]
-        user.email = request.data["email"]
-        user.save()
-
-        profile.first_name = request.data["first_name"]
-        profile.last_name = request.data["last_name"]
-        profile.salary = request.data["salary"]
-        profile.save()
-
-        serializer = self.serializer_class(user)
-
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=["patch"], url_path="password")
     def update_password(self, request):
         user = request.user
-        old_password = request.data["old_password"]
         new_password = request.data["new_password"]
 
-        if check_password(old_password, user.password):
-            user.password = make_password(new_password)
-            user.save()
+        if check_password(request.data["old_password"], user.password):
+            user.set_password(new_password)
 
             return Response(status=status.HTTP_200_OK)
 
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class ProfileView(ModelViewSet):
