@@ -36,6 +36,8 @@ class AccountSerializerTest(TestCase):
             username="test", email="test@test.test"
         )
 
+        self.request = self.factory.get("/")
+
         self.account = Account.objects.create(name="test", user=self.user)
 
         self.account_user = AccountUser.objects.create(
@@ -49,10 +51,9 @@ class AccountSerializerTest(TestCase):
         )
 
     def test_get_permissions_for_account_owner(self):
-        request = self.factory.get("/")
-        request.user = self.user
+        self.request.user = self.user
 
-        serializer = AccountSerializer(context={"request": request})
+        serializer = AccountSerializer(context={"request": self.request})
 
         permissions = serializer.get_permissions(self.account)
 
@@ -68,8 +69,7 @@ class AccountSerializerTest(TestCase):
 
     def test_get_permissions(self):
         user2 = User.objects.create(username="user2", email="user@user2.test")
-        request = self.factory.get("/")
-        request.user = user2
+        self.request.user = user2
 
         account_user = AccountUser.objects.create(
             account=self.account, user=user2
@@ -78,7 +78,7 @@ class AccountSerializerTest(TestCase):
             account_user=account_user, permissions=self.permission
         )
 
-        serializer = AccountSerializer(context={"request": request})
+        serializer = AccountSerializer(context={"request": self.request})
 
         permissions = serializer.get_permissions(self.account)
 
@@ -100,11 +100,10 @@ class AccountSerializerTest(TestCase):
             username="newUser", email="new@user.test"
         )
 
-        request = self.factory.get("/")
-        request.user = new_user
+        self.request.user = new_user
 
         with self.assertRaises(AccountUser.DoesNotExist):
-            serializer = AccountSerializer(context={"request": request})
+            serializer = AccountSerializer(context={"request": self.request})
             serializer.get_permissions(self.account)
 
 
