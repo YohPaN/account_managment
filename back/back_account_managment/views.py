@@ -1,15 +1,17 @@
 import json
 
-from back_account_managment.models import Account, AccountUser, Item, Profile
+from back_account_managment.models import Account, AccountUser, Item
 from back_account_managment.permissions import CRUDAccountPermission, IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
     ManageAccountSerializer,
+    ProfileSerializer,
+    RegisterUserSerializer,
     UserSerializer,
 )
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import check_password
 from django.db.models import Exists, OuterRef
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -56,72 +58,37 @@ class UserView(ModelViewSet):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
-class ProfileView(ModelViewSet):
-    queryset = Profile.objects.all()
-    permission_classes = [IsOwner, permissions.IsAuthenticated]
-
-    def list(self, request):
-        user = request.user
-        serializer = UserSerializer(user)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request):
-        data = request.data
-        user = request.user
-
-        try:
-            user.username = data.get("username", user.username)
-            user.email = data.get("email", user.email)
-            user.save()
-
-            # Update profile fields
-            profile = Profile.objects.get(user=user)
-            profile.first_name = data.get("first_name", profile.first_name)
-            profile.last_name = data.get("last_name", profile.last_name)
-            profile.salary = data.get("salary", profile.salary)
-            profile.save()
-
-            return Response(status=status.HTTP_200_OK)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        data = request.data
+        user_serializer = RegisterUserSerializer(data=request.data)
 
-        try:
-            user = User.objects.create_user(
-                username=data["username"],
-                email=data["email"],
-            )
-            user.set_password(data["password"]),
+        if user_serializer.is_valid():
+            user_validated_data = user_serializer.validated_data
+            user = User(**user_validated_data)
 
-            profile = Profile.objects.create(
-                first_name=data["first_name"],
-                last_name=data["last_name"],
-                salary=(
-                    float(data["salary"]) if data["salary"] != "" else None
-                ),
-                user=user,
-            )
+            password = user_serializer.validated_data.get("password", None)
 
-            account = Account.objects.create(
-                name="my account", user=user, is_main=True
-            )
+            if password is None:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
+            user.set_password(password)
             user.save()
-            profile.save()
-            account.save()
 
-            return Response(status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            profile_serializer = ProfileSerializer(
+                data={"user": user.pk, **request.data}
             )
+
+            if profile_serializer.is_valid():
+                profile_serializer.save()
+
+                return Response(status=status.HTTP_201_CREATED)
+
+            else:
+                user.delete()
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class ItemView(ModelViewSet):
