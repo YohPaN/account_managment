@@ -4,7 +4,6 @@ from back_account_managment.models import Account, AccountUser, Item
 from back_account_managment.permissions import CRUDAccountPermission, IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
-    ItemSerializer,
     ManageAccountSerializer,
     ProfileSerializer,
     RegisterUserSerializer,
@@ -89,12 +88,6 @@ class RegisterView(APIView):
                 user.delete()
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-class ItemView(ModelViewSet):
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
-    permission_classes = [IsOwner, permissions.IsAuthenticated]
 
 
 class AccountView(ModelViewSet):

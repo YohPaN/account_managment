@@ -156,11 +156,6 @@ class RegisterViewTest(TestCase):
         self.assertEqual(len(User.objects.all()), 0)
 
 
-class ItemViewTest(TestCase):
-    def setUp(cls):
-        pass
-
-
 class AccountViewTest(TestCase):
     def setUp(cls):
         pass
