@@ -107,7 +107,7 @@ class AccountSerializer(serializers.ModelSerializer):
 class ManageAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ["id", "name", "user"]
+        fields = ["name", "user"]
 
 
 class AccountUserPermissionsSerializer(serializers.Serializer):

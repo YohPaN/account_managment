@@ -129,7 +129,7 @@ class AccountView(ModelViewSet):
         user = request.user
 
         try:
-            account = Account.objects.filter(user=user).first()
+            account = Account.objects.get(user=user, is_main=True)
         except Account.DoesNotExist:
             return Response(
                 {"detail": "Account not found."},
@@ -140,18 +140,15 @@ class AccountView(ModelViewSet):
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    def create(self, request, *args, **kwargs):
-        data = {"name": request.data["name"], "user": request.user.id}
-        serializer = ManageAccountSerializer(data=data)
+    def create(self, request):
+        serializer = ManageAccountSerializer(
+            data={**request.data, "user": request.user.id}
+        )
 
         if serializer.is_valid():
-            new_account = serializer.save()
+            account = serializer.save()
 
-            account = Account.objects.get(pk=new_account.id)
-
-            contributors = json.loads(request.data["contributors"])
-
-            for contributor in contributors:
+            for contributor in json.loads(request.data["contributors"]):
                 if contributor != request.user.username:
                     AccountUser.objects.create(
                         account=account,

@@ -1,4 +1,7 @@
+import json
+
 from back_account_managment.models import Profile
+from back_account_managment.views import Account, AccountUser
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.test import TestCase
@@ -157,5 +160,105 @@ class RegisterViewTest(TestCase):
 
 
 class AccountViewTest(TestCase):
-    def setUp(cls):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="jonDoe",
+            email="jon@doe.test",
+        )
+
+        self.user2 = User.objects.create(
+            username="testeur",
+            email="test@eur.test",
+        )
+
+        self.c = APIClient()
+        self.c.force_authenticate(user=self.user)
+
+    def test_get_context(self):
+        # TODO: find a way to test get_serializer_context
+        # factory = APIRequestFactory()
+        # request = factory.get("/")
+
+        # account_view = AccountView(request=request)
+        # context = account_view.get_serializer_context()
+        # self.assertNotIn("request", context)
+
+        # account_view.get_serializer_context()
         pass
+
+    def test_list(self):
+        [
+            Account.objects.create(id=i + 1, name="test", user=self.user)
+            for i in range(2)
+        ]
+        account = Account.objects.create(id=3, name="test", user=self.user2)
+
+        AccountUser.objects.create(account=account, user=self.user)
+
+        response = self.c.get("/api/accounts/")
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertIn("own", response.data)
+        self.assertIn("contributor_account", response.data)
+        self.assertEqual(len(response.data["own"]), 2)
+        self.assertEqual(len(response.data["contributor_account"]), 1)
+
+    def test_get_current_user_account(self):
+        account = Account.objects.create(
+            id=3,
+            name="test",
+            user=self.user,
+            is_main=True,
+        )
+
+        response = self.c.get("/api/accounts/me/")
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(response.data["id"], account.pk)
+
+    def test_no_account_get_current_user_account(self):
+        response = self.c.get("/api/accounts/me/")
+        self.assertTrue(status.is_client_error(response.status_code))
+
+    def test_create_account(self):
+        self.assertEqual(len(Account.objects.all()), 0)
+        response = self.c.post(
+            "/api/accounts/",
+            {
+                "name": "test account",
+                "user": self.user.id,
+                "contributors": json.dumps([]),
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertIsNotNone(Account.objects.get(name="test account"))
+
+    def test_create_account_with_contributors(self):
+        self.assertEqual(len(Account.objects.all()), 0)
+
+        constributors = [
+            self.user2.username,
+        ]
+
+        response = self.c.post(
+            "/api/accounts/",
+            {
+                "name": "test account",
+                "user": self.user.id,
+                "contributors": json.dumps(constributors),
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertIsNotNone(Account.objects.get(name="test account"))
+        self.assertEqual(len(AccountUser.objects.all()), 1)
+        self.assertIsNotNone(
+            AccountUser.objects.get(
+                user=self.user2,
+                account=Account.objects.get(name="test account"),
+            )
+        )
