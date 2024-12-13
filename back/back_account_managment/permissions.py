@@ -41,6 +41,9 @@ class CRUDPermission(permissions.BasePermission):
             case _:
                 return False
 
+        if account.user == request.user:
+            return True
+
         permission = Permission.objects.get(codename=codename)
 
         account_user = AccountUser.objects.filter(

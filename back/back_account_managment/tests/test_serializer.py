@@ -59,10 +59,7 @@ class AccountSerializerTest(TestCase):
         self.assertEqual(
             permissions,
             [
-                "view_account",
-                "add_account",
-                "change_account",
-                "delete_account",
+                "owner",
             ],
         )
 

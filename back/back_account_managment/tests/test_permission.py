@@ -56,6 +56,8 @@ class CRUDAccountTest(TestCase):
             username="JonDoe", email="jon@doe.test"
         )
 
+        self.user2 = User.objects.create(username="Jon", email="jo@do.tes")
+
         self.account = Account.objects.create(
             id=1, name="test", user=self.user
         )
@@ -86,7 +88,7 @@ class CRUDAccountTest(TestCase):
         AccountUser.objects.create(account=self.account, user=self.user)
 
         request = self.factory.get("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -96,7 +98,7 @@ class CRUDAccountTest(TestCase):
 
     def test_get_for_not_contributor_user(self):
         request = self.factory.get("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -126,7 +128,7 @@ class CRUDAccountTest(TestCase):
         AccountUser.objects.create(account=self.account, user=self.user)
 
         request = self.factory.post("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -136,7 +138,7 @@ class CRUDAccountTest(TestCase):
 
     def test_post_for_not_contributor_user(self):
         request = self.factory.post("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -166,7 +168,7 @@ class CRUDAccountTest(TestCase):
         AccountUser.objects.create(account=self.account, user=self.user)
 
         request = self.factory.put("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -176,7 +178,7 @@ class CRUDAccountTest(TestCase):
 
     def test_put_for_not_contributor_user(self):
         request = self.factory.put("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -206,7 +208,7 @@ class CRUDAccountTest(TestCase):
         AccountUser.objects.create(account=self.account, user=self.user)
 
         request = self.factory.patch("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -216,7 +218,7 @@ class CRUDAccountTest(TestCase):
 
     def test_patch_for_not_contributor_user(self):
         request = self.factory.patch("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -246,7 +248,7 @@ class CRUDAccountTest(TestCase):
         AccountUser.objects.create(account=self.account, user=self.user)
 
         request = self.factory.delete("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
@@ -256,7 +258,7 @@ class CRUDAccountTest(TestCase):
 
     def test_delete_for_not_contributor_user(self):
         request = self.factory.delete("/")
-        request.user = self.user
+        request.user = self.user2
 
         self.assertFalse(
             self.CRUDPermission.has_object_permission(

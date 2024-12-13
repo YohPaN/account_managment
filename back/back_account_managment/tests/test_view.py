@@ -1,10 +1,12 @@
 import json
+from decimal import Decimal
 
 from back_account_managment.models import AccountUserPermission, Profile
 from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import Permission
+from django.db import IntegrityError
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -20,47 +22,52 @@ class UserViewTest(TestCase):
         )
         self.user.set_password("password"),
 
+        self.profile = Profile.objects.create(
+            first_name="test",
+            last_name="test",
+            salary=20.12,
+            user=self.user,
+        )
+
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
     def test_get_current_user(self):
-        excepted_response = {
-            "username": "jonDoe",
-            "email": "jon@doe.test",
-            "profile": None,
-        }
         response = self.c.get("/api/users/me/")
         self.assertTrue(status.is_success(response.status_code))
 
         self.assertIn("username", response.data)
         self.assertIn("email", response.data)
         self.assertIn("profile", response.data)
-        self.assertEqual(excepted_response, response.data)
         self.assertEqual(response.data["username"], "jonDoe")
         self.assertEqual(response.data["email"], "jon@doe.test")
-        self.assertIsNone(response.data["profile"])
+        self.assertEqual(response.data["profile"]["first_name"], "test")
+        self.assertEqual(response.data["profile"]["last_name"], "test")
+        self.assertEqual(response.data["profile"]["salary"], "20.12")
 
     def test_update_profile(self):
-        excepted_response = {
-            "username": "JonTheRipper",
-            "email": "jon@the.ripper",
-        }
-
         response = self.c.patch(
             "/api/users/me/update/",
             {
                 "username": "JonTheRipper",
                 "email": "jon@the.ripper",
+                "first_name": "first_name",
+                "last_name": "last_name",
+                "salary": 50.04,
             },
             format="json",
         )
 
+        self.profile.refresh_from_db()
+
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(self.user.username, "JonTheRipper")
         self.assertEqual(self.user.email, "jon@the.ripper")
+        self.assertEqual(self.profile.first_name, "first_name")
+        self.assertEqual(self.profile.last_name, "last_name")
+        self.assertEqual(self.profile.salary, Decimal("50.04"))
         self.assertIn("username", response.data)
         self.assertIn("email", response.data)
-        self.assertEqual(response.data, excepted_response)
 
     def test_update_password(self):
         self.assertTrue(check_password("password", self.user.password))
@@ -83,6 +90,7 @@ class RegisterViewTest(TestCase):
 
     def test_register(self):
         self.assertEqual(len(User.objects.all()), 0)
+        self.assertEqual(len(Account.objects.all()), 0)
 
         response = self.c.post(
             "/api/register/",
@@ -104,6 +112,8 @@ class RegisterViewTest(TestCase):
         self.assertTrue(check_password("password", user.password))
 
         self.assertIsNotNone(Profile.objects.get(first_name="Jon"))
+        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertIsNotNone(Account.objects.get(user=user))
 
     def test_error_when_password_is_none(self):
         self.assertEqual(len(User.objects.all()), 0)
@@ -347,11 +357,11 @@ class AccountViewTest(TestCase):
             id=1, user=self.user, name="first name", is_main=True
         )
 
-        response = self.c.delete(
-            "/api/accounts/1/",
-        )
+        with self.assertRaises(IntegrityError):
+            self.c.delete(
+                "/api/accounts/1/",
+            )
 
-        self.assertTrue(status.is_client_error(response.status_code))
         self.assertEqual(len(Account.objects.all()), 1)
 
     def test_create_item_under_an_account(self):

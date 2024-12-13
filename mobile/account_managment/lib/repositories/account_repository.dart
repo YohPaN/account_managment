@@ -60,15 +60,34 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> createOrUpdateItem(
-      String title, String description, String valuation, int accountId,
-      [int? itemId]) async {
+  Future<RepoResponse> createItem(
+    String title,
+    String description,
+    String valuation,
+    int accountId,
+  ) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$model_url/$accountId/items/",
       contentType: 'application/json',
       body: {
-        'item_id': itemId != null ? itemId.toString() : "",
+        'account': accountId.toString(),
+        'title': title,
+        'description': description,
+        'valuation': valuation,
+      },
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> updateItem(String title, String description,
+      String valuation, int accountId, int itemId) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "PUT",
+      uri: "$model_url/$accountId/items/$itemId/",
+      contentType: 'application/json',
+      body: {
         'account': accountId.toString(),
         'title': title,
         'description': description,
