@@ -37,10 +37,17 @@ class UserAccountUserSerializer(serializers.ModelSerializer):
         fields = ["username"]
 
 
-class ItemSerializer(serializers.ModelSerializer):
+class ItemWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ["title", "description", "valuation", "account"]
+        read_only_fields = ["account"]
+
+
+class ItemReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ["id", "title", "description", "valuation", "account"]
         read_only_fields = ["account"]
 
 
@@ -53,7 +60,7 @@ class AccountUserSerializer(serializers.ModelSerializer):
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    items = ItemSerializer(many=True)
+    items = ItemReadSerializer(many=True)
     contributors = AccountUserSerializer(many=True)
 
     permissions = serializers.SerializerMethodField()
@@ -78,10 +85,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
         if account.user == user:
             return [
-                "view_account",
-                "add_account",
-                "change_account",
-                "delete_account",
+                "owner",
             ]
 
         try:

@@ -78,8 +78,13 @@ class _ItemDrawerState extends State<ItemDrawer> {
           ? "-${valuationController.text}"
           : valuationController.text;
 
-      return await accountViewModel.createOrUpdateItem(titleController.text,
-          descriptionController.text, valuation, widget.item?.id);
+      if (widget.action == "create") {
+        return await accountViewModel.createItem(
+            titleController.text, descriptionController.text, valuation);
+      } else {
+        return await accountViewModel.updateItem(titleController.text,
+            descriptionController.text, valuation, widget.item!.id);
+      }
     }
 
     return Padding(
