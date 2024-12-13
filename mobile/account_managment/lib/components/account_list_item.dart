@@ -27,8 +27,8 @@ class AccountListItem extends StatelessWidget {
           ),
         ),
         onPressed: () async => {
-          await Provider.of<AccountViewModel>(context, listen: false)
-              .getAccount(account.id),
+          Provider.of<AccountViewModel>(context, listen: false)
+              .accountIdToRetrieve = account.id,
           Provider.of<NavigationIndex>(context, listen: false).changeIndex(0)
         },
         child: Row(

@@ -3,6 +3,7 @@ import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/models/item.dart';
+import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -36,11 +37,17 @@ class AccountScreen extends StatelessWidget {
       );
     }
 
+    Future<RepoResponse?> getAccount() async {
+      var accountID =
+          accountViewModel.accountIdToRetrieve ?? accountViewModel.account?.id;
+      return accountViewModel.getAccount(accountID);
+    }
+
     return Consumer<AccountViewModel>(
       builder: (context, accountViewModel, child) {
         return Scaffold(
           body: FutureBuilder(
-            future: accountViewModel.getAccount(accountViewModel.account?.id),
+            future: getAccount(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 if (snapshot.data!.success) {
