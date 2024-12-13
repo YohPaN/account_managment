@@ -45,13 +45,13 @@ class AccountScreen extends StatelessWidget {
 
     return Consumer<AccountViewModel>(
       builder: (context, accountViewModel, child) {
-        return Scaffold(
-          body: FutureBuilder(
-            future: getAccount(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data!.success) {
-                  return Column(
+        return FutureBuilder(
+          future: getAccount(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data!.success) {
+                return Scaffold(
+                  body: Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(
@@ -121,40 +121,40 @@ class AccountScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                  );
-                } else {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(36.0),
-                      child: Text(
-                        snapshot.data!.message,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 34.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red[700],
-                        ),
+                  ),
+                  floatingActionButton: Visibility(
+                    visible: HasPermissions.hasPermissions(
+                        ressource: "item",
+                        action: "create",
+                        permissions: accountViewModel.account!.permissions),
+                    child: FloatingActionButton(
+                      onPressed: () => showModal("create"),
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      child: const Icon(Icons.add),
+                    ),
+                  ),
+                );
+              } else {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(36.0),
+                    child: Text(
+                      snapshot.data!.message,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 34.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[700],
                       ),
                     ),
-                  );
-                }
-              } else {
-                return const Center(child: CircularProgressIndicator());
+                  ),
+                );
               }
-            },
-          ),
-          floatingActionButton: Visibility(
-            visible: HasPermissions.hasPermissions(
-                ressource: "item",
-                action: "create",
-                permissions: accountViewModel.account!.permissions),
-            child: FloatingActionButton(
-              onPressed: () => showModal("create"),
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              child: const Icon(Icons.add),
-            ),
-          ),
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
         );
       },
     );
