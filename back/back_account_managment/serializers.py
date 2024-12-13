@@ -40,7 +40,8 @@ class UserAccountUserSerializer(serializers.ModelSerializer):
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ["id", "title", "description", "valuation", "account"]
+        fields = ["title", "description", "valuation", "account"]
+        read_only_fields = ["account"]
 
 
 class AccountUserSerializer(serializers.ModelSerializer):

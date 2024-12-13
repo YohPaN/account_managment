@@ -1,9 +1,10 @@
 import json
 
-from back_account_managment.models import Profile
-from back_account_managment.views import Account, AccountUser
+from back_account_managment.models import AccountUserPermission, Profile
+from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
+from django.contrib.auth.models import Permission
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -262,3 +263,157 @@ class AccountViewTest(TestCase):
                 account=Account.objects.get(name="test account"),
             )
         )
+
+    def test_update_account(self):
+        account = Account.objects.create(
+            id=1, user=self.user, name="first name"
+        )
+
+        response = self.c.patch(
+            "/api/accounts/1/",
+            {
+                "name": "second name",
+                "contributors": json.dumps([]),
+            },
+            format="json",
+        )
+
+        account.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(account.name, "second name")
+
+    def test_update_account_with_contributors(self):
+        account = Account.objects.create(
+            id=1, user=self.user, name="first name"
+        )
+
+        self.assertEqual(
+            len(AccountUser.objects.filter(account=account, user=self.user2)),
+            0,
+        )
+
+        response = self.c.patch(
+            "/api/accounts/1/",
+            {
+                "contributors": json.dumps([self.user2.username]),
+            },
+            format="json",
+        )
+
+        account.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(
+            len(AccountUser.objects.filter(account=account, user=self.user2)),
+            1,
+        )
+
+    def test_destroy_account(self):
+        Account.objects.create(id=1, user=self.user, name="first name")
+
+        response = self.c.delete(
+            "/api/accounts/1/",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(Account.objects.all()), 0)
+
+    def test_destroy_account_with_contributors(self):
+        account = Account.objects.create(
+            id=1, user=self.user, name="first name"
+        )
+        AccountUser.objects.create(account=account, user=self.user2)
+
+        response = self.c.delete(
+            "/api/accounts/1/",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(Account.objects.all()), 0)
+        self.assertEqual(len(AccountUser.objects.all()), 0)
+
+    def test_create_item_under_an_account(self):
+        account = Account.objects.create(id=1, name="test", user=self.user)
+        self.assertEqual(len(account.items.all()), 0)
+
+        account_user = AccountUser.objects.create(
+            account=account, user=self.user
+        )
+
+        AccountUserPermission.objects.create(
+            account_user=account_user,
+            permissions=Permission.objects.get(codename="add_account"),
+        )
+
+        response = self.c.post(
+            "/api/accounts/1/items/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(Item.objects.filter(account=account)), 1)
+
+    def test_update_item_under_an_account(self):
+        account = Account.objects.create(id=1, name="test", user=self.user)
+        Item.objects.create(
+            id=1,
+            account=account,
+            title="test",
+            description="description",
+            valuation=42.69,
+        )
+        self.assertEqual(len(account.items.all()), 1)
+
+        account_user = AccountUser.objects.create(
+            account=account, user=self.user
+        )
+
+        AccountUserPermission.objects.create(
+            account_user=account_user,
+            permissions=Permission.objects.get(codename="change_item"),
+        )
+
+        response = self.c.put(
+            "/api/accounts/1/items/1/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(account.items.get(pk=1).title, "mon")
+
+    def test_delete_items(self):
+        account = Account.objects.create(id=1, name="test", user=self.user)
+
+        account_user = AccountUser.objects.create(
+            account=account, user=self.user
+        )
+
+        AccountUserPermission.objects.create(
+            account_user=account_user,
+            permissions=Permission.objects.get(codename="delete_item"),
+        )
+
+        Item.objects.create(
+            id=1,
+            account=account,
+            title="test",
+            description="description",
+            valuation=42.69,
+        )
+        self.assertEqual(len(account.items.all()), 1)
+
+        response = self.c.delete("/api/accounts/1/items/1/")
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(account.items.all()), 0)

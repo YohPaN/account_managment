@@ -1,9 +1,10 @@
 import json
 
 from back_account_managment.models import Account, AccountUser, Item
-from back_account_managment.permissions import CRUDAccountPermission, IsOwner
+from back_account_managment.permissions import CRUDPermission, IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
+    ItemSerializer,
     ManageAccountSerializer,
     ProfileSerializer,
     RegisterUserSerializer,
@@ -93,7 +94,7 @@ class RegisterView(APIView):
 class AccountView(ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
-    permission_classes = [permissions.IsAuthenticated, CRUDAccountPermission]
+    permission_classes = [permissions.IsAuthenticated, CRUDPermission]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -160,14 +161,17 @@ class AccountView(ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk):
-        data = request.data
         account = Account.objects.get(pk=pk)
 
-        account.name = data["name"]
-        account.save()
+        serializer = ManageAccountSerializer(
+            account, data=request.data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
 
         user_contributors = User.objects.filter(
-            username__in=json.loads(data["contributors"])
+            username__in=json.loads(request.data["contributors"])
         ).exclude(username=account.user.username)
 
         account_users = AccountUser.objects.filter(account=account)
@@ -182,10 +186,9 @@ class AccountView(ModelViewSet):
         contributor_to_add = user_contributors_set - account_user_set
 
         for contributor in contributor_to_add:
-            new_account_user = AccountUser.objects.create(
+            AccountUser.objects.create(
                 user=User.objects.get(username=contributor), account=account
             )
-            new_account_user.save()
 
         for contributor in contributor_to_remove:
             AccountUser.objects.filter(
@@ -206,35 +209,15 @@ class AccountView(ModelViewSet):
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
-    @action(detail=True, methods=["post"], url_path="items")
-    def create_or_update_item(self, request, pk=None):
-        account = self.get_object()
 
-        data = request.data
-        item_id = data.get("item_id", None)
+class ItemView(ModelViewSet):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    permission_classes = [permissions.IsAuthenticated, CRUDPermission]
 
-        if item_id is not None and item_id != "":
-            item = Item.objects.get(pk=item_id)
-            item.title = data["title"]
-            item.description = data["description"]
-            item.valuation = data["valuation"]
-            item.save()
+    def perform_create(self, serializer):
+        account = Account.objects.get(
+            pk=self.kwargs.get("account_id"),
+        )
 
-        else:
-            Item.objects.create(
-                account=account,
-                title=data["title"],
-                description=data["description"],
-                valuation=data["valuation"],
-            )
-
-        return Response(status=status.HTTP_201_CREATED)
-
-    @action(
-        detail=True, methods=["delete"], url_path="items/(?P<item_id>[^/.]+)"
-    )
-    def delete_item(self, request, pk=None, item_id=None):
-        item = Item.objects.get(pk=item_id)
-        item.delete()
-
-        return Response(status=status.HTTP_200_OK)
+        serializer.save(account=account)

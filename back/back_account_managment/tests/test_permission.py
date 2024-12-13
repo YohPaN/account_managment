@@ -4,8 +4,9 @@ from back_account_managment.models import (
     Account,
     AccountUser,
     AccountUserPermission,
+    Item,
 )
-from back_account_managment.permissions import CRUDAccountPermission, IsOwner
+from back_account_managment.permissions import CRUDPermission, IsOwner
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import TestCase
@@ -61,7 +62,7 @@ class CRUDAccountTest(TestCase):
 
         self.factory = APIRequestFactory()
 
-        self.CRUDAccountPermission = CRUDAccountPermission
+        self.CRUDPermission = CRUDPermission
 
     def test_can_get(self):
         permission = Permission.objects.get(codename="view_account")
@@ -76,8 +77,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -88,8 +89,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -98,8 +99,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -116,8 +117,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -128,8 +129,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -138,8 +139,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -156,8 +157,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -168,8 +169,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -178,8 +179,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -196,8 +197,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -208,8 +209,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -218,8 +219,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -236,8 +237,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -248,8 +249,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -258,8 +259,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
             )
         )
 
@@ -269,7 +270,31 @@ class CRUDAccountTest(TestCase):
         request.method = "OTHER"
 
         self.assertFalse(
-            self.CRUDAccountPermission.has_object_permission(
-                self=None, request=request, view=None, account=self.account
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
+            )
+        )
+
+    def test_can_get_item(self):
+        permission = Permission.objects.get(codename="view_item")
+        item = Item.objects.create(
+            title="test",
+            description="test",
+            valuation=12.56,
+            account=self.account,
+        )
+        account_user = AccountUser.objects.create(
+            account=self.account, user=self.user
+        )
+        AccountUserPermission.objects.create(
+            account_user=account_user, permissions=permission
+        )
+
+        request = self.factory.get("/")
+        request.user = self.user
+
+        self.assertTrue(
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=item
             )
         )

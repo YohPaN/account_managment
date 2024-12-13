@@ -1,4 +1,8 @@
-from back_account_managment.models import AccountUser, AccountUserPermission
+from back_account_managment.models import (
+    AccountUser,
+    AccountUserPermission,
+    Item,
+)
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from rest_framework import permissions
@@ -8,28 +12,31 @@ User = get_user_model()
 
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # if getattr(obj, "user", None) is None:
-        #     return True
-
         return obj.user == request.user
 
 
-class CRUDAccountPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, account):
+class CRUDPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, instance):
         method = request.method
+        ressource_name = instance.__class__.__name__.lower()
+
+        if isinstance(instance, Item):
+            account = instance.account
+        else:
+            account = instance
 
         match method:
             case "GET":
-                codename = "view_account"
+                codename = f"view_{ressource_name}"
 
             case "POST":
-                codename = "add_account"
+                codename = f"add_{ressource_name}"
 
             case "PUT" | "PATCH":
-                codename = "change_account"
+                codename = f"change_{ressource_name}"
 
             case "DELETE":
-                codename = "delete_account"
+                codename = f"delete_{ressource_name}"
 
             case _:
                 return False
