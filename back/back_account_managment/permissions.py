@@ -50,7 +50,7 @@ class CRUDPermission(permissions.BasePermission):
             user=request.user, account=account
         ).first()
 
-        if account_user is None:
+        if account_user is None or account_user.state != "APPROVED":
             return False
 
         account_user_permissions = AccountUserPermission.objects.filter(

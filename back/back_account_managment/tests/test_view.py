@@ -190,9 +190,16 @@ class AccountViewTest(TestCase):
             Account.objects.create(id=i + 1, name="test", user=self.user)
             for i in range(2)
         ]
-        account = Account.objects.create(id=3, name="test", user=self.user2)
 
+        account = Account.objects.create(id=3, name="test", user=self.user2)
         AccountUser.objects.create(account=account, user=self.user)
+
+        account_approved = Account.objects.create(
+            id=4, name="test", user=self.user2
+        )
+        AccountUser.objects.create(
+            account=account_approved, user=self.user, state="APPROVED"
+        )
 
         response = self.c.get("/api/accounts/")
 

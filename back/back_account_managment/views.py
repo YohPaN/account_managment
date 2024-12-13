@@ -127,7 +127,7 @@ class AccountView(ModelViewSet):
 
     def list(self, request):
         contributor_account_user = AccountUser.objects.filter(
-            account=OuterRef("pk"), user=request.user
+            account=OuterRef("pk"), user=request.user, state="APPROVED"
         )
 
         own_accounts = Account.objects.filter(user=request.user)
