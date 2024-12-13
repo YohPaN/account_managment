@@ -1,4 +1,5 @@
 import 'package:account_managment/common/internal_notification.dart';
+import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/components/password_drawer.dart';
 import 'package:account_managment/components/password_field.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
@@ -160,7 +161,12 @@ class _ProfileFormState extends State<ProfileForm> {
                   final RepoResponse repoResponse = await createOrUpdate();
                   Provider.of<InternalNotification>(context, listen: false)
                       .showMessage(repoResponse.message, repoResponse.success);
-                  Navigator.pop(context);
+                  if (widget.action == "create") {
+                    Navigator.pop(context);
+                  } else {
+                    Provider.of<NavigationIndex>(context, listen: false)
+                        .changeIndex(0);
+                  }
                 }
               },
               child: Text(
