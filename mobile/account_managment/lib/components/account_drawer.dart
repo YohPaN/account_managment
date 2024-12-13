@@ -106,31 +106,34 @@ class _AccountDrawerState extends State<AccountDrawer> {
                   labelText: 'User to add',
                   suffixIcon: IconButton(
                     onPressed: () => {
-                      if (profileViewModel.user!.username !=
-                          userToAddController.text)
+                      if (userToAddController.text != "")
                         {
-                          _addUser(),
-                        }
-                      else
-                        {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Error"),
-                                content: const Text(
-                                    "You can't add yourself to your account"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text("OK"),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
+                          if (profileViewModel.user!.username !=
+                              userToAddController.text)
+                            {
+                              _addUser(),
+                            }
+                          else
+                            {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Error"),
+                                    content: const Text(
+                                        "You can't add yourself to your account"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            }
                         }
                     },
                     icon: const Icon(Icons.add),
