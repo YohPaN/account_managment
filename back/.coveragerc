@@ -1,0 +1,9 @@
+[run]
+source = back_account_managment
+
+[report]
+omit =
+    */migrations/*
+    */tests/*
+    */settings/*
+    */__init__.py

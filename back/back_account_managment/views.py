@@ -1,21 +1,17 @@
 import json
 
-from back_account_managment.models import Account, AccountUser, Item, Profile
-from back_account_managment.permissions import (
-    CanCreate,
-    CanDelete,
-    CanUpdate,
-    IsContributor,
-    IsOwner,
-)
+from back_account_managment.models import Account, AccountUser, Item
+from back_account_managment.permissions import CRUDPermission, IsOwner
 from back_account_managment.serializers import (
     AccountSerializer,
     ItemSerializer,
     ManageAccountSerializer,
+    ProfileSerializer,
+    RegisterUserSerializer,
     UserSerializer,
 )
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import check_password
 from django.db.models import Exists, OuterRef
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -33,140 +29,72 @@ class UserView(ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user(self, request):
-        user = request.user
-        serializer = self.serializer_class(user)
+        serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
     @action(detail=False, methods=["patch"], url_path="me/update")
     def update_current_user(self, request):
-        user = request.user
-        profile = user.profile
+        serializer = self.get_serializer(
+            request.user, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.validated_data, status=status.HTTP_201_CREATED
+            )
 
-        user.username = request.data["username"]
-        user.password = request.data["password"]
-        user.email = request.data["email"]
-        user.save()
-
-        profile.first_name = request.data["first_name"]
-        profile.last_name = request.data["last_name"]
-        profile.salary = request.data["salary"]
-        profile.save()
-
-        serializer = self.serializer_class(user)
-
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=["patch"], url_path="password")
     def update_password(self, request):
         user = request.user
-        old_password = request.data["old_password"]
         new_password = request.data["new_password"]
 
-        if check_password(old_password, user.password):
-            user.password = make_password(new_password)
-            user.save()
+        if check_password(request.data["old_password"], user.password):
+            user.set_password(new_password)
 
             return Response(status=status.HTTP_200_OK)
 
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-
-class ProfileView(ModelViewSet):
-    queryset = Profile.objects.all()
-    permission_classes = [IsOwner, permissions.IsAuthenticated]
-
-    def list(self, request):
-        user = request.user
-        serializer = UserSerializer(user)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request):
-        data = request.data
-        user = request.user
-
-        try:
-            user.username = data.get("username", user.username)
-            user.email = data.get("email", user.email)
-            user.save()
-
-            # Update profile fields
-            profile = Profile.objects.get(user=user)
-            profile.first_name = data.get("first_name", profile.first_name)
-            profile.last_name = data.get("last_name", profile.last_name)
-            profile.salary = data.get("salary", profile.salary)
-            profile.save()
-
-            return Response(status=status.HTTP_200_OK)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        data = request.data
+        user_serializer = RegisterUserSerializer(data=request.data)
 
-        try:
-            user = User.objects.create_user(
-                username=data["username"],
-                email=data["email"],
-            )
-            user.set_password(data["password"]),
+        if user_serializer.is_valid():
+            user_validated_data = user_serializer.validated_data
+            user = User(**user_validated_data)
 
-            profile = Profile.objects.create(
-                first_name=data["first_name"],
-                last_name=data["last_name"],
-                salary=(
-                    float(data["salary"]) if data["salary"] != "" else None
-                ),
-                user=user,
-            )
+            password = user_serializer.validated_data.get("password", None)
 
-            account = Account.objects.create(
-                name="my account", user=user, is_main=True
-            )
+            if password is None:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
+            user.set_password(password)
             user.save()
-            profile.save()
-            account.save()
 
-            return Response(status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            profile_serializer = ProfileSerializer(
+                data={"user": user.pk, **request.data}
             )
 
+            if profile_serializer.is_valid():
+                profile_serializer.save()
 
-class ItemView(ModelViewSet):
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
-    permission_classes = [IsOwner, permissions.IsAuthenticated]
+                return Response(status=status.HTTP_201_CREATED)
+
+            else:
+                user.delete()
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class AccountView(ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-    ]
-
-    permission_by_method = {
-        "get": (IsOwner | IsContributor),
-        "post": (IsOwner | CanCreate),
-        "patch": (IsOwner | CanUpdate),
-        "delete": (IsOwner | CanDelete),
-    }
-
-    def get_permissions(self):
-        if self.request.method not in permissions.SAFE_METHODS:
-            self.permission_classes.append(
-                self.permission_by_method[self.request.method.lower()]
-            )
-
-        return [permission() for permission in self.permission_classes]
+    permission_classes = [permissions.IsAuthenticated, CRUDPermission]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -202,7 +130,7 @@ class AccountView(ModelViewSet):
         user = request.user
 
         try:
-            account = Account.objects.filter(user=user).first()
+            account = Account.objects.get(user=user, is_main=True)
         except Account.DoesNotExist:
             return Response(
                 {"detail": "Account not found."},
@@ -213,18 +141,15 @@ class AccountView(ModelViewSet):
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    def create(self, request, *args, **kwargs):
-        data = {"name": request.data["name"], "user": request.user.id}
-        serializer = ManageAccountSerializer(data=data)
+    def create(self, request):
+        serializer = ManageAccountSerializer(
+            data={**request.data, "user": request.user.id}
+        )
 
         if serializer.is_valid():
-            new_account = serializer.save()
+            account = serializer.save()
 
-            account = Account.objects.get(pk=new_account.id)
-
-            contributors = json.loads(request.data["contributors"])
-
-            for contributor in contributors:
+            for contributor in json.loads(request.data["contributors"]):
                 if contributor != request.user.username:
                     AccountUser.objects.create(
                         account=account,
@@ -236,14 +161,17 @@ class AccountView(ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk):
-        data = request.data
         account = Account.objects.get(pk=pk)
 
-        account.name = data["name"]
-        account.save()
+        serializer = ManageAccountSerializer(
+            account, data=request.data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
 
         user_contributors = User.objects.filter(
-            username__in=json.loads(data["contributors"])
+            username__in=json.loads(request.data["contributors"])
         ).exclude(username=account.user.username)
 
         account_users = AccountUser.objects.filter(account=account)
@@ -258,10 +186,9 @@ class AccountView(ModelViewSet):
         contributor_to_add = user_contributors_set - account_user_set
 
         for contributor in contributor_to_add:
-            new_account_user = AccountUser.objects.create(
+            AccountUser.objects.create(
                 user=User.objects.get(username=contributor), account=account
             )
-            new_account_user.save()
 
         for contributor in contributor_to_remove:
             AccountUser.objects.filter(
@@ -270,47 +197,19 @@ class AccountView(ModelViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
-    def destroy(self, request, pk):
-        account = Account.objects.filter(pk=pk, is_main=False)
+    def perform_destroy(self, instance):
+        if not instance.is_main:
+            instance.delete()
 
-        if account.exists():
-            account.delete()
-            return Response(status=status.HTTP_200_OK)
 
-        return Response(
-            data={"error": "You can't delete your main account"},
-            status=status.HTTP_401_UNAUTHORIZED,
+class ItemView(ModelViewSet):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    permission_classes = [permissions.IsAuthenticated, CRUDPermission]
+
+    def perform_create(self, serializer):
+        account = Account.objects.get(
+            pk=self.kwargs.get("account_id"),
         )
 
-    @action(detail=True, methods=["post"], url_path="items")
-    def create_or_update_item(self, request, pk=None):
-        account = self.get_object()
-
-        data = request.data
-        item_id = data.get("item_id", None)
-
-        if item_id is not None and item_id != "":
-            item = Item.objects.get(pk=item_id)
-            item.title = data["title"]
-            item.description = data["description"]
-            item.valuation = data["valuation"]
-            item.save()
-
-        else:
-            Item.objects.create(
-                account=account,
-                title=data["title"],
-                description=data["description"],
-                valuation=data["valuation"],
-            )
-
-        return Response(status=status.HTTP_201_CREATED)
-
-    @action(
-        detail=True, methods=["delete"], url_path="items/(?P<item_id>[^/.]+)"
-    )
-    def delete_item(self, request, pk=None, item_id=None):
-        item = Item.objects.get(pk=item_id)
-        item.delete()
-
-        return Response(status=status.HTTP_200_OK)
+        serializer.save(account=account)

@@ -14,7 +14,13 @@ User = get_user_model()
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ["first_name", "last_name", "salary"]
+        fields = ["user", "first_name", "last_name", "salary"]
+
+
+class RegisterUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password", "profile"]
+        fields = ["username", "email", "profile"]
 
 
 class UserAccountUserSerializer(serializers.ModelSerializer):
@@ -34,7 +40,8 @@ class UserAccountUserSerializer(serializers.ModelSerializer):
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ["id", "title", "description", "valuation", "account"]
+        fields = ["title", "description", "valuation", "account"]
+        read_only_fields = ["account"]
 
 
 class AccountUserSerializer(serializers.ModelSerializer):
@@ -64,12 +71,25 @@ class AccountSerializer(serializers.ModelSerializer):
         ]
 
     def get_permissions(self, account):
-        user = self.context["request"].user
+        try:
+            user = self.context["request"].user
+        except KeyError:
+            raise KeyError("There is no request attach on context")
 
         if account.user == user:
-            return ["owner"]
+            return [
+                "view_account",
+                "add_account",
+                "change_account",
+                "delete_account",
+            ]
 
-        account_user = AccountUser.objects.get(user=user, account=account)
+        try:
+            account_user = AccountUser.objects.get(user=user, account=account)
+        except AccountUser.DoesNotExist:
+            raise AccountUser.DoesNotExist(
+                "The user isn't a contributor of the account"
+            )
 
         account_user_permissions = AccountUserPermission.objects.filter(
             account_user=account_user
@@ -88,7 +108,7 @@ class AccountSerializer(serializers.ModelSerializer):
 class ManageAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ["id", "name", "user"]
+        fields = ["name", "user"]
 
 
 class AccountUserPermissionsSerializer(serializers.Serializer):
