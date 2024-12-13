@@ -175,18 +175,6 @@ class AccountViewTest(TestCase):
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
-    def test_get_context(self):
-        # TODO: find a way to test get_serializer_context
-        # factory = APIRequestFactory()
-        # request = factory.get("/")
-
-        # account_view = AccountView(request=request)
-        # context = account_view.get_serializer_context()
-        # self.assertNotIn("request", context)
-
-        # account_view.get_serializer_context()
-        pass
-
     def test_list(self):
         [
             Account.objects.create(id=i + 1, name="test", user=self.user)
@@ -310,7 +298,18 @@ class AccountViewTest(TestCase):
         )
 
     def test_destroy_account(self):
-        Account.objects.create(id=1, user=self.user, name="first name")
+        account = Account.objects.create(
+            id=1, user=self.user, name="first name"
+        )
+
+        account_user = AccountUser.objects.create(
+            account=account, user=self.user
+        )
+
+        AccountUserPermission.objects.create(
+            account_user=account_user,
+            permissions=Permission.objects.get(codename="delete_account"),
+        )
 
         response = self.c.delete(
             "/api/accounts/1/",
@@ -323,6 +322,16 @@ class AccountViewTest(TestCase):
         account = Account.objects.create(
             id=1, user=self.user, name="first name"
         )
+
+        account_user = AccountUser.objects.create(
+            account=account, user=self.user
+        )
+
+        AccountUserPermission.objects.create(
+            account_user=account_user,
+            permissions=Permission.objects.get(codename="delete_account"),
+        )
+
         AccountUser.objects.create(account=account, user=self.user2)
 
         response = self.c.delete(
@@ -332,6 +341,18 @@ class AccountViewTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(Account.objects.all()), 0)
         self.assertEqual(len(AccountUser.objects.all()), 0)
+
+    def test_destroy_main_account(self):
+        Account.objects.create(
+            id=1, user=self.user, name="first name", is_main=True
+        )
+
+        response = self.c.delete(
+            "/api/accounts/1/",
+        )
+
+        self.assertTrue(status.is_client_error(response.status_code))
+        self.assertEqual(len(Account.objects.all()), 1)
 
     def test_create_item_under_an_account(self):
         account = Account.objects.create(id=1, name="test", user=self.user)

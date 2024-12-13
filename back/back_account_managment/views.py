@@ -197,17 +197,9 @@ class AccountView(ModelViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
-    def destroy(self, request, pk):
-        account = Account.objects.filter(pk=pk, is_main=False)
-
-        if account.exists():
-            account.delete()
-            return Response(status=status.HTTP_200_OK)
-
-        return Response(
-            data={"error": "You can't delete your main account"},
-            status=status.HTTP_401_UNAUTHORIZED,
-        )
+    def perform_destroy(self, instance):
+        if not instance.is_main:
+            instance.delete()
 
 
 class ItemView(ModelViewSet):
