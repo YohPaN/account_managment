@@ -300,3 +300,22 @@ class CRUDAccountTest(TestCase):
                 self=None, request=request, view=None, instance=item
             )
         )
+
+    def test_when_contributor_is_not_APPROVED(self):
+        permission = Permission.objects.get(codename="view_account")
+        account_user = AccountUser.objects.create(
+            account=self.account, user=self.user2
+        )
+        AccountUserPermission.objects.create(
+            account_user=account_user, permissions=permission
+        )
+
+        request = self.factory.get("/")
+        request.user = self.user2
+
+        self.assertEqual(account_user.state, "PENDING")
+        self.assertFalse(
+            self.CRUDPermission.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
+            )
+        )
