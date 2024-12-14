@@ -455,3 +455,204 @@ class AccountViewTest(TestCase):
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(account.items.all()), 0)
+
+
+class AccountUserPermissionTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="test", email="test@test.test"
+        )
+
+        self.user2 = User.objects.create(
+            username="test2", email="test2@test.test"
+        )
+
+        self.account = Account.objects.create(name="test", user=self.user)
+        self.account2 = Account.objects.create(name="test", user=self.user2)
+
+        self.account_user = AccountUser.objects.create(
+            account=self.account, user=self.user
+        )
+        self.account_user2 = AccountUser.objects.create(
+            account=self.account2, user=self.user2
+        )
+
+        # get permissions instance
+        self.add_item_permission = Permission.objects.get(codename="add_item")
+        self.change_item_permission = Permission.objects.get(
+            codename="change_item"
+        )
+        self.delete_item_permission = Permission.objects.get(
+            codename="delete_item"
+        )
+
+        self.account_user_permission = AccountUserPermission.objects.create(
+            account_user=self.account_user,
+            permissions=self.add_item_permission,
+        )
+        self.account_user_permission = AccountUserPermission.objects.create(
+            account_user=self.account_user,
+            permissions=self.change_item_permission,
+        )
+
+        self.c = APIClient()
+        self.c.force_authenticate(user=self.user)
+
+    def test_add_permission_to_user_on_account(self):
+        self.assertEqual(
+            len(
+                AccountUserPermission.objects.filter(
+                    account_user=self.account_user,
+                    permissions=self.delete_item_permission,
+                )
+            ),
+            0,
+        )
+
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/",  # noqa
+            {
+                "user": "test",
+                "permissions": ["delete_item"],
+            },
+            format="json",
+        )
+        self.assertTrue(status.is_success(response.status_code))
+
+        self.assertIsNotNone(
+            AccountUserPermission.objects.get(
+                account_user=self.account_user,
+                permissions=self.delete_item_permission,
+            ),
+        )
+
+        self.assertEqual(
+            len(
+                AccountUserPermission.objects.filter(
+                    account_user=self.account_user2,
+                )
+            ),
+            0,
+        )
+
+    def test_remove_permission_to_user_on_account(self):
+        AccountUserPermission.objects.create(
+            account_user=self.account_user,
+            permissions=self.delete_item_permission,
+        )
+
+        AccountUserPermission.objects.create(
+            account_user=self.account_user2,
+            permissions=self.delete_item_permission,
+        )
+
+        self.assertEqual(
+            len(
+                AccountUserPermission.objects.filter(
+                    account_user=self.account_user,
+                    permissions=self.delete_item_permission,
+                )
+            ),
+            1,
+        )
+
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/",  # noqa
+            {
+                "user": "test",
+                "permissions": [],
+            },
+            format="json",
+        )
+        self.assertTrue(status.is_success(response.status_code))
+
+        self.assertEqual(
+            len(
+                AccountUserPermission.objects.filter(
+                    account_user=self.account_user,
+                    permissions=self.delete_item_permission,
+                )
+            ),
+            0,
+        )
+
+        self.assertIsNotNone(
+            AccountUserPermission.objects.get(
+                account_user=self.account_user2,
+                permissions=self.delete_item_permission,
+            ),
+        )
+
+    def test_list_account_user_permission(self):
+        response = self.c.get(
+            f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/"  # noqa
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertIn("add_item", response.data)
+
+        response = self.c.get(
+            f"/api/accounts/{self.account2.pk}/{self.user2.username}/permissions/"  # noqa
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertNotIn("add_item", response.data)
+
+    def test_raise_error_if_accout_user_does_not_exist(self):
+        with self.assertRaises(AccountUser.DoesNotExist):
+            self.c.get(
+                f"/api/accounts/{self.account.pk}/{self.user2.username}/permissions/"  # noqa
+            )
+
+    def test_add_and_remove_permission_to_user_on_account(self):
+        self.assertEqual(
+            len(
+                AccountUserPermission.objects.filter(
+                    account_user=self.account_user
+                )
+            ),
+            2,
+        )
+
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/",  # noqa
+            {
+                "user": "test",
+                "permissions": ["add_item", "delete_item"],
+            },
+            format="json",
+        )
+        self.assertTrue(status.is_success(response.status_code))
+
+        self.assertEqual(
+            len(
+                AccountUserPermission.objects.filter(
+                    account_user=self.account_user
+                )
+            ),
+            2,
+        )
+
+        self.assertIsNotNone(
+            AccountUserPermission.objects.get(
+                account_user=self.account_user,
+                permissions=self.add_item_permission,
+            )
+        )
+
+        self.assertIsNotNone(
+            AccountUserPermission.objects.get(
+                account_user=self.account_user,
+                permissions=self.delete_item_permission,
+            )
+        )
+
+        self.assertEqual(
+            len(
+                AccountUserPermission.objects.filter(
+                    account_user=self.account_user,
+                    permissions=self.change_item_permission,
+                )
+            ),
+            0,
+        )
