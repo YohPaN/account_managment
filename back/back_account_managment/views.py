@@ -7,7 +7,11 @@ from back_account_managment.models import (
     Item,
     Profile,
 )
-from back_account_managment.permissions import CRUDPermission, IsOwner
+from back_account_managment.permissions import (
+    CRUDPermission,
+    IsOwner,
+    ManageAccountUserPermissions,
+)
 from back_account_managment.serializers import (
     AccountSerializer,
     AccountUserPermissionsSerializer,
@@ -255,6 +259,10 @@ class ItemView(ModelViewSet):
 
 class AccountUserPermissionView(ModelViewSet):
     serializer_class = AccountUserPermissionsSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        ManageAccountUserPermissions,
+    ]
 
     def list(self, request, *args, **kwargs):
         codenames = [entry.codename for entry in self.get_queryset()]

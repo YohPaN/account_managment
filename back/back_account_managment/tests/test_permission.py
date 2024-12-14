@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 from back_account_managment.models import (
     Account,
@@ -6,7 +6,11 @@ from back_account_managment.models import (
     AccountUserPermission,
     Item,
 )
-from back_account_managment.permissions import CRUDPermission, IsOwner
+from back_account_managment.permissions import (
+    CRUDPermission,
+    IsOwner,
+    ManageAccountUserPermissions,
+)
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import TestCase
@@ -317,5 +321,67 @@ class CRUDAccountTest(TestCase):
         self.assertFalse(
             self.CRUDPermission.has_object_permission(
                 self=None, request=request, view=None, instance=self.account
+            )
+        )
+
+
+class ManageAccountUserPermissionsTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="JonDoe", email="jon@doe.test"
+        )
+
+        self.user2 = User.objects.create(username="Jon", email="jo@do.tes")
+
+        self.account = Account.objects.create(
+            id=1, name="test", user=self.user
+        )
+
+        self.factory = APIRequestFactory()
+
+        self.ManageAccountUserPermissions = ManageAccountUserPermissions()
+
+        self.view = MagicMock()
+
+    def test_safe_method(self):
+        request = self.factory.get("/")
+
+        self.assertTrue(
+            self.ManageAccountUserPermissions.has_permission(
+                request=request, view=None
+            )
+        )
+
+    def test_account_not_exist(self):
+        request = self.factory.put("/")
+
+        self.view.kwargs = {"account_id": 2}
+
+        with self.assertRaises(Account.DoesNotExist):
+            self.ManageAccountUserPermissions.has_permission(
+                request=request, view=self.view
+            )
+
+    def test_can_manage(self):
+        request = self.factory.put("/")
+        request.user = self.user
+
+        self.view.kwargs = {"account_id": 1}
+
+        self.assertTrue(
+            self.ManageAccountUserPermissions.has_permission(
+                request=request, view=self.view
+            )
+        )
+
+    def test_cannot_manage(self):
+        request = self.factory.put("/")
+        request.user = self.user2
+
+        self.view.kwargs = {"account_id": 1}
+
+        self.assertFalse(
+            self.ManageAccountUserPermissions.has_permission(
+                request=request, view=self.view
             )
         )
