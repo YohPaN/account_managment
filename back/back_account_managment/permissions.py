@@ -1,4 +1,5 @@
 from back_account_managment.models import (
+    Account,
     AccountUser,
     AccountUserPermission,
     Item,
@@ -6,6 +7,7 @@ from back_account_managment.models import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from rest_framework import permissions
+from rest_framework.permissions import SAFE_METHODS
 
 User = get_user_model()
 
@@ -58,6 +60,23 @@ class CRUDPermission(permissions.BasePermission):
         ).first()
 
         if account_user_permissions is not None:
+            return True
+
+        return False
+
+
+class ManageAccountUserPermissions(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        try:
+            account = Account.objects.get(pk=view.kwargs["account_id"])
+
+        except Account.DoesNotExist:
+            raise Account.DoesNotExist("Account does not exist")
+
+        if account.user == request.user:
             return True
 
         return False

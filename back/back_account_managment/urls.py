@@ -8,6 +8,11 @@ router.register(r"users", views.UserView)
 router.register(
     r"accounts/(?P<account_id>[^/.]+)/items", views.ItemView, basename="items"
 )
+router.register(
+    r"accounts/(?P<account_id>[^/.]+)/(?P<user_username>[^/.]+)/permissions",
+    views.AccountUserPermissionView,
+    basename="permissions",
+)
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),

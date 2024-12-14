@@ -1,9 +1,20 @@
 import json
 
-from back_account_managment.models import Account, AccountUser, Item, Profile
-from back_account_managment.permissions import CRUDPermission, IsOwner
+from back_account_managment.models import (
+    Account,
+    AccountUser,
+    AccountUserPermission,
+    Item,
+    Profile,
+)
+from back_account_managment.permissions import (
+    CRUDPermission,
+    IsOwner,
+    ManageAccountUserPermissions,
+)
 from back_account_managment.serializers import (
     AccountSerializer,
+    AccountUserPermissionsSerializer,
     ItemWriteSerializer,
     ManageAccountSerializer,
     ProfileSerializer,
@@ -12,6 +23,7 @@ from back_account_managment.serializers import (
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.models import Permission
 from django.db import IntegrityError
 from django.db.models import Exists, OuterRef
 from rest_framework import permissions, status
@@ -243,3 +255,60 @@ class ItemView(ModelViewSet):
         )
 
         serializer.save(account=account)
+
+
+class AccountUserPermissionView(ModelViewSet):
+    serializer_class = AccountUserPermissionsSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        ManageAccountUserPermissions,
+    ]
+
+    def list(self, request, *args, **kwargs):
+        codenames = [entry.codename for entry in self.get_queryset()]
+        return Response(codenames)
+
+    def get_queryset(self):
+        try:
+            account_user = AccountUser.objects.get(
+                user=User.objects.get(
+                    username=self.kwargs.get("user_username")
+                ),
+                account=self.kwargs.get("account_id"),
+            )
+        except AccountUser.DoesNotExist:
+            raise AccountUser.DoesNotExist(
+                "This user is not a contributor of this account"
+            )
+
+        return Permission.objects.filter(
+            Exists(
+                AccountUserPermission.objects.filter(
+                    account_user=account_user, permissions=OuterRef("pk")
+                )
+            )
+        )
+
+    def create(self, request, *args, **kwargs):
+        account_user = AccountUser.objects.get(
+            user=User.objects.get(username=kwargs.get("user_username")),
+            account=kwargs.get("account_id"),
+        )
+
+        permissions_to_remove = AccountUserPermission.objects.exclude(
+            account_user=account_user,
+            permissions__codename__in=request.data["permissions"],
+        ).filter(account_user=account_user)
+
+        for account_user_permission in permissions_to_remove:
+            account_user_permission.delete()
+
+        for permission_codename in request.data["permissions"]:
+            permission = Permission.objects.get(codename=permission_codename)
+
+            AccountUserPermission.objects.get_or_create(
+                account_user=account_user,
+                permissions=permission,
+            )
+
+        return Response(status=status.HTTP_200_OK)
