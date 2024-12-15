@@ -257,6 +257,7 @@ class ItemView(ModelViewSet):
         serializer.save(account=account)
 
 
+# TODO: changer les tests pour s'adapter au dernier commit
 class AccountUserPermissionView(ModelViewSet):
     serializer_class = AccountUserPermissionsSerializer
     permission_classes = [
@@ -266,7 +267,7 @@ class AccountUserPermissionView(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         codenames = [entry.codename for entry in self.get_queryset()]
-        return Response(codenames)
+        return Response({"permissions": codenames})
 
     def get_queryset(self):
         try:
@@ -303,7 +304,7 @@ class AccountUserPermissionView(ModelViewSet):
         for account_user_permission in permissions_to_remove:
             account_user_permission.delete()
 
-        for permission_codename in request.data["permissions"]:
+        for permission_codename in json.loads(request.data["permissions"]):
             permission = Permission.objects.get(codename=permission_codename)
 
             AccountUserPermission.objects.get_or_create(
