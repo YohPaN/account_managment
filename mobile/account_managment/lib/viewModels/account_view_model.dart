@@ -198,7 +198,7 @@ class AccountViewModel extends ChangeNotifier {
   }
 
   Future<RepoResponse> manageItemPermissions({
-    required int accountId,
+    int? accountId,
     required String username,
     required List<String> permissions,
   }) async {
