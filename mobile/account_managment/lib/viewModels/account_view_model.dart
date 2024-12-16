@@ -186,4 +186,26 @@ class AccountViewModel extends ChangeNotifier {
 
     return repoResponse;
   }
+
+  Future<RepoResponse> listItemPermissions({
+    required int accountId,
+    required String username,
+  }) async {
+    final RepoResponse repoResponse = await accountRepository
+        .listItemPermissions(accountId: accountId, username: username);
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> manageItemPermissions({
+    required int accountId,
+    required String username,
+    required List<String> permissions,
+  }) async {
+    final RepoResponse repoResponse =
+        await accountRepository.manageItemPermissions(
+            accountId: accountId, username: username, permissions: permissions);
+
+    return repoResponse;
+  }
 }

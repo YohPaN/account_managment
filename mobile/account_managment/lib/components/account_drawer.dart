@@ -29,6 +29,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
   final TextEditingController userToAddController = TextEditingController();
 
   final List<Contributor> _usersToAdd = [];
+  final List<ExpansionTileController> _controllers = [];
 
   @override
   void initState() {
@@ -37,12 +38,18 @@ class _AccountDrawerState extends State<AccountDrawer> {
       for (var contributor in widget.account!.contributor) {
         _usersToAdd.add(contributor);
       }
+
+      for (var _ in _usersToAdd) {
+        _controllers.add(ExpansionTileController());
+      }
     }
   }
 
   _addUser() {
     setState(() {
       _usersToAdd.add(Contributor(username: userToAddController.text));
+      _controllers.add(ExpansionTileController());
+
       userToAddController.text = "";
     });
   }
@@ -50,8 +57,12 @@ class _AccountDrawerState extends State<AccountDrawer> {
   _removeUser(int index) {
     setState(() {
       _usersToAdd.removeAt(index);
+      _controllers.removeAt(index);
       userToAddController.text = "";
     });
+    for (var controller in _controllers) {
+      controller.collapse();
+    }
   }
 
   @override
@@ -167,8 +178,17 @@ class _AccountDrawerState extends State<AccountDrawer> {
                             ],
                           ),
                           child: ListTile(
-                            title: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                            title: ExpansionTile(
+                              controller: _controllers[index],
+                              onExpansionChanged: (isExpanded) {
+                                if (isExpanded) {
+                                  for (var (key, controller)
+                                      in _controllers.indexed) {
+                                    if (key != index) controller.collapse();
+                                  }
+                                }
+                              },
+                              title: Row(
                                 children: [
                                   Icon(
                                     Icons.circle,
@@ -183,18 +203,104 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                         horizontal: 16.0),
                                     child: Text(_usersToAdd[index].username),
                                   ),
-                                  Expanded(
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          IconButton(
-                                            onPressed: () => _removeUser(index),
-                                            icon: const Icon(Icons.remove),
-                                          ),
-                                        ]),
+                                ],
+                              ),
+                              children: [
+                                FutureBuilder(
+                                  future: accountViewModel.listItemPermissions(
+                                    accountId: widget.account!.id,
+                                    username: _usersToAdd[index].username,
                                   ),
-                                ]),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      final List<String> permissions = [
+                                        ...snapshot.data!.data?["permissions"],
+                                      ];
+
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text("Permissions"),
+                                          CheckboxListTile(
+                                            title: const Text("Add item"),
+                                            value: permissions
+                                                .contains("add_item"),
+                                            onChanged: (bool? value) async {
+                                              value!
+                                                  ? permissions.add("add_item")
+                                                  : permissions
+                                                      .remove("add_item");
+
+                                              await accountViewModel
+                                                  .manageItemPermissions(
+                                                      accountId:
+                                                          widget.account!.id,
+                                                      username:
+                                                          _usersToAdd[index]
+                                                              .username,
+                                                      permissions: permissions);
+                                              setState(() {});
+                                            },
+                                          ),
+                                          CheckboxListTile(
+                                            title: const Text("Change item"),
+                                            value: permissions
+                                                .contains("change_item"),
+                                            onChanged: (bool? value) async {
+                                              value!
+                                                  ? permissions
+                                                      .add("change_item")
+                                                  : permissions
+                                                      .remove("change_item");
+
+                                              await accountViewModel
+                                                  .manageItemPermissions(
+                                                      accountId:
+                                                          widget.account!.id,
+                                                      username:
+                                                          _usersToAdd[index]
+                                                              .username,
+                                                      permissions: permissions);
+                                              setState(() {});
+                                            },
+                                          ),
+                                          CheckboxListTile(
+                                            title: const Text("Remove item"),
+                                            value: permissions
+                                                .contains("delete_item"),
+                                            onChanged: (bool? value) async {
+                                              value!
+                                                  ? permissions
+                                                      .add("delete_item")
+                                                  : permissions
+                                                      .remove("delete_item");
+
+                                              await accountViewModel
+                                                  .manageItemPermissions(
+                                                      accountId:
+                                                          widget.account!.id,
+                                                      username:
+                                                          _usersToAdd[index]
+                                                              .username,
+                                                      permissions: permissions);
+                                              setState(() {});
+                                            },
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () => _removeUser(index),
+                                            child: const Text("Delete"),
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
+                                  },
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       );

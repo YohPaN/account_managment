@@ -107,4 +107,31 @@ class AccountRepository {
 
     return repoResponse;
   }
+
+  Future<RepoResponse> listItemPermissions(
+      {required int accountId, required String username}) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "GET",
+      uri: "$model_url/$accountId/$username/permissions/",
+      contentType: 'application/json',
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> manageItemPermissions(
+      {required int accountId,
+      required String username,
+      required List<String> permissions}) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$model_url/$accountId/$username/permissions/",
+      contentType: 'application/json',
+      body: {
+        'permissions': permissions,
+      },
+    );
+
+    return repoResponse;
+  }
 }

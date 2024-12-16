@@ -513,7 +513,7 @@ class AccountUserPermissionTest(TestCase):
             f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/",  # noqa
             {
                 "user": "test",
-                "permissions": ["delete_item"],
+                "permissions": json.dumps(["delete_item"]),
             },
             format="json",
         )
@@ -560,7 +560,7 @@ class AccountUserPermissionTest(TestCase):
             f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/",  # noqa
             {
                 "user": "test",
-                "permissions": [],
+                "permissions": json.dumps([]),
             },
             format="json",
         )
@@ -589,14 +589,14 @@ class AccountUserPermissionTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertIn("add_item", response.data)
+        self.assertIn("add_item", response.data["permissions"])
 
         response = self.c.get(
             f"/api/accounts/{self.account2.pk}/{self.user2.username}/permissions/"  # noqa
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertNotIn("add_item", response.data)
+        self.assertNotIn("add_item", response.data["permissions"])
 
     def test_raise_error_if_accout_user_does_not_exist(self):
         with self.assertRaises(AccountUser.DoesNotExist):
@@ -618,7 +618,7 @@ class AccountUserPermissionTest(TestCase):
             f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/",  # noqa
             {
                 "user": "test",
-                "permissions": ["add_item", "delete_item"],
+                "permissions": json.dumps(["add_item", "delete_item"]),
             },
             format="json",
         )
