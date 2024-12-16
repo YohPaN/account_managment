@@ -120,7 +120,7 @@ class AccountRepository {
   }
 
   Future<RepoResponse> manageItemPermissions(
-      {required int accountId,
+      {int? accountId,
       required String username,
       required List<String> permissions}) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(

@@ -1,4 +1,5 @@
 import 'package:account_managment/common/internal_notification.dart';
+import 'package:account_managment/components/permission_checkbox.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
@@ -222,71 +223,26 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           const Text("Permissions"),
-                                          CheckboxListTile(
-                                            title: const Text("Add item"),
-                                            value: permissions
-                                                .contains("add_item"),
-                                            onChanged: (bool? value) async {
-                                              value!
-                                                  ? permissions.add("add_item")
-                                                  : permissions
-                                                      .remove("add_item");
-
-                                              await accountViewModel
-                                                  .manageItemPermissions(
-                                                      accountId:
-                                                          widget.account!.id,
-                                                      username:
-                                                          _usersToAdd[index]
-                                                              .username,
-                                                      permissions: permissions);
-                                              setState(() {});
-                                            },
-                                          ),
-                                          CheckboxListTile(
-                                            title: const Text("Change item"),
-                                            value: permissions
-                                                .contains("change_item"),
-                                            onChanged: (bool? value) async {
-                                              value!
-                                                  ? permissions
-                                                      .add("change_item")
-                                                  : permissions
-                                                      .remove("change_item");
-
-                                              await accountViewModel
-                                                  .manageItemPermissions(
-                                                      accountId:
-                                                          widget.account!.id,
-                                                      username:
-                                                          _usersToAdd[index]
-                                                              .username,
-                                                      permissions: permissions);
-                                              setState(() {});
-                                            },
-                                          ),
-                                          CheckboxListTile(
-                                            title: const Text("Remove item"),
-                                            value: permissions
-                                                .contains("delete_item"),
-                                            onChanged: (bool? value) async {
-                                              value!
-                                                  ? permissions
-                                                      .add("delete_item")
-                                                  : permissions
-                                                      .remove("delete_item");
-
-                                              await accountViewModel
-                                                  .manageItemPermissions(
-                                                      accountId:
-                                                          widget.account!.id,
-                                                      username:
-                                                          _usersToAdd[index]
-                                                              .username,
-                                                      permissions: permissions);
-                                              setState(() {});
-                                            },
-                                          ),
+                                          PermissionCheckbox(
+                                              permissions: permissions,
+                                              permissionsCodename: "add_item",
+                                              accountId: widget.account!.id,
+                                              username:
+                                                  _usersToAdd[index].username),
+                                          PermissionCheckbox(
+                                              permissions: permissions,
+                                              permissionsCodename:
+                                                  "change_item",
+                                              accountId: widget.account!.id,
+                                              username:
+                                                  _usersToAdd[index].username),
+                                          PermissionCheckbox(
+                                              permissions: permissions,
+                                              permissionsCodename:
+                                                  "delete_item",
+                                              accountId: widget.account!.id,
+                                              username:
+                                                  _usersToAdd[index].username),
                                           ElevatedButton(
                                             onPressed: () => _removeUser(index),
                                             child: const Text("Delete"),
