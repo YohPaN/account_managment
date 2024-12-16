@@ -257,7 +257,6 @@ class ItemView(ModelViewSet):
         serializer.save(account=account)
 
 
-# TODO: changer les tests pour s'adapter au dernier commit
 class AccountUserPermissionView(ModelViewSet):
     serializer_class = AccountUserPermissionsSerializer
     permission_classes = [

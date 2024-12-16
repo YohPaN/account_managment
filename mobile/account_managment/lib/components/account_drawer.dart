@@ -65,7 +65,6 @@ class _AccountDrawerState extends State<AccountDrawer> {
     }
   }
 
-//TODO: display error message on futurebuilder
   @override
   Widget build(BuildContext context) {
     final accountViewModel = Provider.of<AccountViewModel>(context);
@@ -221,7 +220,6 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                       return Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        //TODO refactoriser la gestion des permissions
                                         children: [
                                           const Text("Permissions"),
                                           CheckboxListTile(
