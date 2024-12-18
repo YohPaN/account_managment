@@ -219,51 +219,74 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                         ),
                                         builder: (context, snapshot) {
                                           if (snapshot.hasData) {
-                                            final List<String> permissions = [
-                                              ...snapshot
-                                                  .data!.data?["permissions"],
-                                            ];
+                                            if (snapshot.data!.success) {
+                                              final List<String> permissions = [
+                                                ...snapshot
+                                                    .data!.data?["permissions"],
+                                              ];
 
-                                            return Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Text("Permissions"),
-                                                PermissionCheckbox(
-                                                    permissions: permissions,
-                                                    permissionsCodename:
-                                                        "add_item",
-                                                    accountId:
-                                                        widget.account!.id,
-                                                    username: _usersToAdd[index]
-                                                        .username),
-                                                PermissionCheckbox(
-                                                    permissions: permissions,
-                                                    permissionsCodename:
-                                                        "change_item",
-                                                    accountId:
-                                                        widget.account!.id,
-                                                    username: _usersToAdd[index]
-                                                        .username),
-                                                PermissionCheckbox(
-                                                    permissions: permissions,
-                                                    permissionsCodename:
-                                                        "delete_item",
-                                                    accountId:
-                                                        widget.account!.id,
-                                                    username: _usersToAdd[index]
-                                                        .username),
-                                                ElevatedButton(
-                                                  onPressed: () =>
-                                                      _removeUser(index),
-                                                  child: const Text("Delete"),
+                                              return Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  const Text("Permissions"),
+                                                  PermissionCheckbox(
+                                                      permissions: permissions,
+                                                      permissionsCodename:
+                                                          "add_item",
+                                                      accountId:
+                                                          widget.account!.id,
+                                                      username:
+                                                          _usersToAdd[index]
+                                                              .username),
+                                                  PermissionCheckbox(
+                                                      permissions: permissions,
+                                                      permissionsCodename:
+                                                          "change_item",
+                                                      accountId:
+                                                          widget.account!.id,
+                                                      username:
+                                                          _usersToAdd[index]
+                                                              .username),
+                                                  PermissionCheckbox(
+                                                      permissions: permissions,
+                                                      permissionsCodename:
+                                                          "delete_item",
+                                                      accountId:
+                                                          widget.account!.id,
+                                                      username:
+                                                          _usersToAdd[index]
+                                                              .username),
+                                                  ElevatedButton(
+                                                    onPressed: () =>
+                                                        _removeUser(index),
+                                                    child: const Text("Delete"),
+                                                  ),
+                                                ],
+                                              );
+                                            } else {
+                                              return Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      36.0),
+                                                  child: Text(
+                                                    snapshot.data!.message,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 34.0,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.red[700],
+                                                    ),
+                                                  ),
                                                 ),
-                                              ],
-                                            );
+                                              );
+                                            }
                                           } else {
                                             return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            );
                                           }
                                         },
                                       )
