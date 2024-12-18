@@ -119,7 +119,7 @@ class RequestHandler {
 
           message = checkFields(data);
         }
-
+//TODO: améliorer la logique ici,  c'est un peu bruoillon
         success = SUCCESS_HTTP_CODE.contains(response.statusCode);
 
         if (message == "" && success) {
