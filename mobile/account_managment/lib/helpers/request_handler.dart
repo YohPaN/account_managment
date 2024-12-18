@@ -120,11 +120,13 @@ class RequestHandler {
           message = checkFields(data);
         }
 
-        if (message == "") {
-          message = "Ressource $action successfully";
-        }
-
         success = SUCCESS_HTTP_CODE.contains(response.statusCode);
+
+        if (message == "" && success) {
+          message = "Ressource $action successfully";
+        } else if (message == "" && !success) {
+          message = jsonDecode(response.body)["error"];
+        }
       } else {
         message = "No response";
       }
