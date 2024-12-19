@@ -24,7 +24,6 @@ class RequestHandler {
       Map<String, dynamic>? body}) async {
     http.Response? response;
     Map<String, dynamic>? data;
-    String message = "";
     String action = "";
 
     bool success = false;
@@ -95,46 +94,72 @@ class RequestHandler {
           break;
 
         default:
-          message = "Method not handle";
+          return RepoResponse(
+            success: false,
+            message: "Method not handle",
+          );
       }
 
-      if (response != null) {
-        if (response.body != "") {
-          data = jsonDecode(response.body);
+      if (response == null) {
+        return RepoResponse(success: false, message: "No response !");
+      }
 
-          if (data!["code"] == "token_not_valid") {
-            final RepoResponse repoResponse =
-                await AuthRepository().refreshToken();
+      success = SUCCESS_HTTP_CODE.contains(response.statusCode);
+      if (response.body != "") {
+        data = jsonDecode(response.body);
+      }
 
-            if (repoResponse.success) {
-              await storage.write(
-                  key: 'accessToken', value: repoResponse.data!['access']);
+      if (!success && data == null) {
+        return RepoResponse(success: false, message: "No data !");
+      } else if (!success && data != null) {
+        if (data.containsKey("code") && data["code"] == "token_not_valid") {
+          final RepoResponse repoResponse =
+              await AuthRepository().refreshToken();
 
-              return handleRequest(
-                  method: method, uri: uri, contentType: contentType);
-            } else {
-              message = repoResponse.data!["detail"];
-            }
+          if (repoResponse.success) {
+            await storage.write(
+              key: 'accessToken',
+              value: repoResponse.data!['access'],
+            );
+
+            return handleRequest(
+              method: method,
+              uri: uri,
+              contentType: contentType,
+            );
+          } else {
+            return RepoResponse(
+              success: false,
+              message: repoResponse.data!["detail"],
+            );
           }
-
-          message = checkFields(data);
         }
 
-        if (message == "") {
-          message = "Ressource $action successfully";
-        }
-
-        success = SUCCESS_HTTP_CODE.contains(response.statusCode);
-      } else {
-        message = "No response";
+        return RepoResponse(
+            success: false,
+            message: jsonDecode(response.body).containsKey("error")
+                ? jsonDecode(response.body)["error"]
+                : jsonDecode(response.body).containsKey("detail")
+                    ? jsonDecode(response.body)["detail"]
+                    : "An error happend");
       }
     } on TimeoutException {
-      message = "Unable to contact server";
+      return RepoResponse(
+        success: false,
+        message: "Unable to contact server",
+      );
     } catch (e) {
-      message = e.toString();
+      return RepoResponse(
+        success: false,
+        message: e.toString(),
+      );
     }
 
-    return RepoResponse(data: data, success: success, message: message);
+    return RepoResponse(
+      data: data,
+      success: true,
+      message: "Ressource $action successfully",
+    );
   }
 
   static Future<Map<String, String>> buildHeaders(
@@ -158,18 +183,6 @@ class RequestHandler {
 
   static Uri buildUri(String uri) {
     return Uri.parse("http://${APIConfig.base_url}:${APIConfig.port}/api/$uri");
-  }
-
-  static String checkFields(data) {
-    for (var field in data.entries) {
-      if (field.value is Iterable && !field.value.isEmpty) {
-        if (field.value[0] == "This field may not be blank.") {
-          return "The field ${field.key} may not be blank.";
-        }
-      }
-    }
-
-    return "";
   }
 
   static String serializeBody(Map<String, dynamic> body) {

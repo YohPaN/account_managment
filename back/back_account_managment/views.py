@@ -24,7 +24,6 @@ from back_account_managment.serializers import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
-from django.db import IntegrityError
 from django.db.models import Exists, OuterRef
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -233,12 +232,18 @@ class AccountView(ModelViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
-    def perform_destroy(self, instance):
-        try:
-            assert not instance.is_main
+    def destroy(self, request, pk):
+        instance = self.get_object()
+
+        if not instance.is_main:
             instance.delete()
-        except AssertionError:
-            raise IntegrityError("You can't delete your main account !")
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {"error": "You can't delete your main account"},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
 
 class ItemView(ModelViewSet):
