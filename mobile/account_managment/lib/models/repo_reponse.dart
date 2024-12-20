@@ -1,5 +1,5 @@
 class RepoResponse {
-  Map<String, dynamic>? data;
+  dynamic data;
   bool success = false;
   String message;
 

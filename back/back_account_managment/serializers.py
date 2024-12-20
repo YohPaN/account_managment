@@ -128,7 +128,7 @@ class AccountUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccountUser
-        fields = ["state", "account"]
+        fields = ["id", "account"]
         read_only_fields = ["account"]
 
 

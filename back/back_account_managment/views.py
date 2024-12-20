@@ -277,7 +277,9 @@ class AccountUserView(ModelViewSet):
     def count(self, request):
         ask = self.queryset.count()
 
-        return Response({"waiting_ask": ask}, status=status.HTTP_200_OK)
+        return Response(
+            {"pending_account_request": ask}, status=status.HTTP_200_OK
+        )
 
 
 class AccountUserPermissionView(ModelViewSet):

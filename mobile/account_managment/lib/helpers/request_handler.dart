@@ -23,7 +23,7 @@ class RequestHandler {
       bool? needAuth = true,
       Map<String, dynamic>? body}) async {
     http.Response? response;
-    Map<String, dynamic>? data;
+    dynamic data;
     String action = "";
 
     bool success = false;
