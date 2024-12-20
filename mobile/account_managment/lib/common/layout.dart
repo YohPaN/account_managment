@@ -78,10 +78,16 @@ class _LayoutState extends State<Layout> {
           ),
           NavigationDestination(
             icon: Badge(
-                label: Text(Provider.of<AccountUserViewModel>(context)
+              isLabelVisible:
+                  Provider.of<AccountUserViewModel>(context).accountUsersCount >
+                      0,
+              label: Text(
+                Provider.of<AccountUserViewModel>(context)
                     .accountUsersCount
-                    .toString()),
-                child: const Icon(Icons.settings)),
+                    .toString(),
+              ),
+              child: const Icon(Icons.settings),
+            ),
             label: 'Settings',
           ),
         ],
