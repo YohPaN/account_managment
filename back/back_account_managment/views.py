@@ -260,7 +260,7 @@ class ItemView(ModelViewSet):
             pk=self.kwargs.get("account_id"),
         )
 
-        serializer.save(account=account)
+        serializer.save(account=account, user=self.request.user)
 
 
 class AccountUserView(ModelViewSet):

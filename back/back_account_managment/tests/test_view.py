@@ -6,7 +6,6 @@ from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import Permission
-from django.db import IntegrityError
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -364,11 +363,11 @@ class AccountViewTest(TestCase):
             id=1, user=self.user, name="first name", is_main=True
         )
 
-        with self.assertRaises(IntegrityError):
-            self.c.delete(
-                "/api/accounts/1/",
-            )
+        response = self.c.delete(
+            "/api/accounts/1/",
+        )
 
+        self.assertTrue(status.is_client_error(response.status_code))
         self.assertEqual(len(Account.objects.all()), 1)
 
     def test_create_item_under_an_account(self):
@@ -405,6 +404,7 @@ class AccountViewTest(TestCase):
             title="test",
             description="description",
             valuation=42.69,
+            user=self.user,
         )
         self.assertEqual(len(account.items.all()), 1)
 
@@ -448,6 +448,7 @@ class AccountViewTest(TestCase):
             title="test",
             description="description",
             valuation=42.69,
+            user=self.user,
         )
         self.assertEqual(len(account.items.all()), 1)
 
