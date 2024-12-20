@@ -6,6 +6,7 @@ from back_account_managment.models import (
     Profile,
 )
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from rest_framework import serializers
 
 User = get_user_model()
@@ -59,7 +60,7 @@ class AccountAccountUserSerializer(serializers.ModelSerializer):
         fields = ["user", "state"]
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class AccountListSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
     contributors = AccountAccountUserSerializer(many=True)
 
@@ -107,6 +108,69 @@ class AccountSerializer(serializers.ModelSerializer):
             permission["permissions_codename"]
             for permission in serializer.data
         ]
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    items = ItemReadSerializer(many=True)
+    contributors = AccountAccountUserSerializer(many=True)
+
+    permissions = serializers.SerializerMethodField()
+
+    own_contribution = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Account
+        fields = [
+            "id",
+            "name",
+            "total",
+            "is_main",
+            "items",
+            "contributors",
+            "permissions",
+            "own_contribution",
+        ]
+
+    def get_permissions(self, account):
+        try:
+            user = self.context["request"].user
+        except KeyError:
+            raise KeyError("There is no request attach on context")
+
+        if account.user == user:
+            return [
+                "owner",
+            ]
+
+        try:
+            account_user = AccountUser.objects.get(user=user, account=account)
+        except AccountUser.DoesNotExist:
+            raise AccountUser.DoesNotExist(
+                "The user isn't a contributor of the account"
+            )
+
+        account_user_permissions = AccountUserPermission.objects.filter(
+            account_user=account_user
+        )
+
+        serializer = AccountUserPermissionsSerializer(
+            account_user_permissions, many=True
+        )
+
+        return [
+            permission["permissions_codename"]
+            for permission in serializer.data
+        ]
+
+    def get_own_contribution(self, account):
+        try:
+            user = self.context["request"].user
+        except KeyError:
+            raise KeyError("There is no request attach on context")
+
+        return Item.objects.filter(user=user, account=account).aggregate(
+            total=Sum("valuation")
+        )
 
 
 class UsernameUserSerilizer(serializers.ModelSerializer):

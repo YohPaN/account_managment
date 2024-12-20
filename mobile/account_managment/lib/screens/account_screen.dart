@@ -56,24 +56,58 @@ class AccountScreen extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 16.0, horizontal: 24.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
                           children: [
-                            Flexible(
-                                child: Text(
-                              accountViewModel.account!.name.capitalize(),
-                              style: const TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            )),
-                            Text(
-                              "${accountViewModel.account!.total != null ? accountViewModel.account!.total!.toStringAsFixed(2) : "0.00"}€",
-                              style: TextStyle(
-                                  fontSize: 24.0,
-                                  color: accountViewModel.account!.total !=
-                                              null &&
-                                          accountViewModel.account!.total! < 0
-                                      ? Colors.red[600]
-                                      : Colors.green[500]),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                    child: Text(
+                                  accountViewModel.account!.name.capitalize(),
+                                  style: const TextStyle(
+                                      fontSize: 24.0,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                                Text(
+                                  "${accountViewModel.account!.total != null ? accountViewModel.account!.total!.toStringAsFixed(2) : "0.00"}€",
+                                  style: TextStyle(
+                                      fontSize: 24.0,
+                                      color: accountViewModel.account!.total !=
+                                                  null &&
+                                              accountViewModel.account!.total! <
+                                                  0
+                                          ? Colors.red[600]
+                                          : Colors.green[500]),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(
+                                    child: Text(
+                                  "Your contribution",
+                                  style: TextStyle(),
+                                )),
+                                Text(
+                                  accountViewModel.account!.ownContribution !=
+                                          null
+                                      ? accountViewModel
+                                          .account!.ownContribution!
+                                          .toStringAsFixed(2)
+                                      : "0.00",
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      color: accountViewModel.account!
+                                                      .ownContribution !=
+                                                  null &&
+                                              accountViewModel.account!
+                                                      .ownContribution! <
+                                                  0
+                                          ? Colors.red[600]
+                                          : Colors.green[500]),
+                                ),
+                              ],
                             ),
                           ],
                         ),
