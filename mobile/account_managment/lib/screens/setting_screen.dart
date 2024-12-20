@@ -55,15 +55,27 @@ class SettingScreen extends StatelessWidget {
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       ElevatedButton(
-                                        onPressed: () => print(
-                                            "no: ${accountUserViewModel.accountUsers[index].id}"),
+                                        onPressed: () async =>
+                                            await accountUserViewModel
+                                                .partialUpdateAccountUser(
+                                                    accountUserId:
+                                                        accountUserViewModel
+                                                            .accountUsers[index]
+                                                            .id,
+                                                    state: "DISAPPROVED"),
                                         child: const Icon(
                                           Icons.close,
                                         ),
                                       ),
                                       ElevatedButton(
-                                        onPressed: () => print(
-                                            "yes: ${accountUserViewModel.accountUsers[index].id}"),
+                                        onPressed: () async =>
+                                            await accountUserViewModel
+                                                .partialUpdateAccountUser(
+                                                    accountUserId:
+                                                        accountUserViewModel
+                                                            .accountUsers[index]
+                                                            .id,
+                                                    state: "APPROVED"),
                                         child: const Icon(
                                           Icons.check,
                                         ),

@@ -24,8 +24,6 @@ class _LayoutState extends State<Layout> {
     const SettingScreen(),
   ];
 
-  int pendingAccountRequest = 0;
-
   @override
   void initState() {
     super.initState();
@@ -33,17 +31,18 @@ class _LayoutState extends State<Layout> {
   }
 
   Future<void> _initialize() async {
-    final countResponse =
-        await Provider.of<AccountUserViewModel>(context, listen: false)
-            .countAccountUser();
+    await Provider.of<AccountUserViewModel>(context, listen: false)
+        .countAccountUser();
 
-    setState(() {
-      pendingAccountRequest = countResponse;
-    });
+    setState(() {});
 
-    if (pendingAccountRequest > 0) {
+    if (Provider.of<AccountUserViewModel>(context, listen: false)
+            .accountUsersCount >
+        0) {
       Provider.of<InternalNotification>(context, listen: false)
-          .showPendingAccountRequest(pendingAccountRequest);
+          .showPendingAccountRequest(
+              Provider.of<AccountUserViewModel>(context, listen: false)
+                  .accountUsersCount);
     }
   }
 
@@ -79,7 +78,9 @@ class _LayoutState extends State<Layout> {
           ),
           NavigationDestination(
             icon: Badge(
-                label: Text(pendingAccountRequest.toString()),
+                label: Text(Provider.of<AccountUserViewModel>(context)
+                    .accountUsersCount
+                    .toString()),
                 child: const Icon(Icons.settings)),
             label: 'Settings',
           ),

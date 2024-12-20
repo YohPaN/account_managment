@@ -275,7 +275,8 @@ class AccountUserView(ModelViewSet):
 
     @action(methods=["get"], detail=False, url_path="count")
     def count(self, request):
-        ask = self.queryset.count()
+        queryset = self.get_queryset()
+        ask = queryset.count()
 
         return Response(
             {"pending_account_request": ask}, status=status.HTTP_200_OK

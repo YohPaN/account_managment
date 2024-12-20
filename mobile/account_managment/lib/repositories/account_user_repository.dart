@@ -27,12 +27,24 @@ class AccountUserRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> create(String name, List<String> contributors) async {
+  Future<RepoResponse> create() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$model_url/",
       contentType: 'application/json',
       body: {},
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> partialUpdate(
+      {required int accountUserId, required String state}) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "PATCH",
+      uri: "$model_url/$accountUserId/",
+      contentType: 'application/json',
+      body: {"state": state},
     );
 
     return repoResponse;
