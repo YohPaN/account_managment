@@ -6,6 +6,7 @@ class Account {
   String name;
   bool isMain;
   List<Item> items;
+  double? ownContribution;
   List<Contributor> contributor;
   List<dynamic> permissions;
   double? total;
@@ -15,6 +16,7 @@ class Account {
     required this.name,
     required this.isMain,
     required this.items,
+    this.ownContribution,
     required this.contributor,
     required this.permissions,
     this.total,
@@ -26,6 +28,9 @@ class Account {
       name: jsonAccount["name"],
       isMain: jsonAccount["is_main"],
       items: [],
+      ownContribution: jsonAccount["own_contribution"] != null
+          ? jsonAccount["own_contribution"]["total"]
+          : null,
       contributor: [],
       permissions: jsonAccount["permissions"],
       total: jsonAccount["total"]["total_sum"],

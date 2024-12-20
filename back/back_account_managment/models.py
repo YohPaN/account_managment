@@ -47,6 +47,7 @@ class Item(models.Model):
     account = models.ForeignKey(
         Account, on_delete=models.CASCADE, related_name="items"
     )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class AccountUserState(models.TextChoices):

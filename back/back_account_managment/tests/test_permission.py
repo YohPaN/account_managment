@@ -288,6 +288,7 @@ class CRUDAccountTest(TestCase):
             description="test",
             valuation=12.56,
             account=self.account,
+            user=self.user,
         )
         account_user = AccountUser.objects.create(
             account=self.account, user=self.user

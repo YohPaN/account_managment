@@ -13,6 +13,7 @@ from back_account_managment.permissions import (
     ManageAccountUserPermissions,
 )
 from back_account_managment.serializers import (
+    AccountListSerializer,
     AccountSerializer,
     AccountUserPermissionsSerializer,
     AccountUserSerializer,
@@ -148,9 +149,13 @@ class AccountView(ModelViewSet):
             Exists(contributor_account_user)
         )
 
-        own_account_serialized = self.get_serializer(own_accounts, many=True)
-        contributor_account_serialized = self.get_serializer(
+        own_account_serialized = AccountListSerializer(own_accounts, many=True)
+        own_account_serialized.context.update({"request": self.request})
+        contributor_account_serialized = AccountListSerializer(
             contributor_accounts, many=True
+        )
+        contributor_account_serialized.context.update(
+            {"request": self.request}
         )
 
         return Response(
@@ -260,7 +265,7 @@ class ItemView(ModelViewSet):
             pk=self.kwargs.get("account_id"),
         )
 
-        serializer.save(account=account)
+        serializer.save(account=account, user=self.request.user)
 
 
 class AccountUserView(ModelViewSet):
