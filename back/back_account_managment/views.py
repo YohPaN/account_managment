@@ -15,6 +15,7 @@ from back_account_managment.permissions import (
 from back_account_managment.serializers import (
     AccountSerializer,
     AccountUserPermissionsSerializer,
+    AccountUserSerializer,
     ItemWriteSerializer,
     ManageAccountSerializer,
     ProfileSerializer,
@@ -260,6 +261,23 @@ class ItemView(ModelViewSet):
         )
 
         serializer.save(account=account)
+
+
+class AccountUserView(ModelViewSet):
+    queryset = AccountUser.objects.all()
+    serializer_class = AccountUserSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+    ]
+
+    def get_queryset(self):
+        return self.queryset.filter(state="PENDING", user=self.request.user)
+
+    @action(methods=["get"], detail=False, url_path="count")
+    def count(self, request):
+        ask = self.queryset.count()
+
+        return Response({"waiting_ask": ask}, status=status.HTTP_200_OK)
 
 
 class AccountUserPermissionView(ModelViewSet):
