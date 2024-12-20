@@ -5,6 +5,7 @@ from rest_framework import routers
 router = routers.DefaultRouter()
 router.register(r"accounts", views.AccountView)
 router.register(r"users", views.UserView)
+router.register(r"account_user", views.AccountUserView)
 router.register(
     r"accounts/(?P<account_id>[^/.]+)/items", views.ItemView, basename="items"
 )

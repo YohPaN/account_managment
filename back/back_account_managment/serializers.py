@@ -51,7 +51,7 @@ class ItemReadSerializer(serializers.ModelSerializer):
         read_only_fields = ["account"]
 
 
-class AccountUserSerializer(serializers.ModelSerializer):
+class AccountAccountUserSerializer(serializers.ModelSerializer):
     user = UserAccountUserSerializer()
 
     class Meta:
@@ -61,7 +61,7 @@ class AccountUserSerializer(serializers.ModelSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
-    contributors = AccountUserSerializer(many=True)
+    contributors = AccountAccountUserSerializer(many=True)
 
     permissions = serializers.SerializerMethodField()
 
@@ -107,6 +107,29 @@ class AccountSerializer(serializers.ModelSerializer):
             permission["permissions_codename"]
             for permission in serializer.data
         ]
+
+
+class UsernameUserSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]
+
+
+class MinimalAccountSerilizer(serializers.ModelSerializer):
+    user = UsernameUserSerilizer()
+
+    class Meta:
+        model = Account
+        fields = ["name", "user"]
+
+
+class AccountUserSerializer(serializers.ModelSerializer):
+    account = MinimalAccountSerilizer()
+
+    class Meta:
+        model = AccountUser
+        fields = ["state", "account"]
+        read_only_fields = ["account"]
 
 
 class ManageAccountSerializer(serializers.ModelSerializer):
