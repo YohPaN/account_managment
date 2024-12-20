@@ -15,4 +15,17 @@ class InternalNotification extends ChangeNotifier {
         closeOnClick: true,
         closeButtonShowType: CloseButtonShowType.none);
   }
+
+  void showPendingAccountRequest(int count) {
+    toastification.show(
+      type: ToastificationType.warning,
+      style: ToastificationStyle.flatColored,
+      title: const Text("Account ask"),
+      description: Text("You have $count ask to join an account"),
+      alignment: Alignment.center,
+      icon: const Icon(Icons.notifications),
+      borderRadius: BorderRadius.circular(12.0),
+      dragToClose: true,
+    );
+  }
 }
