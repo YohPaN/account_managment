@@ -273,6 +273,13 @@ class ItemView(ModelViewSet):
             user=user,
         )
 
+    def perform_update(self, serializer):
+        user = get_object_or_404(User, username=self.request.data["user"])
+
+        serializer.save(
+            user=user,
+        )
+
 
 class AccountUserView(ModelViewSet):
     queryset = AccountUser.objects.all()
