@@ -156,23 +156,38 @@ class AccountViewModel extends ChangeNotifier {
     listAccount();
   }
 
-  Future<RepoResponse> createItem(
-    String title,
-    String description,
-    String valuation,
-  ) async {
+  Future<RepoResponse> createItem({
+    required String title,
+    required String description,
+    required String valuation,
+    required String? username,
+  }) async {
     final RepoResponse repoResponse = await accountRepository.createItem(
-        title, description, valuation, account!.id);
+        title: title,
+        description: description,
+        valuation: valuation,
+        accountId: account!.id,
+        username: username);
 
     notifyListeners();
 
     return repoResponse;
   }
 
-  Future<RepoResponse> updateItem(
-      String title, String description, String valuation, int itemId) async {
+  Future<RepoResponse> updateItem({
+    required String title,
+    required String description,
+    required String valuation,
+    required String? username,
+    required int itemId,
+  }) async {
     final RepoResponse repoResponse = await accountRepository.updateItem(
-        title, description, valuation, account!.id, itemId);
+        title: title,
+        description: description,
+        valuation: valuation,
+        accountId: account!.id,
+        username: username,
+        itemId: itemId);
 
     notifyListeners();
 

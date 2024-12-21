@@ -9,6 +9,7 @@ class Account {
   double? ownContribution;
   List<Contributor> contributor;
   List<dynamic> permissions;
+  String user;
   double? total;
 
   Account({
@@ -19,6 +20,7 @@ class Account {
     this.ownContribution,
     required this.contributor,
     required this.permissions,
+    required this.user,
     this.total,
   });
 
@@ -33,6 +35,7 @@ class Account {
           : null,
       contributor: [],
       permissions: jsonAccount["permissions"],
+      user: jsonAccount["user"]["username"],
       total: jsonAccount["total"]["total_sum"],
     );
   }

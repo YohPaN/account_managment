@@ -27,6 +27,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.db.models import Exists, OuterRef
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -265,7 +266,23 @@ class ItemView(ModelViewSet):
             pk=self.kwargs.get("account_id"),
         )
 
-        serializer.save(account=account, user=self.request.user)
+        username = self.request.data.get("username", None)
+
+        user = get_object_or_404(User, username=username)
+
+        serializer.save(
+            account=account,
+            user=user,
+        )
+
+    def perform_update(self, serializer):
+        username = self.request.data.get("username", None)
+
+        user = get_object_or_404(User, username=username)
+
+        serializer.save(
+            user=user,
+        )
 
 
 class AccountUserView(ModelViewSet):
