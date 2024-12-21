@@ -25,6 +25,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
   final TextEditingController valuationController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final List<bool> _selectButton = [true, false];
+  String? _username;
+
   final List<Map<String, Color?>> buttonStyleChoices = [
     {
       "selectedColor": Colors.red[700],
@@ -55,6 +57,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
         titleController.text = widget.item!.title;
         descriptionController.text = widget.item!.description;
         valuationController.text = widget.item!.valuation.abs().toString();
+        _username = widget.item!.username;
       }
     }
   }
@@ -63,6 +66,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
   Widget build(BuildContext context) {
     final AccountViewModel accountViewModel =
         Provider.of<AccountViewModel>(context, listen: false);
+
     switchButton(index) {
       setState(() {
         for (int i = 0; i < _selectButton.length; i++) {
@@ -73,6 +77,19 @@ class _ItemDrawerState extends State<ItemDrawer> {
       });
     }
 
+    final List<DropdownMenuEntry<String>> menuEntries = [
+      DropdownMenuEntry<String>(
+        value: accountViewModel.account!.user,
+        label: "Me",
+      ),
+      ...accountViewModel.account!.contributor.map(
+        (contributor) => DropdownMenuEntry<String>(
+          value: contributor.username,
+          label: contributor.username,
+        ),
+      ),
+    ];
+
     createOrUpdate() async {
       final valuation = _selectButton[0]
           ? "-${valuationController.text}"
@@ -80,10 +97,19 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
       if (widget.action == "create") {
         return await accountViewModel.createItem(
-            titleController.text, descriptionController.text, valuation);
+          title: titleController.text,
+          description: descriptionController.text,
+          valuation: valuation,
+          username: _username,
+        );
       } else {
-        return await accountViewModel.updateItem(titleController.text,
-            descriptionController.text, valuation, widget.item!.id);
+        return await accountViewModel.updateItem(
+          title: titleController.text,
+          description: descriptionController.text,
+          valuation: valuation,
+          username: _username,
+          itemId: widget.item!.id,
+        );
       }
     }
 
@@ -125,6 +151,14 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   "twoDigitMax",
                   "validPositifDouble"
                 ]),
+              ),
+              const SizedBox(height: 16),
+              DropdownMenu(
+                initialSelection: _username,
+                onSelected: (value) => setState(() {
+                  _username = value;
+                }),
+                dropdownMenuEntries: menuEntries,
               ),
               const SizedBox(height: 16),
               ToggleButtons(

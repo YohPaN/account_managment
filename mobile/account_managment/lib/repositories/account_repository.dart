@@ -60,18 +60,20 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> createItem(
-    String title,
-    String description,
-    String valuation,
-    int accountId,
-  ) async {
+  Future<RepoResponse> createItem({
+    required String title,
+    required String description,
+    required String valuation,
+    required int accountId,
+    required String? username,
+  }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$model_url/$accountId/items/",
       contentType: 'application/json',
       body: {
         'account': accountId.toString(),
+        'username': username,
         'title': title,
         'description': description,
         'valuation': valuation,
@@ -81,14 +83,21 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> updateItem(String title, String description,
-      String valuation, int accountId, int itemId) async {
+  Future<RepoResponse> updateItem({
+    required String title,
+    required String description,
+    required String valuation,
+    required int accountId,
+    required String? username,
+    required int itemId,
+  }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PUT",
       uri: "$model_url/$accountId/items/$itemId/",
       contentType: 'application/json',
       body: {
         'account': accountId.toString(),
+        'username': username,
         'title': title,
         'description': description,
         'valuation': valuation,

@@ -266,7 +266,9 @@ class ItemView(ModelViewSet):
             pk=self.kwargs.get("account_id"),
         )
 
-        user = get_object_or_404(User, username=self.request.data["user"])
+        username = self.request.data.get("username", None)
+
+        user = get_object_or_404(User, username=username)
 
         serializer.save(
             account=account,
@@ -274,7 +276,9 @@ class ItemView(ModelViewSet):
         )
 
     def perform_update(self, serializer):
-        user = get_object_or_404(User, username=self.request.data["user"])
+        username = self.request.data.get("username", None)
+
+        user = get_object_or_404(User, username=username)
 
         serializer.save(
             user=user,

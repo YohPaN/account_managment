@@ -46,9 +46,11 @@ class ItemWriteSerializer(serializers.ModelSerializer):
 
 
 class ItemReadSerializer(serializers.ModelSerializer):
+    user = UserAccountUserSerializer()
+
     class Meta:
         model = Item
-        fields = ["id", "title", "description", "valuation", "account"]
+        fields = ["id", "title", "description", "valuation", "account", "user"]
         read_only_fields = ["account"]
 
 
@@ -60,9 +62,16 @@ class AccountAccountUserSerializer(serializers.ModelSerializer):
         fields = ["user", "state"]
 
 
+class UsernameUserSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]
+
+
 class AccountListSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
     contributors = AccountAccountUserSerializer(many=True)
+    user = UsernameUserSerilizer()
 
     permissions = serializers.SerializerMethodField()
 
@@ -76,6 +85,7 @@ class AccountListSerializer(serializers.ModelSerializer):
             "items",
             "contributors",
             "permissions",
+            "user",
         ]
 
     def get_permissions(self, account):
@@ -113,6 +123,7 @@ class AccountListSerializer(serializers.ModelSerializer):
 class AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
     contributors = AccountAccountUserSerializer(many=True)
+    user = UsernameUserSerilizer()
 
     permissions = serializers.SerializerMethodField()
 
@@ -129,6 +140,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "contributors",
             "permissions",
             "own_contribution",
+            "user",
         ]
 
     def get_permissions(self, account):
@@ -171,12 +183,6 @@ class AccountSerializer(serializers.ModelSerializer):
         return Item.objects.filter(user=user, account=account).aggregate(
             total=Sum("valuation")
         )
-
-
-class UsernameUserSerilizer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username"]
 
 
 class MinimalAccountSerilizer(serializers.ModelSerializer):
