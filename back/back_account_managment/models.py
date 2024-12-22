@@ -33,7 +33,10 @@ class Account(models.Model):
     is_main = models.BooleanField(default=False)
 
     class Meta:
-        permissions = [("link_user_item", "Can link a user to an item")]
+        permissions = [
+            ("link_user_item", "Can link a user to an item"),
+            ("add_item_without_user", "Can create an item with no user"),
+        ]
 
     @property
     def total(self):

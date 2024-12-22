@@ -80,3 +80,46 @@ class ManageAccountUserPermissions(permissions.BasePermission):
             return True
 
         return False
+
+
+class LinkItemUserPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        user = request.user
+        username = request.data.get("username", None)
+        account = Account.objects.filter(
+            pk=view.kwargs.get("account_id")
+        ).first()
+
+        if account is None:
+            return False
+
+        if account.user == user or (
+            username == user.username and request.method == "POST"
+        ):
+            return True
+
+        account_user = AccountUser.objects.get(
+            user=user,
+            account=account,
+        )
+
+        link_user_item = AccountUserPermission.objects.filter(
+            account_user=account_user,
+            permissions=Permission.objects.get(codename="link_user_item"),
+        ).first()
+
+        add_item_without_user = AccountUserPermission.objects.filter(
+            account_user=account_user,
+            permissions=Permission.objects.get(
+                codename="add_item_without_user"
+            ),
+        ).first()
+
+        if username is None:
+            return add_item_without_user is not None
+
+        else:
+            return link_user_item is not None

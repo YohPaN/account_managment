@@ -10,6 +10,7 @@ from back_account_managment.models import (
 from back_account_managment.permissions import (
     CRUDPermission,
     IsOwner,
+    LinkItemUserPermission,
     ManageAccountUserPermissions,
 )
 from back_account_managment.serializers import (
@@ -259,6 +260,7 @@ class ItemView(ModelViewSet):
     permission_classes = [
         permissions.IsAuthenticated,
         CRUDPermission,
+        LinkItemUserPermission,
     ]
 
     def perform_create(self, serializer):
