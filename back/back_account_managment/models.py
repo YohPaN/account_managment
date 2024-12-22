@@ -32,6 +32,9 @@ class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
 
+    class Meta:
+        permissions = [("link_user_item", "Can link a user to an item")]
+
     @property
     def total(self):
         return Item.objects.filter(account=self.pk).aggregate(
