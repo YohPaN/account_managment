@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from back_account_managment.models import (
     Account,
     AccountUser,
@@ -128,6 +130,7 @@ class AccountSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
 
     own_contribution = serializers.SerializerMethodField()
+    need_to_add = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
@@ -140,6 +143,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "contributors",
             "permissions",
             "own_contribution",
+            "need_to_add",
             "user",
         ]
 
@@ -180,9 +184,33 @@ class AccountSerializer(serializers.ModelSerializer):
         except KeyError:
             raise KeyError("There is no request attach on context")
 
-        return Item.objects.filter(user=user, account=account).aggregate(
-            total=Sum("valuation")
+        total = Item.objects.filter(
+            user=user, account=account, valuation__gt=0
         )
+        if total.count() > 0:
+            return total.aggregate(total=(Sum("valuation")))
+
+        return {"total": Decimal(0.00)}
+
+    def get_need_to_add(self, account):
+        total = Item.objects.filter(account=account, valuation__lt=0)
+
+        if total.count() > 0:
+            total = total.aggregate(total=Sum("valuation"))
+
+            user_part = total["total"] / (
+                AccountUser.objects.filter(
+                    account=account, state="APPROVED"
+                ).count()
+                + 1
+            )
+
+            return {
+                "total": user_part
+                + self.get_own_contribution(account=account)["total"]
+            }
+
+        return {"total": Decimal(0.00)}
 
 
 class MinimalAccountSerilizer(serializers.ModelSerializer):

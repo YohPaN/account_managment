@@ -65,7 +65,7 @@ class AccountRepository {
     required String description,
     required String valuation,
     required int accountId,
-    required String? username,
+    String? username,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
@@ -73,7 +73,7 @@ class AccountRepository {
       contentType: 'application/json',
       body: {
         'account': accountId.toString(),
-        'username': username,
+        if (username != null) 'username': username,
         'title': title,
         'description': description,
         'valuation': valuation,
@@ -97,7 +97,7 @@ class AccountRepository {
       contentType: 'application/json',
       body: {
         'account': accountId.toString(),
-        'username': username,
+        if (username != null) 'username': username,
         'title': title,
         'description': description,
         'valuation': valuation,
