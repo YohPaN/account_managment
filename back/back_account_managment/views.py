@@ -144,7 +144,6 @@ class AccountView(ModelViewSet):
         contributor_account_user = AccountUser.objects.filter(
             account=OuterRef("pk"), user=request.user, state="APPROVED"
         )
-
         own_accounts = Account.objects.filter(user=request.user)
 
         contributor_accounts = Account.objects.filter(
@@ -270,7 +269,7 @@ class ItemView(ModelViewSet):
 
         username = self.request.data.get("username", None)
 
-        user = get_object_or_404(User, username=username)
+        user = get_object_or_404(User, username=username) if username else None
 
         serializer.save(
             account=account,
@@ -280,7 +279,7 @@ class ItemView(ModelViewSet):
     def perform_update(self, serializer):
         username = self.request.data.get("username", None)
 
-        user = get_object_or_404(User, username=username)
+        user = get_object_or_404(User, username=username) if username else None
 
         serializer.save(
             user=user,

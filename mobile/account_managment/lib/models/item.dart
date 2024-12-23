@@ -17,7 +17,7 @@ class Item {
       id: jsonItem["id"],
       title: jsonItem["title"],
       description: jsonItem["description"],
-      username: jsonItem["user"]["username"] ?? "",
+      username: jsonItem["user"] != null ? jsonItem["user"]["username"] : "",
       valuation: double.parse(
         jsonItem["valuation"],
       ),

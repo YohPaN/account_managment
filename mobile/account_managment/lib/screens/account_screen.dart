@@ -96,16 +96,35 @@ class AccountScreen extends StatelessWidget {
                                           .account!.ownContribution!
                                           .toStringAsFixed(2)
                                       : "0.00",
+                                  style: const TextStyle(
+                                    fontSize: 18.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(
+                                    child: Text(
+                                  "Need to add",
+                                  style: TextStyle(),
+                                )),
+                                Text(
+                                  accountViewModel.account!.needToAdd != null
+                                      ? accountViewModel.account!.needToAdd!
+                                          .toStringAsFixed(2)
+                                      : "0.00",
                                   style: TextStyle(
                                       fontSize: 18.0,
-                                      color: accountViewModel.account!
-                                                      .ownContribution !=
-                                                  null &&
-                                              accountViewModel.account!
-                                                      .ownContribution! <
-                                                  0
-                                          ? Colors.red[600]
-                                          : Colors.green[500]),
+                                      color:
+                                          accountViewModel.account!.needToAdd !=
+                                                      null &&
+                                                  accountViewModel
+                                                          .account!.needToAdd! <
+                                                      0
+                                              ? Colors.red[600]
+                                              : Colors.green[500]),
                                 ),
                               ],
                             ),
