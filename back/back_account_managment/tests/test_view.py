@@ -389,6 +389,7 @@ class AccountViewTest(TestCase):
                 "title": "mon",
                 "description": "petit poney",
                 "valuation": 12.56,
+                "username": self.user.username,
             },
             format="json",
         )
@@ -423,12 +424,48 @@ class AccountViewTest(TestCase):
                 "title": "mon",
                 "description": "petit poney",
                 "valuation": 12.56,
+                "username": self.user.username,
             },
             format="json",
         )
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(account.items.get(pk=1).title, "mon")
+
+    def test_update_item_under_an_account_with_another_user_under_item(self):
+        account = Account.objects.create(id=1, name="test", user=self.user2)
+        Item.objects.create(
+            id=1,
+            account=account,
+            title="test",
+            description="description",
+            valuation=42.69,
+            user=self.user2,
+        )
+        self.assertEqual(len(account.items.all()), 1)
+
+        account_user = AccountUser.objects.create(
+            account=account, user=self.user, state="APPROVED"
+        )
+
+        AccountUserPermission.objects.create(
+            account_user=account_user,
+            permissions=Permission.objects.get(codename="change_item"),
+        )
+
+        response = self.c.put(
+            "/api/accounts/1/items/1/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "username": self.user.username,
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(account.items.get(pk=1).user, self.user)
 
     def test_delete_items(self):
         account = Account.objects.create(id=1, name="test", user=self.user)

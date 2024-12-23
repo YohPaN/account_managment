@@ -84,7 +84,7 @@ class ManageAccountUserPermissions(permissions.BasePermission):
 
 class LinkItemUserPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
+        if request.method != "POST":
             return True
 
         user = request.user
@@ -96,9 +96,7 @@ class LinkItemUserPermission(permissions.BasePermission):
         if account is None:
             return False
 
-        if account.user == user or (
-            username == user.username and request.method == "POST"
-        ):
+        if account.user == user:
             return True
 
         account_user = AccountUser.objects.get(

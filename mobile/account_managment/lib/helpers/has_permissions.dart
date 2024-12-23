@@ -34,4 +34,12 @@ class HasPermissions {
 
     return permissionRessource.every(permissions.contains);
   }
+
+  static bool hasSpecificPerm(
+      {required String permission, required List<dynamic> permissions}) {
+    if (permissions.contains("owner")) {
+      return true;
+    }
+    return permissions.contains(permission);
+  }
 }

@@ -25,7 +25,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
   final TextEditingController valuationController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final List<bool> _selectButton = [true, false];
-  String? _username;
+  String _username = "";
 
   final List<Map<String, Color?>> buttonStyleChoices = [
     {
@@ -57,7 +57,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
         titleController.text = widget.item!.title;
         descriptionController.text = widget.item!.description;
         valuationController.text = widget.item!.valuation.abs().toString();
-        _username = widget.item!.username;
+        _username = widget.item!.username ?? "";
       }
     }
   }
@@ -82,13 +82,36 @@ class _ItemDrawerState extends State<ItemDrawer> {
         value: accountViewModel.account!.user,
         label: "Me",
       ),
-      ...accountViewModel.account!.contributor.map(
-        (contributor) => DropdownMenuEntry<String>(
-          value: contributor.username,
-          label: contributor.username,
-        ),
-      ),
     ];
+
+    if (widget.action == "update" ||
+        HasPermissions.hasSpecificPerm(
+            permission: "link_user_item",
+            permissions: accountViewModel.account!.permissions)) {
+      menuEntries.addAll(
+        accountViewModel.account!.contributor.map(
+          (contributor) => DropdownMenuEntry<String>(
+            value: contributor.username,
+            label: contributor.username,
+          ),
+        ),
+      );
+    }
+
+    if (widget.action == "update" ||
+        HasPermissions.hasSpecificPerm(
+          permission: "add_item_without_user",
+          permissions: accountViewModel.account!.permissions,
+        )) {
+      menuEntries.add(
+        const DropdownMenuEntry<String>(
+          value: "",
+          label: "",
+        ),
+      );
+    } else {
+      _username = accountViewModel.account!.user;
+    }
 
     createOrUpdate() async {
       final valuation = _selectButton[0]
@@ -100,14 +123,14 @@ class _ItemDrawerState extends State<ItemDrawer> {
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
-          username: _username,
+          username: _username != "" ? _username : null,
         );
       } else {
         return await accountViewModel.updateItem(
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
-          username: _username,
+          username: _username != "" ? _username : null,
           itemId: widget.item!.id,
         );
       }
@@ -156,7 +179,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               DropdownMenu(
                 initialSelection: _username,
                 onSelected: (value) => setState(() {
-                  _username = value;
+                  _username = value!;
                 }),
                 dropdownMenuEntries: menuEntries,
               ),
