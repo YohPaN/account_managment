@@ -9,9 +9,10 @@ from back_account_managment.models import (
 )
 from back_account_managment.permissions import (
     CRUDPermission,
+    IsAccountContributor,
+    IsAccountOwner,
     IsOwner,
     LinkItemUserPermission,
-    ManageAccountUserPermissions,
 )
 from back_account_managment.serializers import (
     AccountListSerializer,
@@ -132,7 +133,7 @@ class AccountView(ModelViewSet):
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
-        (IsOwner | CRUDPermission),
+        (IsOwner | (IsAccountContributor, CRUDPermission)),
     ]
 
     def get_serializer_context(self):
@@ -258,8 +259,7 @@ class ItemView(ModelViewSet):
     queryset = Item.objects.all()
     permission_classes = [
         permissions.IsAuthenticated,
-        CRUDPermission,
-        LinkItemUserPermission,
+        (IsAccountOwner | IsOwner | (CRUDPermission, LinkItemUserPermission)),
     ]
 
     def perform_create(self, serializer):
@@ -308,10 +308,7 @@ class AccountUserView(ModelViewSet):
 
 class AccountUserPermissionView(ModelViewSet):
     serializer_class = AccountUserPermissionsSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        ManageAccountUserPermissions,
-    ]
+    permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
 
     def list(self, request, *args, **kwargs):
         codenames = [entry.codename for entry in self.get_queryset()]

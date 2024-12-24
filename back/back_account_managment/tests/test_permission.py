@@ -9,6 +9,7 @@ from back_account_managment.models import (
 from back_account_managment.permissions import (
     CRUDPermission,
     IsAccountContributor,
+    IsAccountOwner,
     IsOwner,
     LinkItemUserPermission,
 )
@@ -53,6 +54,98 @@ class IsOwnerPermissionTest(TestCase):
         )
 
         self.assertFalse(isOwner)
+
+
+class IsAccountOwnerPermissionTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="JonDoe", email="jon@doe.test"
+        )
+
+        self.user2 = User.objects.create(
+            username="FooBar", email="foo@bar.test"
+        )
+
+        self.account = Account.objects.create(name="test", user=self.user)
+        self.item = Item.objects.create(
+            title="test",
+            description="test",
+            valuation=21.21,
+            user=self.user,
+            account=self.account,
+        )
+
+        self.account_user = AccountUser.objects.create(
+            user=self.user, account=self.account
+        )
+
+        self.account_user_permission = AccountUserPermission.objects.create(
+            permissions=Permission.objects.first(),
+            account_user=self.account_user,
+        )
+
+        factory = APIRequestFactory()
+        self.request = factory.get("/")
+
+        self.IsAccountOwner = IsAccountOwner()
+
+    def test_object_have_permission_with_item(self):
+        self.request.user = self.user
+
+        self.assertTrue(
+            self.IsAccountOwner.has_object_permission(
+                request=self.request, view=None, instance=self.item
+            )
+        )
+
+    def test_object_have_not_permission_with_item(self):
+        self.request.user = self.user2
+
+        self.assertFalse(
+            self.IsAccountOwner.has_object_permission(
+                request=self.request, view=None, instance=self.item
+            )
+        )
+
+    def test_object_have_permission_with_account_user_permission(self):
+        self.request.user = self.user
+
+        self.assertTrue(
+            self.IsAccountOwner.has_object_permission(
+                request=self.request,
+                view=None,
+                instance=self.account_user_permission,
+            )
+        )
+
+    def test_object_have_not_permission_with_account_user_permission(self):
+        self.request.user = self.user2
+
+        self.assertFalse(
+            self.IsAccountOwner.has_object_permission(
+                request=self.request,
+                view=None,
+                instance=self.account_user_permission,
+            )
+        )
+
+    def test_object_have_permission_with_account(self):
+        self.request.user = self.user
+
+        self.assertTrue(
+            self.IsAccountOwner.has_object_permission(
+                request=self.request, view=None, instance=self.account
+            )
+        )
+
+    def test_object_have_not_permission_with_account(self):
+        self.request.user = self.user2
+
+        self.assertFalse(
+            self.IsAccountOwner.has_object_permission(
+                request=self.request, view=None, instance=self.account
+            )
+        )
 
 
 class CRUDAccountTest(TestCase):

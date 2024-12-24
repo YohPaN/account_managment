@@ -15,6 +15,20 @@ class IsOwner(permissions.BasePermission):
         return obj.user == request.user
 
 
+class IsAccountOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, instance):
+        if isinstance(instance, Item):
+            account = instance.account
+
+        elif isinstance(instance, AccountUserPermission):
+            account = instance.account_user.account
+
+        else:
+            account = instance
+
+        return account.user == request.user
+
+
 class CRUDPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, instance):
         method = request.method
