@@ -1,15 +1,21 @@
 from back_account_managment.models import (
-    Account,
     AccountUser,
     AccountUserPermission,
     Item,
 )
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
 from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS
 
 User = get_user_model()
+
+
+def determine_account(instance):
+    if isinstance(instance, Item):
+        return instance.account
+
+    else:
+        return instance
 
 
 class IsOwner(permissions.BasePermission):
@@ -17,15 +23,19 @@ class IsOwner(permissions.BasePermission):
         return obj.user == request.user
 
 
+class IsAccountOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, instance):
+        account = determine_account(instance)
+
+        return account.user == request.user
+
+
 class CRUDPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, instance):
         method = request.method
         ressource_name = instance.__class__.__name__.lower()
 
-        if isinstance(instance, Item):
-            account = instance.account
-        else:
-            account = instance
+        account = determine_account(instance)
 
         match method:
             case "GET":
@@ -43,20 +53,12 @@ class CRUDPermission(permissions.BasePermission):
             case _:
                 return False
 
-        if account.user == request.user:
-            return True
-
-        permission = Permission.objects.get(codename=codename)
-
         account_user = AccountUser.objects.filter(
             user=request.user, account=account
         ).first()
 
-        if account_user is None or account_user.state != "APPROVED":
-            return False
-
         account_user_permissions = AccountUserPermission.objects.filter(
-            account_user=account_user, permissions=permission
+            account_user=account_user, permissions__codename=codename
         ).first()
 
         if account_user_permissions is not None:
@@ -65,18 +67,15 @@ class CRUDPermission(permissions.BasePermission):
         return False
 
 
-class ManageAccountUserPermissions(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
+class IsAccountContributor(permissions.BasePermission):
+    def has_object_permission(self, request, view, instance):
+        account = determine_account(instance)
 
-        try:
-            account = Account.objects.get(pk=view.kwargs["account_id"])
+        account_user = AccountUser.objects.filter(
+            user=request.user, account=account
+        ).first()
 
-        except Account.DoesNotExist:
-            raise Account.DoesNotExist("Account does not exist")
-
-        if account.user == request.user:
+        if account_user is not None and account_user.state == "APPROVED":
             return True
 
         return False
@@ -84,40 +83,24 @@ class ManageAccountUserPermissions(permissions.BasePermission):
 
 class LinkItemUserPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method != "POST":
-            return True
-
-        user = request.user
-        username = request.data.get("username", None)
-        account = Account.objects.filter(
-            pk=view.kwargs.get("account_id")
-        ).first()
-
-        if account is None:
-            return False
-
-        if account.user == user:
+        if request.method in [*SAFE_METHODS, "DELETE"]:
             return True
 
         account_user = AccountUser.objects.get(
-            user=user,
-            account=account,
+            user=request.user,
+            account_id=view.kwargs.get("account_id"),
         )
 
-        link_user_item = AccountUserPermission.objects.filter(
+        permissions = AccountUserPermission.objects.filter(
             account_user=account_user,
-            permissions=Permission.objects.get(codename="link_user_item"),
-        ).first()
+        ).values_list("permissions__codename", flat=True)
 
-        add_item_without_user = AccountUserPermission.objects.filter(
-            account_user=account_user,
-            permissions=Permission.objects.get(
-                codename="add_item_without_user"
-            ),
-        ).first()
+        if "change_item" in permissions:
+            return True
+
+        username = request.data.get("username", None)
 
         if username is None:
-            return add_item_without_user is not None
-
+            return "add_item_without_user" in permissions
         else:
-            return link_user_item is not None
+            return "link_user_item" in permissions

@@ -9,9 +9,10 @@ from back_account_managment.models import (
 )
 from back_account_managment.permissions import (
     CRUDPermission,
+    IsAccountContributor,
+    IsAccountOwner,
     IsOwner,
     LinkItemUserPermission,
-    ManageAccountUserPermissions,
 )
 from back_account_managment.serializers import (
     AccountListSerializer,
@@ -41,7 +42,7 @@ User = get_user_model()
 class UserView(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsOwner, permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user(self, request):
@@ -132,7 +133,7 @@ class AccountView(ModelViewSet):
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
-        (IsOwner | CRUDPermission),
+        IsOwner | (IsAccountContributor & CRUDPermission),
     ]
 
     def get_serializer_context(self):
@@ -258,8 +259,14 @@ class ItemView(ModelViewSet):
     queryset = Item.objects.all()
     permission_classes = [
         permissions.IsAuthenticated,
-        CRUDPermission,
-        LinkItemUserPermission,
+        (
+            IsAccountOwner
+            | (
+                IsAccountContributor
+                & (IsOwner | CRUDPermission)
+                & LinkItemUserPermission
+            )
+        ),
     ]
 
     def perform_create(self, serializer):
@@ -308,10 +315,7 @@ class AccountUserView(ModelViewSet):
 
 class AccountUserPermissionView(ModelViewSet):
     serializer_class = AccountUserPermissionsSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        ManageAccountUserPermissions,
-    ]
+    permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
 
     def list(self, request, *args, **kwargs):
         codenames = [entry.codename for entry in self.get_queryset()]
@@ -339,6 +343,10 @@ class AccountUserPermissionView(ModelViewSet):
         )
 
     def create(self, request, *args, **kwargs):
+        account = Account.objects.get(pk=kwargs["account_id"])
+
+        self.check_object_permissions(request, account)
+
         account_user = AccountUser.objects.get(
             user=User.objects.get(username=kwargs.get("user_username")),
             account=kwargs.get("account_id"),
