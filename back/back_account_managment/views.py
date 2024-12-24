@@ -133,7 +133,7 @@ class AccountView(ModelViewSet):
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
-        (IsOwner | (IsAccountContributor, CRUDPermission)),
+        IsOwner | (IsAccountContributor & CRUDPermission),
     ]
 
     def get_serializer_context(self):
@@ -259,7 +259,7 @@ class ItemView(ModelViewSet):
     queryset = Item.objects.all()
     permission_classes = [
         permissions.IsAuthenticated,
-        (IsAccountOwner | IsOwner | (CRUDPermission, LinkItemUserPermission)),
+        (IsAccountOwner | IsOwner | (CRUDPermission & LinkItemUserPermission)),
     ]
 
     def perform_create(self, serializer):
