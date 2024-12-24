@@ -42,7 +42,7 @@ User = get_user_model()
 class UserView(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsOwner, permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user(self, request):
@@ -259,7 +259,14 @@ class ItemView(ModelViewSet):
     queryset = Item.objects.all()
     permission_classes = [
         permissions.IsAuthenticated,
-        (IsAccountOwner | IsOwner | (CRUDPermission & LinkItemUserPermission)),
+        (
+            IsAccountOwner
+            | (
+                IsAccountContributor
+                & (IsOwner | CRUDPermission)
+                & LinkItemUserPermission
+            )
+        ),
     ]
 
     def perform_create(self, serializer):

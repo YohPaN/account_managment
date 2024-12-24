@@ -10,6 +10,17 @@ from rest_framework.permissions import SAFE_METHODS
 User = get_user_model()
 
 
+def determine_account(instance):
+    if isinstance(instance, Item):
+        return instance.account
+
+    elif isinstance(instance, AccountUserPermission):
+        return instance.account_user.account
+
+    else:
+        return instance
+
+
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
@@ -17,14 +28,7 @@ class IsOwner(permissions.BasePermission):
 
 class IsAccountOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, instance):
-        if isinstance(instance, Item):
-            account = instance.account
-
-        elif isinstance(instance, AccountUserPermission):
-            account = instance.account_user.account
-
-        else:
-            account = instance
+        account = determine_account(instance)
 
         return account.user == request.user
 
@@ -34,10 +38,7 @@ class CRUDPermission(permissions.BasePermission):
         method = request.method
         ressource_name = instance.__class__.__name__.lower()
 
-        if isinstance(instance, Item):
-            account = instance.account
-        else:
-            account = instance
+        account = determine_account(instance)
 
         match method:
             case "GET":
@@ -71,10 +72,7 @@ class CRUDPermission(permissions.BasePermission):
 
 class IsAccountContributor(permissions.BasePermission):
     def has_object_permission(self, request, view, instance):
-        if isinstance(instance, Item):
-            account = instance.account
-        else:
-            account = instance
+        account = determine_account(instance)
 
         account_user = AccountUser.objects.filter(
             user=request.user, account=account
