@@ -8,8 +8,9 @@ from back_account_managment.models import (
 )
 from back_account_managment.permissions import (
     CRUDPermission,
+    IsAccountContributor,
     IsOwner,
-    ManageAccountUserPermissions,
+    LinkItemUserPermission,
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -100,16 +101,6 @@ class CRUDAccountTest(TestCase):
             )
         )
 
-    def test_get_for_not_contributor_user(self):
-        request = self.factory.get("/")
-        request.user = self.user2
-
-        self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
-
     def test_can_post(self):
         permission = Permission.objects.get(codename="add_account")
         account_user = AccountUser.objects.create(
@@ -131,16 +122,6 @@ class CRUDAccountTest(TestCase):
     def test_post_unauthorize(self):
         AccountUser.objects.create(account=self.account, user=self.user)
 
-        request = self.factory.post("/")
-        request.user = self.user2
-
-        self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
-
-    def test_post_for_not_contributor_user(self):
         request = self.factory.post("/")
         request.user = self.user2
 
@@ -180,16 +161,6 @@ class CRUDAccountTest(TestCase):
             )
         )
 
-    def test_put_for_not_contributor_user(self):
-        request = self.factory.put("/")
-        request.user = self.user2
-
-        self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
-
     def test_can_patch(self):
         permission = Permission.objects.get(codename="change_account")
         account_user = AccountUser.objects.create(
@@ -220,16 +191,6 @@ class CRUDAccountTest(TestCase):
             )
         )
 
-    def test_patch_for_not_contributor_user(self):
-        request = self.factory.patch("/")
-        request.user = self.user2
-
-        self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
-
     def test_can_delete(self):
         permission = Permission.objects.get(codename="delete_account")
         account_user = AccountUser.objects.create(
@@ -251,16 +212,6 @@ class CRUDAccountTest(TestCase):
     def test_delete_unauthorize(self):
         AccountUser.objects.create(account=self.account, user=self.user)
 
-        request = self.factory.delete("/")
-        request.user = self.user2
-
-        self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
-
-    def test_delete_for_not_contributor_user(self):
         request = self.factory.delete("/")
         request.user = self.user2
 
@@ -306,83 +257,183 @@ class CRUDAccountTest(TestCase):
             )
         )
 
-    def test_when_contributor_is_not_APPROVED(self):
-        permission = Permission.objects.get(codename="view_account")
-        account_user = AccountUser.objects.create(
-            account=self.account, user=self.user2
-        )
-        AccountUserPermission.objects.create(
-            account_user=account_user, permissions=permission
-        )
 
-        request = self.factory.get("/")
-        request.user = self.user2
-
-        self.assertEqual(account_user.state, "PENDING")
-        self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
-
-
-class ManageAccountUserPermissionsTest(TestCase):
+class IsAccountContributorTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
             username="JonDoe", email="jon@doe.test"
         )
 
-        self.user2 = User.objects.create(username="Jon", email="jo@do.tes")
-
-        self.account = Account.objects.create(
-            id=1, name="test", user=self.user
-        )
+        self.account = Account.objects.create(name="test", user=self.user)
 
         self.factory = APIRequestFactory()
 
-        self.ManageAccountUserPermissions = ManageAccountUserPermissions()
+        self.IsAccountContributor = IsAccountContributor
+
+    def test_is_account_contributor(self):
+        request = self.factory.get("/")
+        request.user = self.user
+
+        AccountUser.objects.create(
+            account=self.account, user=self.user, state="APPROVED"
+        )
+
+        self.assertTrue(
+            self.IsAccountContributor.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
+            )
+        )
+
+    def test_is_account_contributor_on_item_request(self):
+        request = self.factory.get("/")
+        request.user = self.user
+
+        item = Item.objects.create(
+            title="test",
+            description="test",
+            valuation=21.21,
+            account=self.account,
+            user=self.user,
+        )
+
+        AccountUser.objects.create(
+            account=self.account, user=self.user, state="APPROVED"
+        )
+
+        self.assertTrue(
+            self.IsAccountContributor.has_object_permission(
+                self=None, request=request, view=None, instance=item
+            )
+        )
+
+    def test_is_NOT_account_contributor(self):
+        request = self.factory.get("/")
+        request.user = self.user
+
+        self.assertFalse(
+            self.IsAccountContributor.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
+            )
+        )
+
+    def test_is_account_contributor_not_already_approved(self):
+        request = self.factory.get("/")
+        request.user = self.user
+
+        AccountUser.objects.create(
+            account=self.account, user=self.user, state="PENDING"
+        )
+
+        self.assertFalse(
+            self.IsAccountContributor.has_object_permission(
+                self=None, request=request, view=None, instance=self.account
+            )
+        )
+
+
+class LinkItemUserPermissionTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="JonDoe", email="jon@doe.test"
+        )
+
+        self.account = Account.objects.create(name="test", user=self.user)
+
+        self.account_user = AccountUser.objects.create(
+            account=self.account, user=self.user
+        )
 
         self.view = MagicMock()
+        self.view.kwargs = {
+            "account_id": self.account.pk,
+        }
+
+        self.factory = APIRequestFactory()
+        self.request = self.factory.post("/")
+        self.request.user = self.user
+
+        self.LinkItemUserPermission = LinkItemUserPermission()
 
     def test_safe_method(self):
         request = self.factory.get("/")
+        request.user = self.user
 
         self.assertTrue(
-            self.ManageAccountUserPermissions.has_permission(
+            self.LinkItemUserPermission.has_permission(
                 request=request, view=None
             )
         )
 
-    def test_account_not_exist(self):
-        request = self.factory.put("/")
-
-        self.view.kwargs = {"account_id": 2}
-
-        with self.assertRaises(Account.DoesNotExist):
-            self.ManageAccountUserPermissions.has_permission(
-                request=request, view=self.view
-            )
-
-    def test_can_manage(self):
-        request = self.factory.put("/")
+    def test_delete(self):
+        request = self.factory.delete("/")
         request.user = self.user
 
-        self.view.kwargs = {"account_id": 1}
-
         self.assertTrue(
-            self.ManageAccountUserPermissions.has_permission(
-                request=request, view=self.view
+            self.LinkItemUserPermission.has_permission(
+                request=request, view=None
             )
         )
 
-    def test_cannot_manage(self):
-        request = self.factory.put("/")
-        request.user = self.user2
+    def test_has_change_item_perm(self):
+        AccountUserPermission.objects.create(
+            account_user=self.account_user,
+            permissions=Permission.objects.get(codename="change_item"),
+        )
 
-        self.view.kwargs = {"account_id": 1}
+        self.assertTrue(
+            self.LinkItemUserPermission.has_permission(
+                request=self.request, view=self.view
+            )
+        )
+
+    def test_can_link_empty_item(self):
+        self.request.data = {}
+
+        AccountUserPermission.objects.create(
+            account_user=self.account_user,
+            permissions=Permission.objects.get(
+                codename="add_item_without_user"
+            ),
+        )
+
+        self.assertTrue(
+            self.LinkItemUserPermission.has_permission(
+                request=self.request, view=self.view
+            )
+        )
+
+    def test_unauthorize_link_empty_item(self):
+        self.request.data = {}
 
         self.assertFalse(
-            self.ManageAccountUserPermissions.has_permission(
-                request=request, view=self.view
+            self.LinkItemUserPermission.has_permission(
+                request=self.request, view=self.view
+            )
+        )
+
+    def test_can_link_user(self):
+        user2 = User.objects.create(username="JonDoe2", email="jon2@doe.test")
+
+        self.request.data = {"username": user2.username}
+
+        AccountUserPermission.objects.create(
+            account_user=self.account_user,
+            permissions=Permission.objects.get(codename="link_user_item"),
+        )
+
+        self.assertTrue(
+            self.LinkItemUserPermission.has_permission(
+                request=self.request, view=self.view
+            )
+        )
+
+    def test_unauthorize_link_user(self):
+        user2 = User.objects.create(username="JonDoe2", email="jon2@doe.test")
+
+        self.request.data = {"username": user2.username}
+
+        self.assertFalse(
+            self.LinkItemUserPermission.has_permission(
+                request=self.request, view=self.view
             )
         )
