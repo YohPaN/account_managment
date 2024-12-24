@@ -107,28 +107,6 @@ class IsAccountOwnerPermissionTest(TestCase):
             )
         )
 
-    def test_object_have_permission_with_account_user_permission(self):
-        self.request.user = self.user
-
-        self.assertTrue(
-            self.IsAccountOwner.has_object_permission(
-                request=self.request,
-                view=None,
-                instance=self.account_user_permission,
-            )
-        )
-
-    def test_object_have_not_permission_with_account_user_permission(self):
-        self.request.user = self.user2
-
-        self.assertFalse(
-            self.IsAccountOwner.has_object_permission(
-                request=self.request,
-                view=None,
-                instance=self.account_user_permission,
-            )
-        )
-
     def test_object_have_permission_with_account(self):
         self.request.user = self.user
 

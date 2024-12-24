@@ -14,9 +14,6 @@ def determine_account(instance):
     if isinstance(instance, Item):
         return instance.account
 
-    elif isinstance(instance, AccountUserPermission):
-        return instance.account_user.account
-
     else:
         return instance
 

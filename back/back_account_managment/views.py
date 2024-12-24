@@ -343,6 +343,10 @@ class AccountUserPermissionView(ModelViewSet):
         )
 
     def create(self, request, *args, **kwargs):
+        account = Account.objects.get(pk=kwargs["account_id"])
+
+        self.check_object_permissions(request, account)
+
         account_user = AccountUser.objects.get(
             user=User.objects.get(username=kwargs.get("user_username")),
             account=kwargs.get("account_id"),
