@@ -50,7 +50,10 @@ class _LayoutState extends State<Layout> {
   @override
   Widget build(BuildContext context) {
     var currentPageIndex = Provider.of<NavigationIndex>(context).getIndex;
-    Provider.of<ProfileViewModel>(context, listen: false).getProfile();
+    final ProfileViewModel profileViewModel =
+        Provider.of<ProfileViewModel>(context, listen: false);
+
+    if (profileViewModel.user == null) profileViewModel.getProfile();
 
     return SafeArea(
         child: Scaffold(

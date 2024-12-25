@@ -151,11 +151,6 @@ class AccountViewModel extends ChangeNotifier {
     return repoResponse;
   }
 
-  Future<void> refreshAccount() async {
-    await getAccount(account?.id);
-    listAccount();
-  }
-
   Future<RepoResponse> createItem({
     required String title,
     required String description,
