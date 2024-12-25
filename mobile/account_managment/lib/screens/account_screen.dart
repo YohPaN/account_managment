@@ -135,8 +135,10 @@ class AccountScreen extends StatelessWidget {
                       ),
                       Expanded(
                         child: RefreshIndicator(
-                          onRefresh: () async =>
-                              {await accountViewModel.refreshAccount()},
+                          onRefresh: () async => {
+                            await accountViewModel
+                                .getAccount(accountViewModel.account?.id)
+                          },
                           child: ListView.builder(
                             itemCount:
                                 accountViewModel.account!.items.length ?? 0,
