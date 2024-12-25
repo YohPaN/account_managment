@@ -16,8 +16,8 @@ class InternalNotification extends ChangeNotifier {
         closeButtonShowType: CloseButtonShowType.none);
   }
 
-  void showPendingAccountRequest(int count) {
-    toastification.show(
+  ToastificationItem showPendingAccountRequest(int count) {
+    return toastification.show(
       type: ToastificationType.warning,
       style: ToastificationStyle.flatColored,
       title: const Text("Account ask"),
