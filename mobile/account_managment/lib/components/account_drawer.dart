@@ -1,7 +1,6 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/components/permission_checkbox.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/models/contributor.dart';
@@ -71,10 +70,6 @@ class _AccountDrawerState extends State<AccountDrawer> {
     final accountViewModel = Provider.of<AccountViewModel>(context);
     final profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
-
-    if (profileViewModel.user == null) {
-      profileViewModel.getProfile();
-    }
 
     createOrUpdate() async {
       var response;
@@ -301,10 +296,11 @@ class _AccountDrawerState extends State<AccountDrawer> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (HasPermissions.hasPermissions(
-                      ressource: "account",
-                      action: "update",
-                      permissions: accountViewModel.account!.permissions))
+                  if (profileViewModel.user!.hasPermission(
+                    account: widget.account,
+                    permissionsNeeded: ["change_account"],
+                    permissions: widget.account!.permissions,
+                  ))
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
@@ -319,10 +315,12 @@ class _AccountDrawerState extends State<AccountDrawer> {
                       child: Text('${widget.action} account'.capitalize()),
                     ),
                   if (widget.action == "update" &&
-                      HasPermissions.hasPermissions(
-                          ressource: "account",
-                          action: "delete",
-                          permissions: accountViewModel.account!.permissions))
+                      profileViewModel.user!.hasPermission(
+                        account: widget.account,
+                        permissionsNeeded: ["delete_account"],
+                        permissions: widget.account!.permissions,
+                      ) &&
+                      !widget.account!.isMain)
                     ElevatedButton(
                       onPressed: () async {
                         final RepoResponse repoResponse = await accountViewModel

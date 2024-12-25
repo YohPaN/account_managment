@@ -1,10 +1,10 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -66,6 +66,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
   Widget build(BuildContext context) {
     final AccountViewModel accountViewModel =
         Provider.of<AccountViewModel>(context, listen: false);
+    final ProfileViewModel profileViewModel =
+        Provider.of<ProfileViewModel>(context, listen: false);
 
     switchButton(index) {
       setState(() {
@@ -79,15 +81,17 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
     final List<DropdownMenuEntry<String>> menuEntries = [
       DropdownMenuEntry<String>(
-        value: accountViewModel.account!.user,
+        value: accountViewModel.account!.username,
         label: "Me",
       ),
     ];
 
     if (widget.action == "update" ||
-        HasPermissions.hasSpecificPerm(
-            permission: "link_user_item",
-            permissions: accountViewModel.account!.permissions)) {
+        profileViewModel.user!.hasPermission(
+          account: accountViewModel.account,
+          permissionsNeeded: ["link_user_item"],
+          permissions: accountViewModel.account!.permissions,
+        )) {
       menuEntries.addAll(
         accountViewModel.account!.contributor.map(
           (contributor) => DropdownMenuEntry<String>(
@@ -99,8 +103,9 @@ class _ItemDrawerState extends State<ItemDrawer> {
     }
 
     if (widget.action == "update" ||
-        HasPermissions.hasSpecificPerm(
-          permission: "add_item_without_user",
+        profileViewModel.user!.hasPermission(
+          account: accountViewModel.account,
+          permissionsNeeded: ["add_item_without_user"],
           permissions: accountViewModel.account!.permissions,
         )) {
       menuEntries.add(
@@ -110,7 +115,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
         ),
       );
     } else {
-      _username = accountViewModel.account!.user;
+      _username = accountViewModel.account!.username;
     }
 
     createOrUpdate() async {
@@ -203,10 +208,12 @@ class _ItemDrawerState extends State<ItemDrawer> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   if (widget.action == "update" &&
-                      HasPermissions.hasPermissions(
-                          ressource: "item",
-                          action: "delete",
-                          permissions: accountViewModel.account!.permissions))
+                      profileViewModel.user!.hasPermission(
+                        ressource: widget.item,
+                        account: accountViewModel.account,
+                        permissionsNeeded: ["delete_item"],
+                        permissions: accountViewModel.account!.permissions,
+                      ))
                     ElevatedButton(
                       onPressed: () async {
                         RepoResponse repoResponse =
@@ -219,10 +226,14 @@ class _ItemDrawerState extends State<ItemDrawer> {
                       },
                       child: const Text('Delete Item'),
                     ),
-                  if (HasPermissions.hasPermissions(
-                      ressource: "item",
-                      action: widget.action,
-                      permissions: accountViewModel.account!.permissions))
+                  if (profileViewModel.user!.hasPermission(
+                    ressource: widget.item,
+                    account: accountViewModel.account,
+                    permissionsNeeded: [
+                      "${widget.action == "update" ? "change" : "add"}_item"
+                    ],
+                    permissions: accountViewModel.account!.permissions,
+                  ))
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
