@@ -3,8 +3,10 @@ from back_account_managment.models import (
     AccountUser,
     AccountUserPermission,
 )
-from back_account_managment.serializers import (
+from back_account_managment.serializers.account_serializer import (
     AccountSerializer,
+)
+from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
     AccountUserPermissionsSerializer,
 )
 from django.contrib.auth import get_user_model
@@ -14,18 +16,6 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 
 User = get_user_model()
-
-
-class UserSerializerTest(TestCase):
-    """Nothing to test"""
-
-
-class ProfileSerializerTest(TestCase):
-    """Nothing to test"""
-
-
-class UserAccountUserSerializerTest(TestCase):
-    """Nothing to test"""
 
 
 class AccountSerializerTest(TestCase):
@@ -101,18 +91,6 @@ class AccountSerializerTest(TestCase):
         with self.assertRaises(AccountUser.DoesNotExist):
             serializer = AccountSerializer(context={"request": self.request})
             serializer.get_permissions(self.account)
-
-
-class ItemSerializerTest(TestCase):
-    """Nothing to test"""
-
-
-class AccountUserSerializerTest(TestCase):
-    """Nothing to test"""
-
-
-class ManageAccountSerializerTest(TestCase):
-    """Nothing to test"""
 
 
 class AccountUserPermissionSerializerTest(TestCase):

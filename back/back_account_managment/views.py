@@ -14,13 +14,19 @@ from back_account_managment.permissions import (
     LinkItemUserPermission,
     ManageRessourcePermission,
 )
-from back_account_managment.serializers import (
+from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
     AccountUserPermissionsSerializer,
+    MinimalAccountSerilizer,
+)
+from back_account_managment.serializers.account_user_serializer import (
     AccountUserSerializer,
+)
+from back_account_managment.serializers.item_serializer import (
     ItemWriteSerializer,
-    ManageAccountSerializer,
+)
+from back_account_managment.serializers.user_serializer import (
     ProfileSerializer,
     RegisterUserSerializer,
     UserSerializer,
@@ -185,7 +191,7 @@ class AccountView(ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        serializer = ManageAccountSerializer(
+        serializer = MinimalAccountSerilizer(
             data={**request.data, "user": request.user.id}
         )
 
@@ -206,7 +212,7 @@ class AccountView(ModelViewSet):
     def partial_update(self, request, pk):
         account = Account.objects.get(pk=pk)
 
-        serializer = ManageAccountSerializer(
+        serializer = MinimalAccountSerilizer(
             account, data=request.data, partial=True
         )
 
