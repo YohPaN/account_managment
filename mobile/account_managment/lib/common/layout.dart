@@ -9,6 +9,7 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class Layout extends StatefulWidget {
   const Layout({super.key});
@@ -25,6 +26,8 @@ class _LayoutState extends State<Layout> {
     const SettingScreen(),
   ];
 
+  late final ToastificationItem toastPendingAccountRequest;
+
   @override
   void initState() {
     super.initState();
@@ -40,10 +43,11 @@ class _LayoutState extends State<Layout> {
     if (Provider.of<AccountUserViewModel>(context, listen: false)
             .accountUsersCount >
         0) {
-      Provider.of<InternalNotification>(context, listen: false)
-          .showPendingAccountRequest(
-              Provider.of<AccountUserViewModel>(context, listen: false)
-                  .accountUsersCount);
+      toastPendingAccountRequest =
+          Provider.of<InternalNotification>(context, listen: false)
+              .showPendingAccountRequest(
+                  Provider.of<AccountUserViewModel>(context, listen: false)
+                      .accountUsersCount);
     }
   }
 
@@ -98,6 +102,8 @@ class _LayoutState extends State<Layout> {
         ],
         onDestinationSelected: (index) {
           setState(() {
+            toastification.dismiss(toastPendingAccountRequest);
+
             Provider.of<NavigationIndex>(context, listen: false)
                 .changeIndex(index);
           });
