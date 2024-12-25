@@ -7,11 +7,11 @@ from back_account_managment.models import (
     Item,
 )
 from back_account_managment.permissions import (
-    CRUDPermission,
     IsAccountContributor,
     IsAccountOwner,
     IsOwner,
     LinkItemUserPermission,
+    ManageRessourcePermission,
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -39,8 +39,8 @@ class IsOwnerPermissionTest(TestCase):
         obj = Mock()
         obj.user = User.objects.get(username="JonDoe")
 
-        isOwner = IsOwner.has_object_permission(
-            self=None, request=self.request, view=None, obj=obj
+        isOwner = IsOwner().has_object_permission(
+            request=self.request, view=None, obj=obj
         )
 
         self.assertTrue(isOwner)
@@ -49,8 +49,8 @@ class IsOwnerPermissionTest(TestCase):
         obj = Mock()
         obj.user = User.objects.get(username="FooBar")
 
-        isOwner = IsOwner.has_object_permission(
-            self=None, request=self.request, view=None, obj=obj
+        isOwner = IsOwner().has_object_permission(
+            request=self.request, view=None, obj=obj
         )
 
         self.assertFalse(isOwner)
@@ -126,7 +126,7 @@ class IsAccountOwnerPermissionTest(TestCase):
         )
 
 
-class CRUDAccountTest(TestCase):
+class ManageRessourcePermissionTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
             username="JonDoe", email="jon@doe.test"
@@ -140,37 +140,7 @@ class CRUDAccountTest(TestCase):
 
         self.factory = APIRequestFactory()
 
-        self.CRUDPermission = CRUDPermission
-
-    def test_can_get(self):
-        permission = Permission.objects.get(codename="view_account")
-        account_user = AccountUser.objects.create(
-            account=self.account, user=self.user
-        )
-        AccountUserPermission.objects.create(
-            account_user=account_user, permissions=permission
-        )
-
-        request = self.factory.get("/")
-        request.user = self.user
-
-        self.assertTrue(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
-
-    def test_get_unauthorize(self):
-        AccountUser.objects.create(account=self.account, user=self.user)
-
-        request = self.factory.get("/")
-        request.user = self.user2
-
-        self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
-            )
-        )
+        self.ManageRessourcePermission = ManageRessourcePermission()
 
     def test_can_post(self):
         permission = Permission.objects.get(codename="add_account")
@@ -185,8 +155,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -197,8 +167,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user2
 
         self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -215,8 +185,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -227,8 +197,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user2
 
         self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -245,8 +215,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -257,8 +227,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user2
 
         self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -275,8 +245,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -287,8 +257,8 @@ class CRUDAccountTest(TestCase):
         request.user = self.user2
 
         self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -298,13 +268,13 @@ class CRUDAccountTest(TestCase):
         request.method = "OTHER"
 
         self.assertFalse(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
-    def test_can_get_item(self):
-        permission = Permission.objects.get(codename="view_item")
+    def test_can_post_item(self):
+        permission = Permission.objects.get(codename="add_item")
         item = Item.objects.create(
             title="test",
             description="test",
@@ -319,12 +289,22 @@ class CRUDAccountTest(TestCase):
             account_user=account_user, permissions=permission
         )
 
+        request = self.factory.post("/")
+        request.user = self.user
+
+        self.assertTrue(
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=item
+            )
+        )
+
+    def test_can_safe_method(self):
         request = self.factory.get("/")
         request.user = self.user
 
         self.assertTrue(
-            self.CRUDPermission.has_object_permission(
-                self=None, request=request, view=None, instance=item
+            self.ManageRessourcePermission.has_object_permission(
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -339,7 +319,7 @@ class IsAccountContributorTest(TestCase):
 
         self.factory = APIRequestFactory()
 
-        self.IsAccountContributor = IsAccountContributor
+        self.IsAccountContributor = IsAccountContributor()
 
     def test_is_account_contributor(self):
         request = self.factory.get("/")
@@ -351,7 +331,7 @@ class IsAccountContributorTest(TestCase):
 
         self.assertTrue(
             self.IsAccountContributor.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -373,7 +353,7 @@ class IsAccountContributorTest(TestCase):
 
         self.assertTrue(
             self.IsAccountContributor.has_object_permission(
-                self=None, request=request, view=None, instance=item
+                request=request, view=None, instance=item
             )
         )
 
@@ -383,7 +363,7 @@ class IsAccountContributorTest(TestCase):
 
         self.assertFalse(
             self.IsAccountContributor.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+                request=request, view=None, instance=self.account
             )
         )
 
@@ -397,7 +377,7 @@ class IsAccountContributorTest(TestCase):
 
         self.assertFalse(
             self.IsAccountContributor.has_object_permission(
-                self=None, request=request, view=None, instance=self.account
+                request=request, view=None, instance=self.account
             )
         )
 

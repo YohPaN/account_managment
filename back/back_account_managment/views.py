@@ -8,11 +8,11 @@ from back_account_managment.models import (
     Profile,
 )
 from back_account_managment.permissions import (
-    CRUDPermission,
     IsAccountContributor,
     IsAccountOwner,
     IsOwner,
     LinkItemUserPermission,
+    ManageRessourcePermission,
 )
 from back_account_managment.serializers import (
     AccountListSerializer,
@@ -133,7 +133,7 @@ class AccountView(ModelViewSet):
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
-        IsOwner | (IsAccountContributor & CRUDPermission),
+        IsOwner | (IsAccountContributor & ManageRessourcePermission),
     ]
 
     def get_serializer_context(self):
@@ -263,7 +263,7 @@ class ItemView(ModelViewSet):
             IsAccountOwner
             | (
                 IsAccountContributor
-                & (IsOwner | CRUDPermission)
+                & (IsOwner | ManageRessourcePermission)
                 & LinkItemUserPermission
             )
         ),

@@ -30,17 +30,18 @@ class IsAccountOwner(permissions.BasePermission):
         return account.user == request.user
 
 
-class CRUDPermission(permissions.BasePermission):
+class ManageRessourcePermission(permissions.BasePermission):
     def has_object_permission(self, request, view, instance):
         method = request.method
+
+        if request.method in SAFE_METHODS:
+            return True
+
         ressource_name = instance.__class__.__name__.lower()
 
         account = determine_account(instance)
 
         match method:
-            case "GET":
-                codename = f"view_{ressource_name}"
-
             case "POST":
                 codename = f"add_{ressource_name}"
 

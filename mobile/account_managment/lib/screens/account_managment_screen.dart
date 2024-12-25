@@ -1,6 +1,5 @@
 import 'package:account_managment/components/account_drawer.dart';
 import 'package:account_managment/components/account_list_item.dart';
-import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
@@ -81,12 +80,17 @@ class AccountManagmentScreen extends StatelessWidget {
                               account:
                                   accountViewModel.contributorAccounts![index],
                               callbackFunc: showModal,
-                              canManage: HasPermissions.hasPermissions(
-                                  ressource: "account",
-                                  action: "updateOrDelete",
-                                  permissions: accountViewModel
-                                      .contributorAccounts![index].permissions,
-                                  strict: false),
+                              canManage: profileViewModel.user!.hasPermission(
+                                account: accountViewModel
+                                    .contributorAccounts![index],
+                                permissionsNeeded: [
+                                  "change_account",
+                                  "delete_account"
+                                ],
+                                permissions: accountViewModel
+                                    .contributorAccounts![index].permissions,
+                                strict: false,
+                              ),
                             );
                           },
                         ),

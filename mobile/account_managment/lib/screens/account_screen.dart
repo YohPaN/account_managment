@@ -1,10 +1,10 @@
 import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/helpers/has_permissions.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +15,8 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final accountViewModel =
         Provider.of<AccountViewModel>(context, listen: false);
+    final ProfileViewModel profileViewModel =
+        Provider.of<ProfileViewModel>(context, listen: false);
 
     showModal(String action, [Item? item]) {
       showModalBottomSheet(
@@ -159,12 +161,18 @@ class AccountScreen extends StatelessWidget {
                                       item: accountViewModel
                                           .account!.items[index],
                                       callbackFunc: showModal,
-                                      canManage: HasPermissions.hasPermissions(
-                                          ressource: "item",
-                                          action: "updateOrDelete",
-                                          permissions: accountViewModel
-                                              .account!.permissions,
-                                          strict: false),
+                                      canManage: profileViewModel.user!
+                                          .hasPermission(
+                                              ressource: accountViewModel
+                                                  .account!.items[index],
+                                              account: accountViewModel.account,
+                                              permissionsNeeded: [
+                                                "change_item",
+                                                "delete_item"
+                                              ],
+                                              permissions: accountViewModel
+                                                  .account!.permissions,
+                                              strict: false),
                                     ),
                                   ),
                                 ),
@@ -176,10 +184,11 @@ class AccountScreen extends StatelessWidget {
                     ],
                   ),
                   floatingActionButton: Visibility(
-                    visible: HasPermissions.hasPermissions(
-                        ressource: "item",
-                        action: "create",
-                        permissions: accountViewModel.account!.permissions),
+                    visible: profileViewModel.user!.hasPermission(
+                      account: accountViewModel.account,
+                      permissionsNeeded: ["add_item"],
+                      permissions: accountViewModel.account!.permissions,
+                    ),
                     child: FloatingActionButton(
                       onPressed: () => showModal("create"),
                       foregroundColor: Theme.of(context).colorScheme.primary,
