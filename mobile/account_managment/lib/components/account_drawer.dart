@@ -202,89 +202,90 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                 ],
                               ),
                               children: [
-                                widget.action == "create"
-                                    ? const Text(
-                                        "You have to create the account before managing permissions",
-                                      )
-                                    : FutureBuilder(
-                                        future: accountViewModel
-                                            .listItemPermissions(
-                                          accountId: widget.account!.id,
-                                          username: _usersToAdd[index].username,
-                                        ),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.hasData) {
-                                            if (snapshot.data!.success) {
-                                              final List<String> permissions = [
-                                                ...snapshot
-                                                    .data!.data?["permissions"],
-                                              ];
+                                if (widget.action == "create")
+                                  const Text(
+                                    "You have to create the account before managing permissions",
+                                  )
+                                else if (widget.action == "update" &&
+                                    !widget.account!.contributor.any(
+                                        (contributor) =>
+                                            contributor.username ==
+                                            _usersToAdd[index].username))
+                                  const Text(
+                                    "You have to add the user before managing his permissions",
+                                  )
+                                else if (widget.account!.username ==
+                                    profileViewModel.user!.username)
+                                  FutureBuilder(
+                                    future:
+                                        accountViewModel.listItemPermissions(
+                                      accountId: widget.account!.id,
+                                      username: _usersToAdd[index].username,
+                                    ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        if (snapshot.data!.success) {
+                                          final List<String> permissions = [
+                                            ...snapshot
+                                                .data!.data?["permissions"],
+                                          ];
 
-                                              return Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  const Text("Permissions"),
-                                                  PermissionCheckbox(
-                                                      permissions: permissions,
-                                                      permissionsCodename:
-                                                          "add_item",
-                                                      accountId:
-                                                          widget.account!.id,
-                                                      username:
-                                                          _usersToAdd[index]
-                                                              .username),
-                                                  PermissionCheckbox(
-                                                      permissions: permissions,
-                                                      permissionsCodename:
-                                                          "change_item",
-                                                      accountId:
-                                                          widget.account!.id,
-                                                      username:
-                                                          _usersToAdd[index]
-                                                              .username),
-                                                  PermissionCheckbox(
-                                                      permissions: permissions,
-                                                      permissionsCodename:
-                                                          "delete_item",
-                                                      accountId:
-                                                          widget.account!.id,
-                                                      username:
-                                                          _usersToAdd[index]
-                                                              .username),
-                                                  ElevatedButton(
-                                                    onPressed: () =>
-                                                        _removeUser(index),
-                                                    child: const Text("Delete"),
-                                                  ),
-                                                ],
-                                              );
-                                            } else {
-                                              return Center(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      36.0),
-                                                  child: Text(
-                                                    snapshot.data!.message,
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: 34.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.red[700],
-                                                    ),
-                                                  ),
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text("Permissions"),
+                                              PermissionCheckbox(
+                                                  permissions: permissions,
+                                                  permissionsCodename:
+                                                      "add_item",
+                                                  accountId: widget.account!.id,
+                                                  username: _usersToAdd[index]
+                                                      .username),
+                                              PermissionCheckbox(
+                                                  permissions: permissions,
+                                                  permissionsCodename:
+                                                      "change_item",
+                                                  accountId: widget.account!.id,
+                                                  username: _usersToAdd[index]
+                                                      .username),
+                                              PermissionCheckbox(
+                                                  permissions: permissions,
+                                                  permissionsCodename:
+                                                      "delete_item",
+                                                  accountId: widget.account!.id,
+                                                  username: _usersToAdd[index]
+                                                      .username),
+                                            ],
+                                          );
+                                        } else {
+                                          return Center(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(36.0),
+                                              child: Text(
+                                                snapshot.data!.message,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 34.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.red[700],
                                                 ),
-                                              );
-                                            }
-                                          } else {
-                                            return const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            );
-                                          }
-                                        },
-                                      )
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ElevatedButton(
+                                  onPressed: () => _removeUser(index),
+                                  child: const Text("Delete"),
+                                ),
                               ],
                             ),
                           ),
@@ -296,11 +297,12 @@ class _AccountDrawerState extends State<AccountDrawer> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (profileViewModel.user!.hasPermission(
-                    account: widget.account,
-                    permissionsNeeded: ["change_account"],
-                    permissions: widget.account!.permissions,
-                  ))
+                  if (widget.action == "create" ||
+                      profileViewModel.user!.hasPermission(
+                        account: widget.account,
+                        permissionsNeeded: ["change_account"],
+                        permissions: widget.account!.permissions,
+                      ))
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
