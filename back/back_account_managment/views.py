@@ -176,15 +176,7 @@ class AccountView(ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user_account(self, request, pk=None):
-        user = request.user
-
-        try:
-            account = Account.objects.get(user=user, is_main=True)
-        except Account.DoesNotExist:
-            return Response(
-                {"detail": "Account not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        account = get_object_or_404(Account, user=request.user, is_main=True)
 
         serializer = self.get_serializer(account)
 
@@ -247,10 +239,10 @@ class AccountView(ModelViewSet):
         return Response(status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk):
-        instance = self.get_object()
+        account = self.get_object()
 
-        if not instance.is_main:
-            instance.delete()
+        if not account.is_main:
+            account.delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -323,40 +315,30 @@ class AccountUserPermissionView(ModelViewSet):
     serializer_class = AccountUserPermissionsSerializer
     permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
 
-    def list(self, request, *args, **kwargs):
-        codenames = [entry.codename for entry in self.get_queryset()]
-        return Response({"permissions": codenames})
-
     def get_queryset(self):
-        try:
-            account_user = AccountUser.objects.get(
-                user=User.objects.get(
-                    username=self.kwargs.get("user_username")
-                ),
-                account=self.kwargs.get("account_id"),
-            )
-        except AccountUser.DoesNotExist:
-            raise AccountUser.DoesNotExist(
-                "This user is not a contributor of this account"
-            )
+        return AccountUser.objects.get(
+            user=User.objects.get(username=self.kwargs.get("user_username")),
+            account=self.kwargs.get("account_id"),
+        )
 
-        return Permission.objects.filter(
+    def list(self, request, *args, **kwargs):
+        queryset = Permission.objects.filter(
             Exists(
                 AccountUserPermission.objects.filter(
-                    account_user=account_user, permissions=OuterRef("pk")
+                    account_user=self.get_queryset(),
+                    permissions=OuterRef("pk"),
                 )
             )
         )
+        codenames = [entry.codename for entry in queryset]
+        return Response({"permissions": codenames})
 
     def create(self, request, *args, **kwargs):
         account = Account.objects.get(pk=kwargs["account_id"])
 
         self.check_object_permissions(request, account)
 
-        account_user = AccountUser.objects.get(
-            user=User.objects.get(username=kwargs.get("user_username")),
-            account=kwargs.get("account_id"),
-        )
+        account_user = self.get_queryset()
 
         permissions_to_remove = AccountUserPermission.objects.exclude(
             account_user=account_user,
