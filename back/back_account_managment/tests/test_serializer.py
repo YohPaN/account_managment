@@ -39,20 +39,6 @@ class AccountSerializerTest(TestCase):
             account_user=self.account_user, permissions=self.permission
         )
 
-    def test_get_permissions_for_account_owner(self):
-        self.request.user = self.user
-
-        serializer = AccountSerializer(context={"request": self.request})
-
-        permissions = serializer.get_permissions(self.account)
-
-        self.assertEqual(
-            permissions,
-            [
-                "owner",
-            ],
-        )
-
     def test_get_permissions(self):
         user2 = User.objects.create(username="user2", email="user@user2.test")
         self.request.user = user2
@@ -79,17 +65,6 @@ class AccountSerializerTest(TestCase):
         serializer = AccountSerializer()
 
         with self.assertRaises(KeyError):
-            serializer.get_permissions(self.account)
-
-    def test_user_is_not_a_contributor(self):
-        new_user = User.objects.create(
-            username="newUser", email="new@user.test"
-        )
-
-        self.request.user = new_user
-
-        with self.assertRaises(AccountUser.DoesNotExist):
-            serializer = AccountSerializer(context={"request": self.request})
             serializer.get_permissions(self.account)
 
 

@@ -61,10 +61,7 @@ class UserView(ModelViewSet):
             request.user, data=request.data, partial=True
         )
 
-        try:
-            profile = Profile.objects.get(user=request.user)
-        except Profile.DoesNotExist:
-            profile = None
+        profile = get_object_or_404(Profile, user=request.user)
 
         profile_serializer = ProfileSerializer(
             profile, data=request.data, partial=True
