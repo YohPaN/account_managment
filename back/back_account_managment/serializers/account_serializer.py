@@ -36,6 +36,7 @@ class AccountMeta:
         "permissions",
         "total",
         "user",
+        "salary_based_split",
     ]
 
 
@@ -126,6 +127,7 @@ class AccountListSerializer(_AccountSerializer):
                 "permissions",
                 "total",
                 "user",
+                "salary_based_split",
             ]
         ]
 

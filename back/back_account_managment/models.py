@@ -31,6 +31,7 @@ class Account(models.Model):
     name = models.CharField(max_length=50)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
+    salary_based_split = models.BooleanField(default=False)
 
     class Meta:
         permissions = [

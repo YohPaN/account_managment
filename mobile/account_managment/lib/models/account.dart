@@ -12,6 +12,7 @@ class Account {
   List<dynamic> permissions;
   String username;
   double? total;
+  bool? salaryBasedSplit;
 
   Account({
     required this.id,
@@ -23,6 +24,7 @@ class Account {
     required this.contributor,
     required this.permissions,
     required this.username,
+    required this.salaryBasedSplit,
     this.total,
   });
 
@@ -42,6 +44,7 @@ class Account {
       permissions: jsonAccount["permissions"],
       username: jsonAccount["user"]["username"],
       total: jsonAccount["total"]["total_sum"],
+      salaryBasedSplit: jsonAccount["salary_based_split"],
     );
   }
 }

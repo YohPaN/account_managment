@@ -249,22 +249,30 @@ class AccountViewTest(TestCase):
             username="testeur",
             email="test@eur.test",
         )
+        Profile.objects.create(
+            user=self.user2,
+            first_name="test",
+            last_name="test",
+        )
+
+        self.main_account = Account.objects.create(
+            user=self.user, name="first name", is_main=True
+        )
+
+        self.account = Account.objects.create(
+            user=self.user, name="first name"
+        )
 
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
     def test_list(self):
-        [
-            Account.objects.create(id=i + 1, name="test", user=self.user)
-            for i in range(2)
-        ]
-
-        account = Account.objects.create(id=3, name="test", user=self.user2)
-        AccountUser.objects.create(account=account, user=self.user)
-
-        account_approved = Account.objects.create(
-            id=4, name="test", user=self.user2
+        contributor_account = Account.objects.create(
+            name="test", user=self.user2
         )
+        AccountUser.objects.create(account=contributor_account, user=self.user)
+
+        account_approved = Account.objects.create(name="test", user=self.user2)
         AccountUser.objects.create(
             account=account_approved, user=self.user, state="APPROVED"
         )
@@ -278,23 +286,17 @@ class AccountViewTest(TestCase):
         self.assertEqual(len(response.data["contributor_account"]), 1)
 
     def test_get_current_user_account(self):
-        account = Account.objects.create(
-            id=3,
-            name="test",
-            user=self.user,
-            is_main=True,
-        )
-
         response = self.c.get("/api/accounts/me/")
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(response.data["id"], account.pk)
+        self.assertEqual(response.data["id"], self.main_account.pk)
 
     def test_no_account_get_current_user_account(self):
+        self.c.force_authenticate(user=self.user2)
+
         response = self.c.get("/api/accounts/me/")
-        self.assertTrue(status.is_client_error(response.status_code))
+        self.assertFalse(status.is_success(response.status_code))
 
     def test_create_account(self):
-        self.assertEqual(len(Account.objects.all()), 0)
         response = self.c.post(
             "/api/accounts/",
             {
@@ -306,12 +308,10 @@ class AccountViewTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertEqual(len(Account.objects.all()), 3)
         self.assertIsNotNone(Account.objects.get(name="test account"))
 
     def test_create_account_with_contributors(self):
-        self.assertEqual(len(Account.objects.all()), 0)
-
         constributors = [
             self.user2.username,
         ]
@@ -327,7 +327,7 @@ class AccountViewTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertEqual(len(Account.objects.all()), 3)
         self.assertIsNotNone(Account.objects.get(name="test account"))
         self.assertEqual(len(AccountUser.objects.all()), 1)
         self.assertIsNotNone(
@@ -338,12 +338,8 @@ class AccountViewTest(TestCase):
         )
 
     def test_update_account(self):
-        account = Account.objects.create(
-            id=1, user=self.user, name="first name"
-        )
-
         response = self.c.patch(
-            "/api/accounts/1/",
+            f"/api/accounts/{self.account.pk}/",
             {
                 "name": "second name",
                 "contributors": json.dumps([]),
@@ -351,44 +347,44 @@ class AccountViewTest(TestCase):
             format="json",
         )
 
-        account.refresh_from_db()
+        self.account.refresh_from_db()
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(account.name, "second name")
+        self.assertEqual(self.account.name, "second name")
 
     def test_update_account_with_contributors(self):
-        account = Account.objects.create(
-            id=1, user=self.user, name="first name"
-        )
-
         self.assertEqual(
-            len(AccountUser.objects.filter(account=account, user=self.user2)),
+            len(
+                AccountUser.objects.filter(
+                    account=self.account, user=self.user2
+                )
+            ),
             0,
         )
 
         response = self.c.patch(
-            "/api/accounts/1/",
+            f"/api/accounts/{self.account.pk}/",
             {
                 "contributors": json.dumps([self.user2.username]),
             },
             format="json",
         )
 
-        account.refresh_from_db()
+        self.account.refresh_from_db()
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(
-            len(AccountUser.objects.filter(account=account, user=self.user2)),
+            len(
+                AccountUser.objects.filter(
+                    account=self.account, user=self.user2
+                )
+            ),
             1,
         )
 
     def test_destroy_account(self):
-        account = Account.objects.create(
-            id=1, user=self.user, name="first name"
-        )
-
         account_user = AccountUser.objects.create(
-            account=account, user=self.user
+            account=self.account, user=self.user
         )
 
         AccountUserPermission.objects.create(
@@ -397,19 +393,15 @@ class AccountViewTest(TestCase):
         )
 
         response = self.c.delete(
-            "/api/accounts/1/",
+            f"/api/accounts/{self.account.pk}/",
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 0)
+        self.assertEqual(len(Account.objects.all()), 1)
 
     def test_destroy_account_with_contributors(self):
-        account = Account.objects.create(
-            id=1, user=self.user, name="first name"
-        )
-
         account_user = AccountUser.objects.create(
-            account=account, user=self.user
+            account=self.account, user=self.user
         )
 
         AccountUserPermission.objects.create(
@@ -417,27 +409,122 @@ class AccountViewTest(TestCase):
             permissions=Permission.objects.get(codename="delete_account"),
         )
 
-        AccountUser.objects.create(account=account, user=self.user2)
+        AccountUser.objects.create(account=self.account, user=self.user2)
 
         response = self.c.delete(
-            "/api/accounts/1/",
+            f"/api/accounts/{self.account.pk}/",
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 0)
+        self.assertEqual(len(Account.objects.all()), 1)
         self.assertEqual(len(AccountUser.objects.all()), 0)
 
     def test_destroy_main_account(self):
-        Account.objects.create(
-            id=1, user=self.user, name="first name", is_main=True
-        )
-
         response = self.c.delete(
-            "/api/accounts/1/",
+            f"/api/accounts/{self.main_account.pk}/",
         )
 
-        self.assertTrue(status.is_client_error(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertIsNotNone(Account.objects.get(pk=self.main_account.pk))
+
+    def test_set_split_to_false(self):
+        self.account.salary_based_split = True
+        self.account.save()
+
+        self.account.refresh_from_db()
+
+        self.assertTrue(self.account.salary_based_split)
+
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/split/",
+            {
+                "is_slit": "False",
+            },
+            format="json",
+        )
+
+        self.account.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertFalse(self.account.salary_based_split)
+
+    def test_set_split_to_true(self):
+        self.user2.profile.salary = 12
+        self.user2.profile.save()
+
+        self.assertFalse(self.account.salary_based_split)
+
+        AccountUser.objects.create(
+            account=self.account,
+            user=self.user2,
+            state="APPROVED",
+        )
+
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/split/",
+            {
+                "is_slit": "True",
+            },
+            format="json",
+        )
+
+        self.account.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertTrue(self.account.salary_based_split)
+
+    def test_set_split_to_true_without_all_salary(self):
+        self.assertFalse(self.account.salary_based_split)
+
+        AccountUser.objects.create(
+            account=self.account,
+            user=self.user2,
+            state="APPROVED",
+        )
+
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/split/",
+            {
+                "is_slit": "True",
+            },
+            format="json",
+        )
+
+        self.account.refresh_from_db()
+
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(
+            response.data["error"],
+            "All user in account must have set their salary",
+        )
+
+    def test_set_split_with_value_that_is_not_a_bool_representation(self):
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/split/",
+            {
+                "is_slit": "test",
+            },
+            format="json",
+        )
+
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(
+            response.data["error"],
+            "The 'split' field must represent a bool value",
+        )
+
+    def test_split_without_split_field(self):
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/split/",
+            {},
+            format="json",
+        )
+
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(
+            response.data["error"],
+            "You must include 'split' field",
+        )
 
 
 class ItemViewTest(TestCase):

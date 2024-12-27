@@ -143,4 +143,20 @@ class AccountRepository {
 
     return repoResponse;
   }
+
+  Future<RepoResponse> setSalaryBasedSplit({
+    int? accountId,
+    required bool isSplit,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$model_url/$accountId/split/",
+      contentType: 'application/json',
+      body: {
+        'is_slit': isSplit ? "True" : "False",
+      },
+    );
+
+    return repoResponse;
+  }
 }

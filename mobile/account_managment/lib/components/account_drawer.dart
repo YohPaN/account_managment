@@ -30,6 +30,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
 
   final List<Contributor> _usersToAdd = [];
   final List<ExpansionTileController> _controllers = [];
+  bool isSplit = false;
 
   @override
   void initState() {
@@ -42,6 +43,8 @@ class _AccountDrawerState extends State<AccountDrawer> {
       for (var _ in _usersToAdd) {
         _controllers.add(ExpansionTileController());
       }
+
+      isSplit = widget.account!.salaryBasedSplit ?? false;
     }
   }
 
@@ -105,6 +108,25 @@ class _AccountDrawerState extends State<AccountDrawer> {
                 maxLength: 30,
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
+              ),
+              const SizedBox(height: 16),
+              CheckboxListTile(
+                title: const Text("Account based split"),
+                value: isSplit,
+                onChanged: (bool? value) async {
+                  final RepoResponse repoResponse =
+                      await accountViewModel.setSalaryBasedSplit(
+                    accountId: widget.account!.id,
+                    isSplit: value!,
+                  );
+                  if (repoResponse.success) {
+                    setState(() {
+                      isSplit = value;
+                    });
+                  }
+                  Provider.of<InternalNotification>(context, listen: false)
+                      .showMessage(repoResponse.message, repoResponse.success);
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(
