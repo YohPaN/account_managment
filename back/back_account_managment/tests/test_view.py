@@ -19,6 +19,10 @@ class UserViewTest(TestCase):
             username="jonDoe",
             email="jon@doe.test",
         )
+        self.user2 = User.objects.create(
+            username="testeur",
+            email="jon@doe.testeur",
+        )
         self.user.set_password("password"),
 
         self.profile = Profile.objects.create(
@@ -68,6 +72,56 @@ class UserViewTest(TestCase):
         self.assertIn("username", response.data)
         self.assertIn("email", response.data)
 
+    def test_update_profile_with_bad_data_for_user(self):
+        response = self.c.patch(
+            "/api/users/me/update/",
+            {
+                "username": "@&#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",  # noqa
+                "email": "jon@the.ripper",
+                "first_name": "first_name",
+                "last_name": "last_name",
+                "salary": 50.04,
+            },
+            format="json",
+        )
+
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_profile_with_bad_data_for_profile(self):
+        response = self.c.patch(
+            "/api/users/me/update/",
+            {
+                "username": "JonTheRipper",
+                "email": "jon@the.ripper",
+                "first_name": "first_name",
+                "last_name": "last_name",
+                "salary": "50.04@",
+            },
+            format="json",
+        )
+
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_profile_with_unexisting_profile(self):
+        self.c.force_authenticate(user=self.user2)
+
+        response = self.c.patch(
+            "/api/users/me/update/",
+            {
+                "username": "JonTheRipper",
+                "email": "jon@the.ripper",
+                "first_name": "first_name",
+                "last_name": "last_name",
+                "salary": 50.04,
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_client_error(response.status_code))
+        self.assertEqual(response.status_code, 404)
+
     def test_update_password(self):
         self.assertTrue(check_password("password", self.user.password))
 
@@ -82,14 +136,27 @@ class UserViewTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
         self.assertTrue(check_password("newPassword", self.user.password))
 
+    def test_update_password_with_bad_password(self):
+        self.assertFalse(check_password("bad password", self.user.password))
+
+        response = self.c.patch(
+            "/api/users/password/",
+            {
+                "old_password": "bad password",
+                "new_password": "newPassword",
+            },
+            format="json",
+        )
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(response.status_code, 401)
+        self.assertTrue(check_password("password", self.user.password))
+
 
 class RegisterViewTest(TestCase):
     def setUp(self):
         self.c = APIClient()
 
     def test_register(self):
-        self.assertEqual(len(User.objects.all()), 0)
-        self.assertEqual(len(Account.objects.all()), 0)
 
         response = self.c.post(
             "/api/register/",
@@ -147,7 +214,8 @@ class RegisterViewTest(TestCase):
             format="json",
         )
 
-        self.assertTrue(status.is_client_error(response.status_code))
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(len(User.objects.all()), 0)
 
     def test_error_when_cant_create_profile(self):
@@ -165,7 +233,8 @@ class RegisterViewTest(TestCase):
             format="json",
         )
 
-        self.assertTrue(status.is_client_error(response.status_code))
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(len(User.objects.all()), 0)
 
 
@@ -370,56 +439,42 @@ class AccountViewTest(TestCase):
         self.assertTrue(status.is_client_error(response.status_code))
         self.assertEqual(len(Account.objects.all()), 1)
 
-    def test_create_item_under_an_account(self):
-        account = Account.objects.create(id=1, name="test", user=self.user)
-        self.assertEqual(len(account.items.all()), 0)
 
-        account_user = AccountUser.objects.create(
-            account=account, user=self.user
+class ItemViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="test", email="test@test.test"
+        )
+        self.user2 = User.objects.create(
+            username="test2", email="test2@test.test"
         )
 
-        AccountUserPermission.objects.create(
-            account_user=account_user,
-            permissions=Permission.objects.get(codename="add_account"),
+        self.account = Account.objects.create(name="test", user=self.user)
+
+        self.account_user = AccountUser.objects.create(
+            account=self.account, user=self.user
         )
 
-        response = self.c.post(
-            "/api/accounts/1/items/",
-            {
-                "title": "mon",
-                "description": "petit poney",
-                "valuation": 12.56,
-                "username": self.user.username,
-            },
-            format="json",
-        )
+        for perm in ["add_item", "change_item", "delete_item"]:
+            AccountUserPermission.objects.create(
+                account_user=self.account_user,
+                permissions=Permission.objects.get(codename=perm),
+            )
 
-        self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Item.objects.filter(account=account)), 1)
-
-    def test_update_item_under_an_account(self):
-        account = Account.objects.create(id=1, name="test", user=self.user)
-        Item.objects.create(
-            id=1,
-            account=account,
+        self.item = Item.objects.create(
+            account=self.account,
             title="test",
             description="description",
             valuation=42.69,
             user=self.user,
         )
-        self.assertEqual(len(account.items.all()), 1)
 
-        account_user = AccountUser.objects.create(
-            account=account, user=self.user
-        )
+        self.c = APIClient()
+        self.c.force_authenticate(user=self.user)
 
-        AccountUserPermission.objects.create(
-            account_user=account_user,
-            permissions=Permission.objects.get(codename="change_item"),
-        )
-
-        response = self.c.put(
-            "/api/accounts/1/items/1/",
+    def test_create_item(self):
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/items/",
             {
                 "title": "mon",
                 "description": "petit poney",
@@ -430,31 +485,41 @@ class AccountViewTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(account.items.get(pk=1).title, "mon")
+        self.assertEqual(len(Item.objects.filter(account=self.account)), 2)
 
-    def test_update_item_under_an_account_with_another_user_under_item(self):
-        account = Account.objects.create(id=1, name="test", user=self.user2)
-        Item.objects.create(
-            id=1,
-            account=account,
-            title="test",
-            description="description",
-            valuation=42.69,
-            user=self.user2,
-        )
-        self.assertEqual(len(account.items.all()), 1)
-
-        account_user = AccountUser.objects.create(
-            account=account, user=self.user, state="APPROVED"
+    def test_create_item_without_username(self):
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/items/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+            },
+            format="json",
         )
 
-        AccountUserPermission.objects.create(
-            account_user=account_user,
-            permissions=Permission.objects.get(codename="change_item"),
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(Item.objects.filter(account=self.account)), 2)
+
+    def test_create_item_with_non_existing_username(self):
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/items/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "username": "bad username",
+            },
+            format="json",
         )
 
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(len(Item.objects.filter(account=self.account)), 1)
+
+    def test_update_item(self):
         response = self.c.put(
-            "/api/accounts/1/items/1/",
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "description": "petit poney",
@@ -464,35 +529,92 @@ class AccountViewTest(TestCase):
             format="json",
         )
 
+        self.item.refresh_from_db()
+
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(account.items.get(pk=1).user, self.user)
+        self.assertEqual(self.item.title, "mon")
+
+    def test_update_item_with_another_user_under_item(self):
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "username": self.user2.username,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(self.item.user, self.user2)
+
+    def test_update_item_with_an_empty_user(self):
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(self.item.user, None)
+
+    def test_update_item_with_a_non_existing_username(self):
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "username": "bad username",
+            },
+            format="json",
+        )
+
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(response.status_code, 404)
 
     def test_delete_items(self):
-        account = Account.objects.create(id=1, name="test", user=self.user)
-
-        account_user = AccountUser.objects.create(
-            account=account, user=self.user
+        response = self.c.delete(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/"
         )
-
-        AccountUserPermission.objects.create(
-            account_user=account_user,
-            permissions=Permission.objects.get(codename="delete_item"),
-        )
-
-        Item.objects.create(
-            id=1,
-            account=account,
-            title="test",
-            description="description",
-            valuation=42.69,
-            user=self.user,
-        )
-        self.assertEqual(len(account.items.all()), 1)
-
-        response = self.c.delete("/api/accounts/1/items/1/")
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(account.items.all()), 0)
+        self.assertEqual(len(Item.objects.all()), 0)
+
+
+class AccountUserViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="test", email="test@test.test"
+        )
+
+        self.account = Account.objects.create(name="test", user=self.user)
+
+        self.account_user = AccountUser.objects.create(
+            account=self.account, user=self.user
+        )
+
+        self.account_user2 = AccountUser.objects.create(
+            account=self.account, user=self.user, state="APPROVED"
+        )
+
+        self.c = APIClient()
+        self.c.force_authenticate(user=self.user)
+
+    def test_count(self):
+        response = self.c.get("/api/account_user/count/")
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(response.data, {"pending_account_request": 1})
 
 
 class AccountUserPermissionTest(TestCase):

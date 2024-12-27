@@ -18,7 +18,8 @@ from back_account_managment.serializers.item_serializer import (
 from back_account_managment.serializers.user_serializer import (
     UsernameUserSerilizer,
 )
-from django.db.models import Sum
+from django.contrib.auth.models import Permission
+from django.db.models import Exists, OuterRef, Sum
 from rest_framework import serializers
 
 
@@ -51,41 +52,33 @@ class _AccountSerializer(serializers.ModelSerializer):
         pass
 
     def get_permissions(self, account):
-        try:
-            user = self.context["request"].user
-        except KeyError:
-            raise KeyError("There is no request attach on context")
+        user = self.context["request"].user
 
-        if account.user == user:
-            return [
-                "owner",
-            ]
+        if user == account.user:
+            return []
 
-        try:
-            account_user = AccountUser.objects.get(user=user, account=account)
-        except AccountUser.DoesNotExist:
-            raise AccountUser.DoesNotExist(
-                "The user isn't a contributor of the account"
-            )
-
-        account_user_permissions = AccountUserPermission.objects.filter(
-            account_user=account_user
+        account_user_qs = AccountUser.objects.filter(
+            user=user,
+            account=account,
+            id=OuterRef("account_user"),
         )
 
-        serializer = AccountUserPermissionsSerializer(
-            account_user_permissions, many=True
+        permissions = Permission.objects.filter(
+            Exists(
+                AccountUserPermission.objects.filter(
+                    permissions=OuterRef("pk"),
+                    account_user__in=account_user_qs,
+                )
+            )
         )
 
         return [
-            permission["permissions_codename"]
-            for permission in serializer.data
+            permission["codename"]
+            for permission in permissions.values("codename")
         ]
 
     def get_own_contribution(self, account):
-        try:
-            user = self.context["request"].user
-        except KeyError:
-            raise KeyError("There is no request attach on context")
+        user = self.context["request"].user
 
         total = Item.objects.filter(
             user=user, account=account, valuation__gt=0
