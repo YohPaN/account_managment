@@ -5,6 +5,7 @@ from back_account_managment.models import (
     AccountUser,
     AccountUserPermission,
     Item,
+    Profile,
 )
 from back_account_managment.serializers.account_serializer import (
     AccountSerializer,
@@ -35,6 +36,19 @@ class AccountSerializerTest(TestCase):
         self.user3 = User.objects.create(
             username="test3",
             email="test3@test.test",
+        )
+
+        self.profile = Profile.objects.create(
+            first_name="test",
+            last_name="test",
+            user=self.user,
+            salary=485.52,
+        )
+        self.profile2 = Profile.objects.create(
+            first_name="test",
+            last_name="test",
+            user=self.user2,
+            salary=1542.23,
         )
 
         self.request = self.factory.get("/")
@@ -156,7 +170,7 @@ class AccountSerializerTest(TestCase):
         # Decimal without arg return 0
         self.assertEqual(own_contribution["total"], Decimal())
 
-    def test_get_need_to_add(self):
+    def test_get_need_to_add_without_salary_spliting(self):
         self.request.user = self.user
         serializer = AccountSerializer(context={"request": self.request})
 
@@ -168,7 +182,22 @@ class AccountSerializerTest(TestCase):
         # user has already put 57.46
         self.assertEqual(need_to_add["total"], Decimal("-26.86"))
 
-    def test_get_need_to_add_with_no_items(self):
+    def test_get_need_to_add_without_salary_spliting_and_without_other_user(
+        self,
+    ):
+        self.account_user.delete()
+
+        self.request.user = self.user
+        serializer = AccountSerializer(context={"request": self.request})
+
+        need_to_add = serializer.get_need_to_add(self.account)
+
+        # calcul: all item less than 0 = 168.64
+        # user_part = 168.64
+        # user has already put 57.46
+        self.assertEqual(need_to_add["total"], Decimal("-111.18"))
+
+    def test_get_need_to_add_with_no_items_and_without_salary_spliting(self):
         self.request.user = self.user
         serializer = AccountSerializer(context={"request": self.request})
 
@@ -176,6 +205,54 @@ class AccountSerializerTest(TestCase):
 
         # Decimal without arg return 0
         self.assertEqual(need_to_add["total"], Decimal())
+
+    def test_get_need_to_add_with_spliting(self):
+        self.request.user = self.user
+        self.account.salary_based_split = True
+        self.account.save()
+
+        serializer = AccountSerializer(context={"request": self.request})
+
+        need_to_add = serializer.get_need_to_add(self.account)
+
+        # calcul: all item less than 0 = 168.64
+        # total salary = 2027.75
+        # proportion of user = 0.24
+        # user_part = 40.37
+        # user has already put 57.46
+        self.assertEqual(need_to_add["total"], Decimal("17.08"))
+
+    def test_get_need_to_add_with_spliting_from_none_admin_user(self):
+        self.request.user = self.user2
+        self.account.salary_based_split = True
+        self.account.save()
+
+        serializer = AccountSerializer(context={"request": self.request})
+
+        need_to_add = serializer.get_need_to_add(self.account)
+
+        # calcul: all item less than 0 = 168.64
+        # total salary = 2027.75
+        # proportion of user = 0.76
+        # user_part = 128.26
+        # user has already put 51.53
+        self.assertEqual(need_to_add["total"], Decimal("-76.73"))
+
+    def test_get_need_to_add_with_spliting_but_no_other_user(self):
+        self.request.user = self.user
+        self.account.salary_based_split = True
+        self.account.save()
+        self.account_user.delete()
+
+        serializer = AccountSerializer(context={"request": self.request})
+
+        need_to_add = serializer.get_need_to_add(self.account)
+
+        # calcul: all item less than 0 = 168.64
+        # proportion of user = 1
+        # user_part = 168.64
+        # user has already put 57.46
+        self.assertEqual(need_to_add["total"], Decimal("-111.18"))
 
 
 class AccountUserPermissionSerializerTest(TestCase):

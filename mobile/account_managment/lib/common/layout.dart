@@ -26,7 +26,7 @@ class _LayoutState extends State<Layout> {
     const SettingScreen(),
   ];
 
-  late final ToastificationItem toastPendingAccountRequest;
+  ToastificationItem? toastPendingAccountRequest;
 
   @override
   void initState() {
@@ -102,8 +102,9 @@ class _LayoutState extends State<Layout> {
         ],
         onDestinationSelected: (index) {
           setState(() {
-            toastification.dismiss(toastPendingAccountRequest);
-
+            if (toastPendingAccountRequest != null) {
+              toastification.dismiss(toastPendingAccountRequest!);
+            }
             Provider.of<NavigationIndex>(context, listen: false)
                 .changeIndex(index);
           });

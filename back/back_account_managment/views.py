@@ -248,6 +248,50 @@ class AccountView(ModelViewSet):
             status=status.HTTP_403_FORBIDDEN,
         )
 
+    @action(detail=True, methods=["post"], url_path="split")
+    def set_salary_based_split(self, request, pk=None):
+        account = get_object_or_404(Account, pk=pk)
+
+        split = request.data.get("is_slit", None)
+
+        if split is not None:
+            try:
+                split = eval(split)
+            except NameError:
+                return Response(
+                    {"error": "The 'split' field must represent a bool value"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if split is True:
+                account_users = AccountUser.objects.filter(
+                    account=account,
+                    state="APPROVED",
+                )
+
+                for account_user in account_users:
+                    profile = Profile.objects.get(
+                        user=User.objects.get(pk=account_user.user.pk)
+                    )
+
+                    if profile.salary is None:
+                        return Response(
+                            {
+                                "error": "All user in account must have set their salary"  # noqa
+                            },
+                            status=status.HTTP_401_UNAUTHORIZED,
+                        )
+
+            account.salary_based_split = split
+            account.save()
+
+            return Response(status=status.HTTP_200_OK)
+
+        return Response(
+            {"error": "You must include 'split' field"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
 class ItemView(ModelViewSet):
     serializer_class = ItemWriteSerializer

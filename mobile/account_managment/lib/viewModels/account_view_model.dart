@@ -218,4 +218,16 @@ class AccountViewModel extends ChangeNotifier {
 
     return repoResponse;
   }
+
+  Future<RepoResponse> setSalaryBasedSplit({
+    int? accountId,
+    required bool isSplit,
+  }) async {
+    final RepoResponse repoResponse = await accountRepository
+        .setSalaryBasedSplit(accountId: accountId, isSplit: isSplit);
+
+    notifyListeners();
+
+    return repoResponse;
+  }
 }
