@@ -123,8 +123,11 @@ class _AccountSerializer(serializers.ModelSerializer):
                     )
 
                     user_salary = Profile.objects.get(user=user).salary
+
+                    admin_salary = Decimal(account.user.profile.salary)
+
                     user_proportion = user_salary / (
-                        total_salary["total_salary"] + user_salary
+                        total_salary["total_salary"] + admin_salary
                     )
 
                 else:

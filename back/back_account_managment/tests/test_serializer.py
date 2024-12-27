@@ -222,6 +222,22 @@ class AccountSerializerTest(TestCase):
         # user has already put 57.46
         self.assertEqual(need_to_add["total"], Decimal("17.08"))
 
+    def test_get_need_to_add_with_spliting_from_none_admin_user(self):
+        self.request.user = self.user2
+        self.account.salary_based_split = True
+        self.account.save()
+
+        serializer = AccountSerializer(context={"request": self.request})
+
+        need_to_add = serializer.get_need_to_add(self.account)
+
+        # calcul: all item less than 0 = 168.64
+        # total salary = 2027.75
+        # proportion of user = 0.76
+        # user_part = 128.26
+        # user has already put 51.53
+        self.assertEqual(need_to_add["total"], Decimal("-76.73"))
+
     def test_get_need_to_add_with_spliting_but_no_other_user(self):
         self.request.user = self.user
         self.account.salary_based_split = True
