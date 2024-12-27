@@ -78,10 +78,7 @@ class _AccountSerializer(serializers.ModelSerializer):
         ]
 
     def get_own_contribution(self, account):
-        try:
-            user = self.context["request"].user
-        except KeyError:
-            raise KeyError("There is no request attach on context")
+        user = self.context["request"].user
 
         total = Item.objects.filter(
             user=user, account=account, valuation__gt=0
