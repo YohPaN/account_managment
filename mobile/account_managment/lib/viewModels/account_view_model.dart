@@ -156,13 +156,16 @@ class AccountViewModel extends ChangeNotifier {
     required String description,
     required String valuation,
     required String? username,
+    required String? toAccount,
   }) async {
     final RepoResponse repoResponse = await accountRepository.createItem(
-        title: title,
-        description: description,
-        valuation: valuation,
-        accountId: account!.id,
-        username: username);
+      title: title,
+      description: description,
+      valuation: valuation,
+      accountId: account!.id,
+      username: username,
+      toAccount: toAccount,
+    );
 
     notifyListeners();
 
@@ -174,6 +177,7 @@ class AccountViewModel extends ChangeNotifier {
     required String description,
     required String valuation,
     required String? username,
+    required String? toAccount,
     required int itemId,
   }) async {
     final RepoResponse repoResponse = await accountRepository.updateItem(
@@ -182,6 +186,7 @@ class AccountViewModel extends ChangeNotifier {
         valuation: valuation,
         accountId: account!.id,
         username: username,
+        toAccount: toAccount,
         itemId: itemId);
 
     notifyListeners();

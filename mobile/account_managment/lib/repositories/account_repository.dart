@@ -66,6 +66,7 @@ class AccountRepository {
     required String valuation,
     required int accountId,
     String? username,
+    String? toAccount,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
@@ -74,6 +75,7 @@ class AccountRepository {
       body: {
         'account': accountId.toString(),
         if (username != null) 'username': username,
+        if (toAccount != null) 'toAccount': toAccount,
         'title': title,
         'description': description,
         'valuation': valuation,
@@ -89,6 +91,7 @@ class AccountRepository {
     required String valuation,
     required int accountId,
     required String? username,
+    required String? toAccount,
     required int itemId,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
@@ -98,6 +101,7 @@ class AccountRepository {
       body: {
         'account': accountId.toString(),
         if (username != null) 'username': username,
+        if (toAccount != null) 'toAccount': toAccount,
         'title': title,
         'description': description,
         'valuation': valuation,

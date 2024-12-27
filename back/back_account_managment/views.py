@@ -6,6 +6,7 @@ from back_account_managment.models import (
     AccountUserPermission,
     Item,
     Profile,
+    Transfert,
 )
 from back_account_managment.permissions import (
     IsAccountContributor,
@@ -314,22 +315,35 @@ class ItemView(ModelViewSet):
         )
 
         username = self.request.data.get("username", None)
+        to_account = self.request.data.get("toAccount", None)
 
         user = get_object_or_404(User, username=username) if username else None
 
-        serializer.save(
+        item = serializer.save(
             account=account,
             user=user,
         )
 
+        if to_account:
+            Transfert.objects.create(item=item, to_account_id=to_account)
+
     def perform_update(self, serializer):
         username = self.request.data.get("username", None)
+        to_account = self.request.data.get("toAccount", None)
 
         user = get_object_or_404(User, username=username) if username else None
 
-        serializer.save(
+        item = serializer.save(
             user=user,
         )
+
+        if to_account:
+            Transfert.objects.update_or_create(
+                item=item, defaults={"to_account_id": to_account}
+            )
+
+        else:
+            Transfert.objects.get(item=item).delete()
 
 
 class AccountUserView(ModelViewSet):

@@ -92,3 +92,8 @@ class AccountUser(models.Model):
 class AccountUserPermission(models.Model):
     account_user = models.ForeignKey(AccountUser, on_delete=models.CASCADE)
     permissions = models.ForeignKey(Permission, on_delete=models.CASCADE)
+
+
+class Transfert(models.Model):
+    to_account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    item = models.OneToOneField(Item, on_delete=models.CASCADE)

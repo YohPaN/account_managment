@@ -26,6 +26,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
   final _formKey = GlobalKey<FormState>();
   final List<bool> _selectButton = [true, false];
   String _username = "";
+  String _toAccount = "";
 
   final List<Map<String, Color?>> buttonStyleChoices = [
     {
@@ -53,11 +54,13 @@ class _ItemDrawerState extends State<ItemDrawer> {
         _selectButton[1] = true;
         _buttonStyle = buttonStyleChoices[1];
       }
+
       if (widget.item != null) {
         titleController.text = widget.item!.title;
         descriptionController.text = widget.item!.description;
         valuationController.text = widget.item!.valuation.abs().toString();
         _username = widget.item!.username ?? "";
+        _toAccount = widget.item!.toAccount?["id"] ?? "";
       }
     }
   }
@@ -85,6 +88,27 @@ class _ItemDrawerState extends State<ItemDrawer> {
         label: "Me",
       ),
     ];
+
+    if (accountViewModel.accounts == null) {
+      accountViewModel.listAccount();
+    }
+
+    final List<DropdownMenuEntry<String?>> accountList =
+        accountViewModel.accounts!
+            .map(
+              (account) => DropdownMenuEntry<String?>(
+                value: account.id.toString(),
+                label: account.name,
+              ),
+            )
+            .toList();
+
+    accountList.insert(
+        0,
+        const DropdownMenuEntry<String>(
+          value: "",
+          label: "",
+        ));
 
     if (widget.action == "update" ||
         profileViewModel.user!.hasPermission(
@@ -129,6 +153,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           description: descriptionController.text,
           valuation: valuation,
           username: _username != "" ? _username : null,
+          toAccount: _username != "" ? _toAccount : null,
         );
       } else {
         return await accountViewModel.updateItem(
@@ -136,6 +161,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           description: descriptionController.text,
           valuation: valuation,
           username: _username != "" ? _username : null,
+          toAccount: _toAccount != "" ? _toAccount : null,
           itemId: widget.item!.id,
         );
       }
@@ -187,6 +213,14 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   _username = value!;
                 }),
                 dropdownMenuEntries: menuEntries,
+              ),
+              const SizedBox(height: 16),
+              DropdownMenu(
+                initialSelection: _toAccount,
+                onSelected: (value) => setState(() {
+                  _toAccount = value!;
+                }),
+                dropdownMenuEntries: accountList,
               ),
               const SizedBox(height: 16),
               ToggleButtons(
