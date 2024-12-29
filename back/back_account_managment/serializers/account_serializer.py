@@ -6,6 +6,7 @@ from back_account_managment.models import (
     AccountUserPermission,
     Item,
     Profile,
+    Transfert,
 )
 from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
     AccountUserPermissionsSerializer,
@@ -21,7 +22,7 @@ from back_account_managment.serializers.user_serializer import (
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.db.models import Exists, OuterRef, Sum
+from django.db.models import Exists, OuterRef, Q, Sum
 from rest_framework import serializers
 
 
@@ -39,11 +40,13 @@ class AccountMeta:
         "total",
         "user",
         "salary_based_split",
+        "transfert_items",
     ]
 
 
 class _AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
+    transfert_items = serializers.SerializerMethodField()
     contributors = AccountAccountUserSerializer(many=True)
 
     permissions = serializers.SerializerMethodField()
@@ -53,6 +56,14 @@ class _AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         pass
+
+    def get_transfert_items(self, account):
+        transferts = Transfert.objects.filter(
+            to_account=account, item=OuterRef("pk")
+        )
+        items = Item.objects.filter(Exists(transferts))
+
+        return ItemReadSerializer(items, many=True).data
 
     def get_permissions(self, account):
         user = self.context["request"].user
@@ -83,9 +94,17 @@ class _AccountSerializer(serializers.ModelSerializer):
     def get_own_contribution(self, account):
         user = self.context["request"].user
 
-        total = Item.objects.filter(
-            user=user, account=account, valuation__gt=0
+        transfert_item = Transfert.objects.filter(
+            to_account=account, item=OuterRef("pk")
         )
+
+        total = Item.objects.filter(
+            Q(account=account) | Exists(transfert_item),
+        ).filter(
+            user=user,
+            valuation__gt=0,
+        )
+
         if total.count() > 0:
             return total.aggregate(total=(Sum("valuation")))
 
@@ -94,7 +113,13 @@ class _AccountSerializer(serializers.ModelSerializer):
     def get_need_to_add(self, account):
         user = self.context["request"].user
 
-        total = Item.objects.filter(account=account, valuation__lt=0)
+        transfert_item = Transfert.objects.filter(
+            to_account=account, item=OuterRef("pk")
+        )
+
+        total = Item.objects.filter(
+            Q(account=account) | Exists(transfert_item),
+        ).filter(valuation__lt=0)
 
         if total.count() > 0:
             total = total.aggregate(total=Sum("valuation"))
@@ -183,6 +208,7 @@ class AccountSerializer(_AccountSerializer):
                 "own_contribution",
                 "permissions",
                 "total",
+                "transfert_items",
                 "user",
             ]
         ]

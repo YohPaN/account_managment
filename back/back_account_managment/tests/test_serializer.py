@@ -6,6 +6,7 @@ from back_account_managment.models import (
     AccountUserPermission,
     Item,
     Profile,
+    Transfert,
 )
 from back_account_managment.serializers.account_serializer import (
     AccountSerializer,
@@ -13,6 +14,7 @@ from back_account_managment.serializers.account_serializer import (
 from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
     AccountUserPermissionsSerializer,
 )
+from back_account_managment.serializers.item_serializer import _ItemSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -161,6 +163,25 @@ class AccountSerializerTest(TestCase):
 
         self.assertEqual(own_contribution["total"], Decimal("57.46"))
 
+    def test_get_own_contribution_with_transfert(self):
+        transfert_item = Item.objects.create(
+            title="test",
+            description="test",
+            valuation=18.27,
+            user=self.user,
+            account=self.account2,
+        )
+
+        Transfert.objects.create(to_account=self.account, item=transfert_item)
+
+        self.request.user = self.user
+
+        serializer = AccountSerializer(context={"request": self.request})
+
+        own_contribution = serializer.get_own_contribution(self.account)
+
+        self.assertEqual(own_contribution["total"], Decimal("75.73"))
+
     def test_get_own_contribution_with_no_items(self):
         self.request.user = self.user
         serializer = AccountSerializer(context={"request": self.request})
@@ -181,6 +202,28 @@ class AccountSerializerTest(TestCase):
         # user_part = 84.32
         # user has already put 57.46
         self.assertEqual(need_to_add["total"], Decimal("-26.86"))
+
+    def test_get_need_to_add_with_trasnfert(self):
+        item = Item.objects.create(
+            title="test",
+            description="test",
+            valuation=-58.46,
+            user=self.user,
+            account=self.account2,
+        )
+        Transfert.objects.create(to_account=self.account, item=item)
+
+        self.request.user = self.user
+        serializer = AccountSerializer(context={"request": self.request})
+
+        need_to_add = serializer.get_need_to_add(self.account)
+
+        # calcul: all item less than 0 = 168.64
+        # Plus transfert = 227.1
+        # 2 part because the account owner and the user2 with approved state
+        # user_part = 113.55
+        # user has already put 57.46
+        self.assertEqual(need_to_add["total"], Decimal("-56.09"))
 
     def test_get_need_to_add_without_salary_spliting_and_without_other_user(
         self,
@@ -289,3 +332,29 @@ class AccountUserPermissionSerializerTest(TestCase):
         self.assertEqual(
             serializer.data, {"permissions_codename": "test_code"}
         )
+
+
+class ItemSerializerTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="test", email="test@test.test"
+        )
+        self.account = Account.objects.create(name="test", user=self.user)
+        self.account2 = Account.objects.create(name="test", user=self.user)
+        self.item = Item.objects.create(
+            title="title",
+            description="description",
+            valuation=12,
+            account=self.account2,
+        )
+
+        self.transfert = Transfert.objects.create(
+            to_account=self.account, item=self.item
+        )
+
+    def test_get_to_account(self):
+        expected = {"id": self.account.pk, "name": self.account.name}
+
+        serializer = _ItemSerializer()
+
+        self.assertEqual(expected, serializer.get_to_account(self.item))

@@ -37,6 +37,7 @@ class Account(models.Model):
         permissions = [
             ("link_user_item", "Can link a user to an item"),
             ("add_item_without_user", "Can create an item with no user"),
+            ("transfert_item", "Can transfert item into account"),
         ]
 
     @property
@@ -92,3 +93,8 @@ class AccountUser(models.Model):
 class AccountUserPermission(models.Model):
     account_user = models.ForeignKey(AccountUser, on_delete=models.CASCADE)
     permissions = models.ForeignKey(Permission, on_delete=models.CASCADE)
+
+
+class Transfert(models.Model):
+    to_account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    item = models.OneToOneField(Item, on_delete=models.CASCADE)

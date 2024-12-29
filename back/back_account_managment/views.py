@@ -6,6 +6,7 @@ from back_account_managment.models import (
     AccountUserPermission,
     Item,
     Profile,
+    Transfert,
 )
 from back_account_managment.permissions import (
     IsAccountContributor,
@@ -13,6 +14,7 @@ from back_account_managment.permissions import (
     IsOwner,
     LinkItemUserPermission,
     ManageRessourcePermission,
+    TransfertToAccountPermission,
 )
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
@@ -306,6 +308,7 @@ class ItemView(ModelViewSet):
                 & LinkItemUserPermission
             )
         ),
+        TransfertToAccountPermission,
     ]
 
     def perform_create(self, serializer):
@@ -314,22 +317,38 @@ class ItemView(ModelViewSet):
         )
 
         username = self.request.data.get("username", None)
+        to_account = self.request.data.get("to_account", None)
 
         user = get_object_or_404(User, username=username) if username else None
 
-        serializer.save(
+        item = serializer.save(
             account=account,
             user=user,
         )
 
+        if to_account:
+            Transfert.objects.create(item=item, to_account_id=to_account)
+
     def perform_update(self, serializer):
         username = self.request.data.get("username", None)
+        to_account = self.request.data.get("to_account", None)
 
         user = get_object_or_404(User, username=username) if username else None
 
-        serializer.save(
+        item = serializer.save(
             user=user,
         )
+
+        if to_account:
+            Transfert.objects.update_or_create(
+                item=item, defaults={"to_account_id": to_account}
+            )
+
+        else:
+            transfert = Transfert.objects.filter(item=item).first()
+
+            if transfert:
+                transfert.delete()
 
 
 class AccountUserView(ModelViewSet):

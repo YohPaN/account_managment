@@ -105,3 +105,25 @@ class LinkItemUserPermission(permissions.BasePermission):
             return "add_item_without_user" in permissions
         else:
             return "link_user_item" in permissions
+
+
+class TransfertToAccountPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in [*SAFE_METHODS, "DELETE"]:
+            return True
+
+        to_account = request.data.get("to_account", None)
+
+        if to_account is None:
+            return True
+
+        account_user = AccountUser.objects.get(
+            user=request.user,
+            account_id=request.data.get("to_account"),
+        )
+
+        permissions = AccountUserPermission.objects.filter(
+            account_user=account_user,
+        ).values_list("permissions__codename", flat=True)
+
+        return "transfert_item" in permissions

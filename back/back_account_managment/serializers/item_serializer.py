@@ -1,4 +1,4 @@
-from back_account_managment.models import Item
+from back_account_managment.models import Item, Transfert
 from back_account_managment.serializers.user_serializer import (
     UsernameUserSerilizer,
 )
@@ -7,15 +7,32 @@ from rest_framework import serializers
 
 class ItemMeta:
     model = Item
-    fields = ["id", "title", "description", "valuation", "account", "user"]
+    fields = [
+        "id",
+        "title",
+        "description",
+        "valuation",
+        "account",
+        "user",
+        "to_account",
+    ]
     read_only_fields = ["account"]
 
 
 class _ItemSerializer(serializers.ModelSerializer):
     user = UsernameUserSerilizer()
+    to_account = serializers.SerializerMethodField()
 
     class Meta:
         pass
+
+    def get_to_account(self, item):
+        transfert = Transfert.objects.filter(item=item).first()
+
+        return {
+            "id": transfert.to_account.pk if transfert else None,
+            "name": transfert.to_account.name if transfert else None,
+        }
 
 
 class ItemWriteSerializer(_ItemSerializer):
@@ -33,5 +50,13 @@ class ItemReadSerializer(_ItemSerializer):
             field
             for field in ItemMeta.fields
             if field
-            in ["id", "title", "description", "valuation", "account", "user"]
+            in [
+                "id",
+                "title",
+                "description",
+                "valuation",
+                "account",
+                "user",
+                "to_account",
+            ]
         ]

@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 
 class ListItem extends StatelessWidget {
   final Item item;
+  final int accountId;
   final Function(String, Item) callbackFunc;
   bool canManage = false;
 
   ListItem({
     super.key,
     required this.item,
+    required this.accountId,
     required this.callbackFunc,
     required this.canManage,
   });
@@ -29,11 +31,22 @@ class ListItem extends StatelessWidget {
             ),
           ),
         ),
+        if (item.transfertItem)
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Icon(Icons.input),
+          ),
+        if (item.toAccount!["id"] != null &&
+            item.toAccount!["id"] != accountId.toString())
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Icon(Icons.output),
+          ),
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: Text("${item.valuation.toStringAsFixed(2)}€"),
         ),
-        if (canManage)
+        if (canManage && !item.transfertItem)
           IconButton(
             onPressed: () {
               callbackFunc("update", item);
