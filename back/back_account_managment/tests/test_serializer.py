@@ -6,6 +6,7 @@ from back_account_managment.models import (
     AccountUserPermission,
     Item,
     Profile,
+    Transfert,
 )
 from back_account_managment.serializers.account_serializer import (
     AccountSerializer,
@@ -13,6 +14,7 @@ from back_account_managment.serializers.account_serializer import (
 from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
     AccountUserPermissionsSerializer,
 )
+from back_account_managment.serializers.item_serializer import _ItemSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -289,3 +291,29 @@ class AccountUserPermissionSerializerTest(TestCase):
         self.assertEqual(
             serializer.data, {"permissions_codename": "test_code"}
         )
+
+
+class ItemSerializerTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="test", email="test@test.test"
+        )
+        self.account = Account.objects.create(name="test", user=self.user)
+        self.account2 = Account.objects.create(name="test", user=self.user)
+        self.item = Item.objects.create(
+            title="title",
+            description="description",
+            valuation=12,
+            account=self.account2,
+        )
+
+        self.transfert = Transfert.objects.create(
+            to_account=self.account, item=self.item
+        )
+
+    def test_get_to_account(self):
+        expected = {"id": self.account.pk, "name": self.account.name}
+
+        serializer = _ItemSerializer()
+
+        self.assertEqual(expected, serializer.get_to_account(self.item))

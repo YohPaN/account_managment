@@ -343,7 +343,10 @@ class ItemView(ModelViewSet):
             )
 
         else:
-            Transfert.objects.get(item=item).delete()
+            transfert = Transfert.objects.filter(item=item).first()
+
+            if transfert:
+                transfert.delete()
 
 
 class AccountUserView(ModelViewSet):

@@ -22,7 +22,7 @@ from back_account_managment.serializers.user_serializer import (
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.db.models import Exists, OuterRef, Sum
+from django.db.models import Exists, OuterRef, Q, Sum
 from rest_framework import serializers
 
 
@@ -92,9 +92,15 @@ class _AccountSerializer(serializers.ModelSerializer):
     def get_own_contribution(self, account):
         user = self.context["request"].user
 
+        transfert_item = Transfert.objects.filter(to_account=account)
+
         total = Item.objects.filter(
-            user=user, account=account, valuation__gt=0
+            Q(account=account) | Exists(transfert_item),
+        ).filter(
+            user=user,
+            valuation__gt=0,
         )
+
         if total.count() > 0:
             return total.aggregate(total=(Sum("valuation")))
 
@@ -103,7 +109,11 @@ class _AccountSerializer(serializers.ModelSerializer):
     def get_need_to_add(self, account):
         user = self.context["request"].user
 
-        total = Item.objects.filter(account=account, valuation__lt=0)
+        transfert_item = Transfert.objects.filter(to_account=account)
+
+        total = Item.objects.filter(
+            Q(account=account) | Exists(transfert_item),
+        ).filter(valuation__lt=0)
 
         if total.count() > 0:
             total = total.aggregate(total=Sum("valuation"))
