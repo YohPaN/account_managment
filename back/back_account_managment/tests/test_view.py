@@ -547,12 +547,32 @@ class ItemViewTest(TestCase):
         self.account_user = AccountUser.objects.create(
             account=self.account, user=self.user
         )
+        self.account_user2 = AccountUser.objects.create(
+            account=self.account2, user=self.user
+        )
+        self.account_user3 = AccountUser.objects.create(
+            account=self.account3, user=self.user
+        )
 
-        for perm in ["add_item", "change_item", "delete_item"]:
+        for perm in [
+            "add_item",
+            "change_item",
+            "delete_item",
+            "transfert_item",
+        ]:
             AccountUserPermission.objects.create(
                 account_user=self.account_user,
                 permissions=Permission.objects.get(codename=perm),
             )
+
+        AccountUserPermission.objects.create(
+            account_user=self.account_user2,
+            permissions=Permission.objects.get(codename="transfert_item"),
+        )
+        AccountUserPermission.objects.create(
+            account_user=self.account_user3,
+            permissions=Permission.objects.get(codename="transfert_item"),
+        )
 
         self.item = Item.objects.create(
             account=self.account,
