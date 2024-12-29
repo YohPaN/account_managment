@@ -93,6 +93,10 @@ class AccountViewModel extends ChangeNotifier {
         items.add(Item.deserialize(item));
       }
 
+      for (var transfertItem in repoResponse.data!["transfert_items"]) {
+        items.add(Item.deserialize(transfertItem, true));
+      }
+
       final List<Contributor> contributors = [];
 
       for (var contributor in repoResponse.data!["contributors"]) {

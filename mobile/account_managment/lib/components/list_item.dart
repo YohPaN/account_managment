@@ -29,11 +29,21 @@ class ListItem extends StatelessWidget {
             ),
           ),
         ),
+        if (item.transfertItem)
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Icon(Icons.input),
+          ),
+        if (item.toAccount!["id"] != null)
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Icon(Icons.output),
+          ),
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: Text("${item.valuation.toStringAsFixed(2)}€"),
         ),
-        if (canManage)
+        if (canManage && !item.transfertItem)
           IconButton(
             onPressed: () {
               callbackFunc("update", item);
