@@ -6,6 +6,7 @@ from back_account_managment.models import (
     AccountUserPermission,
     Item,
     Profile,
+    Transfert,
 )
 from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
     AccountUserPermissionsSerializer,
@@ -39,11 +40,13 @@ class AccountMeta:
         "total",
         "user",
         "salary_based_split",
+        "transfert_items",
     ]
 
 
 class _AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
+    transfert_items = serializers.SerializerMethodField()
     contributors = AccountAccountUserSerializer(many=True)
 
     permissions = serializers.SerializerMethodField()
@@ -53,6 +56,12 @@ class _AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         pass
+
+    def get_transfert_items(self, account):
+        transferts = Transfert.objects.filter(to_account=account)
+        items = Item.objects.filter(Exists(transferts))
+
+        return ItemReadSerializer(items, many=True).data
 
     def get_permissions(self, account):
         user = self.context["request"].user
@@ -183,6 +192,7 @@ class AccountSerializer(_AccountSerializer):
                 "own_contribution",
                 "permissions",
                 "total",
+                "transfert_items",
                 "user",
             ]
         ]
