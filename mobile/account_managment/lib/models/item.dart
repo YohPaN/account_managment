@@ -5,7 +5,7 @@ class Item {
   String? username;
   double valuation;
   Map<String, String?>? toAccount;
-  bool transfertItem = false;
+  bool transfertItem;
 
   Item({
     required this.id,
@@ -17,7 +17,7 @@ class Item {
     required this.transfertItem,
   });
 
-  static Item deserialize(jsonItem, [isTransfertItem]) {
+  static Item deserialize(jsonItem, [isTransfertItem = false]) {
     return Item(
         id: jsonItem["id"],
         title: jsonItem["title"],

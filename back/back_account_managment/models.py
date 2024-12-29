@@ -37,6 +37,7 @@ class Account(models.Model):
         permissions = [
             ("link_user_item", "Can link a user to an item"),
             ("add_item_without_user", "Can create an item with no user"),
+            ("transfert_item", "Can transfert item into account"),
         ]
 
     @property

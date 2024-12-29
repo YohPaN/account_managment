@@ -58,7 +58,9 @@ class _AccountSerializer(serializers.ModelSerializer):
         pass
 
     def get_transfert_items(self, account):
-        transferts = Transfert.objects.filter(to_account=account)
+        transferts = Transfert.objects.filter(
+            to_account=account, item=OuterRef("pk")
+        )
         items = Item.objects.filter(Exists(transferts))
 
         return ItemReadSerializer(items, many=True).data

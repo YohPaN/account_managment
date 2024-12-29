@@ -14,6 +14,7 @@ from back_account_managment.permissions import (
     IsOwner,
     LinkItemUserPermission,
     ManageRessourcePermission,
+    TransfertToAccountPermission,
 )
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
@@ -307,6 +308,7 @@ class ItemView(ModelViewSet):
                 & LinkItemUserPermission
             )
         ),
+        TransfertToAccountPermission,
     ]
 
     def perform_create(self, serializer):
@@ -315,7 +317,7 @@ class ItemView(ModelViewSet):
         )
 
         username = self.request.data.get("username", None)
-        to_account = self.request.data.get("toAccount", None)
+        to_account = self.request.data.get("to_account", None)
 
         user = get_object_or_404(User, username=username) if username else None
 
@@ -329,7 +331,7 @@ class ItemView(ModelViewSet):
 
     def perform_update(self, serializer):
         username = self.request.data.get("username", None)
-        to_account = self.request.data.get("toAccount", None)
+        to_account = self.request.data.get("to_account", None)
 
         user = get_object_or_404(User, username=username) if username else None
 

@@ -114,6 +114,10 @@ class AccountViewModel extends ChangeNotifier {
 
     accountIdToRetrieve = null;
 
+    if (_accounts == null) {
+      listAccount();
+    }
+
     return repoResponse;
   }
 

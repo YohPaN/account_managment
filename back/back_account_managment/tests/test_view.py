@@ -618,7 +618,7 @@ class ItemViewTest(TestCase):
                 "description": "petit poney",
                 "valuation": 12.56,
                 "username": self.user.username,
-                "toAccount": self.account2.pk,
+                "to_account": self.account2.pk,
             },
             format="json",
         )
@@ -702,7 +702,7 @@ class ItemViewTest(TestCase):
                 "description": "description",
                 "valuation": 42.69,
                 "username": self.user.username,
-                "toAccount": self.account2.pk,
+                "to_account": self.account2.pk,
             },
             format="json",
         )
@@ -726,7 +726,7 @@ class ItemViewTest(TestCase):
                 "description": "description",
                 "valuation": 42.69,
                 "username": self.user.username,
-                "toAccount": self.account3.pk,
+                "to_account": self.account3.pk,
             },
             format="json",
         )

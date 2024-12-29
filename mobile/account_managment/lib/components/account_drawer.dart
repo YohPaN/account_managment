@@ -278,6 +278,13 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                                   accountId: widget.account!.id,
                                                   username: _usersToAdd[index]
                                                       .username),
+                                              PermissionCheckbox(
+                                                  permissions: permissions,
+                                                  permissionsCodename:
+                                                      "transfert_item",
+                                                  accountId: widget.account!.id,
+                                                  username: _usersToAdd[index]
+                                                      .username),
                                             ],
                                           );
                                         } else {

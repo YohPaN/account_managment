@@ -75,7 +75,7 @@ class AccountRepository {
       body: {
         'account': accountId.toString(),
         if (username != null) 'username': username,
-        if (toAccount != null) 'toAccount': toAccount,
+        if (toAccount != null) 'to_account': toAccount,
         'title': title,
         'description': description,
         'valuation': valuation,
@@ -101,7 +101,7 @@ class AccountRepository {
       body: {
         'account': accountId.toString(),
         if (username != null) 'username': username,
-        if (toAccount != null) 'toAccount': toAccount,
+        if (toAccount != null) 'to_account': toAccount,
         'title': title,
         'description': description,
         'valuation': valuation,

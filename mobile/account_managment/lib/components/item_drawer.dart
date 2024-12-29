@@ -89,26 +89,29 @@ class _ItemDrawerState extends State<ItemDrawer> {
       ),
     ];
 
-    if (accountViewModel.accounts == null) {
-      accountViewModel.listAccount();
-    }
+    final List<DropdownMenuEntry<String?>> accountList = [
+      const DropdownMenuEntry<String>(
+        value: "",
+        label: "",
+      )
+    ];
 
-    final List<DropdownMenuEntry<String?>> accountList =
-        accountViewModel.accounts!
-            .map(
-              (account) => DropdownMenuEntry<String?>(
-                value: account.id.toString(),
-                label: account.name,
-              ),
-            )
-            .toList();
-
-    accountList.insert(
-        0,
-        const DropdownMenuEntry<String>(
-          value: "",
-          label: "",
+    for (var account in accountViewModel.accounts!) {
+      if (account.permissions.contains("transfert_item")) {
+        accountList.add(DropdownMenuEntry<String>(
+          value: account.id.toString(),
+          label: account.name,
         ));
+      }
+    }
+    for (var account in accountViewModel.contributorAccounts!) {
+      if (account.permissions.contains("transfert_item")) {
+        accountList.add(DropdownMenuEntry<String>(
+          value: account.id.toString(),
+          label: account.name,
+        ));
+      }
+    }
 
     if (widget.action == "update" ||
         profileViewModel.user!.hasPermission(
@@ -153,7 +156,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           description: descriptionController.text,
           valuation: valuation,
           username: _username != "" ? _username : null,
-          toAccount: _username != "" ? _toAccount : null,
+          toAccount: _toAccount != "" ? _toAccount : null,
         );
       } else {
         return await accountViewModel.updateItem(

@@ -162,19 +162,21 @@ class AccountScreen extends StatelessWidget {
                                     title: ListItem(
                                       item: accountViewModel
                                           .account!.items[index],
+                                      accountId: accountViewModel.account!.id,
                                       callbackFunc: showModal,
-                                      canManage: profileViewModel.user!
-                                          .hasPermission(
-                                              ressource: accountViewModel
-                                                  .account!.items[index],
-                                              account: accountViewModel.account,
-                                              permissionsNeeded: [
-                                                "change_item",
-                                                "delete_item"
-                                              ],
-                                              permissions: accountViewModel
-                                                  .account!.permissions,
-                                              strict: false),
+                                      canManage:
+                                          profileViewModel.user!.hasPermission(
+                                        ressource: accountViewModel
+                                            .account!.items[index],
+                                        account: accountViewModel.account,
+                                        permissionsNeeded: [
+                                          "change_item",
+                                          "delete_item"
+                                        ],
+                                        permissions: accountViewModel
+                                            .account!.permissions,
+                                        strict: false,
+                                      ),
                                     ),
                                   ),
                                 ),
