@@ -1,7 +1,11 @@
 import json
 from decimal import Decimal
 
-from back_account_managment.models import AccountUserPermission, Profile
+from back_account_managment.models import (
+    AccountUserPermission,
+    Profile,
+    Transfert,
+)
 from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
@@ -537,6 +541,8 @@ class ItemViewTest(TestCase):
         )
 
         self.account = Account.objects.create(name="test", user=self.user)
+        self.account2 = Account.objects.create(name="test", user=self.user)
+        self.account3 = Account.objects.create(name="test", user=self.user)
 
         self.account_user = AccountUser.objects.create(
             account=self.account, user=self.user
@@ -604,6 +610,25 @@ class ItemViewTest(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(len(Item.objects.filter(account=self.account)), 1)
 
+    def test_create_item_with_transfert(self):
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/items/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "username": self.user.username,
+                "toAccount": self.account2.pk,
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(Item.objects.filter(account=self.account)), 2)
+        self.assertEqual(
+            len(Transfert.objects.filter(to_account=self.account2)), 1
+        )
+
     def test_update_item(self):
         response = self.c.put(
             f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
@@ -668,6 +693,72 @@ class ItemViewTest(TestCase):
 
         self.assertFalse(status.is_success(response.status_code))
         self.assertEqual(response.status_code, 404)
+
+    def test_update_item_create_transfert(self):
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "test",
+                "description": "description",
+                "valuation": 42.69,
+                "username": self.user.username,
+                "toAccount": self.account2.pk,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertIsNotNone(
+            Transfert.objects.get(item=self.item, to_account=self.account2)
+        )
+
+    def test_update_item_update_transfert(self):
+        transfert = Transfert.objects.create(
+            item=self.item, to_account=self.account2
+        )
+
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "test",
+                "description": "description",
+                "valuation": 42.69,
+                "username": self.user.username,
+                "toAccount": self.account3.pk,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+        transfert.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(transfert.to_account, self.account3)
+
+    def test_update_item_delete_transfert(self):
+        Transfert.objects.create(item=self.item, to_account=self.account2)
+
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "test",
+                "description": "description",
+                "valuation": 42.69,
+                "username": self.user.username,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertIsNone(
+            Transfert.objects.filter(
+                item=self.item, to_account=self.account2
+            ).first()
+        )
 
     def test_delete_items(self):
         response = self.c.delete(
