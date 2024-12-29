@@ -28,7 +28,7 @@ class Item {
         ),
         transfertItem: isTransfertItem,
         toAccount: {
-          "id": jsonItem["to_account"]["id"].toString(),
+          "id": jsonItem["to_account"]["id"]?.toString(),
           "name": jsonItem["to_account"]["name"]
         });
   }
