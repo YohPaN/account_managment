@@ -92,7 +92,9 @@ class _AccountSerializer(serializers.ModelSerializer):
     def get_own_contribution(self, account):
         user = self.context["request"].user
 
-        transfert_item = Transfert.objects.filter(to_account=account)
+        transfert_item = Transfert.objects.filter(
+            to_account=account, item=OuterRef("pk")
+        )
 
         total = Item.objects.filter(
             Q(account=account) | Exists(transfert_item),
@@ -109,7 +111,9 @@ class _AccountSerializer(serializers.ModelSerializer):
     def get_need_to_add(self, account):
         user = self.context["request"].user
 
-        transfert_item = Transfert.objects.filter(to_account=account)
+        transfert_item = Transfert.objects.filter(
+            to_account=account, item=OuterRef("pk")
+        )
 
         total = Item.objects.filter(
             Q(account=account) | Exists(transfert_item),
