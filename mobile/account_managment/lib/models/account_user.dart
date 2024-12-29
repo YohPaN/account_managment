@@ -13,7 +13,7 @@ class AccountUser {
     return AccountUser(
       id: jsonAccountUser["id"],
       accountName: jsonAccountUser["account"]["name"],
-      adminUsername: jsonAccountUser["account"]["user"]["username"],
+      adminUsername: jsonAccountUser["account"]["username"],
     );
   }
 }

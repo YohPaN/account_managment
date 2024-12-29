@@ -1,4 +1,4 @@
-from back_account_managment.models import AccountUser
+from back_account_managment.models import Account, AccountUser
 from back_account_managment.serializers.user_serializer import (
     UsernameUserSerilizer,
 )
@@ -13,9 +13,17 @@ class AccountUserMeta:
 
 class _AccountAccountUserSerializer(serializers.ModelSerializer):
     user = UsernameUserSerilizer()
+    account = serializers.SerializerMethodField()
 
     class Meta:
         pass
+
+    def get_account(self, account_user):
+        accounts = Account.objects.get(pk=(account_user.pk))
+        return {
+            "name": accounts.name if accounts else None,
+            "username": accounts.user.username if accounts else None,
+        }
 
 
 class AccountAccountUserSerializer(_AccountAccountUserSerializer):
