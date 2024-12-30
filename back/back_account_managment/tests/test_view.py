@@ -577,7 +577,6 @@ class ItemViewTest(TestCase):
         self.item = Item.objects.create(
             account=self.account,
             title="test",
-            description="description",
             valuation=42.69,
             user=self.user,
         )
@@ -605,7 +604,6 @@ class ItemViewTest(TestCase):
             f"/api/accounts/{self.account.pk}/items/",
             {
                 "title": "mon",
-                "description": "petit poney",
                 "valuation": 12.56,
             },
             format="json",
@@ -619,7 +617,6 @@ class ItemViewTest(TestCase):
             f"/api/accounts/{self.account.pk}/items/",
             {
                 "title": "mon",
-                "description": "petit poney",
                 "valuation": 12.56,
                 "username": "bad username",
             },
@@ -635,7 +632,6 @@ class ItemViewTest(TestCase):
             f"/api/accounts/{self.account.pk}/items/",
             {
                 "title": "mon",
-                "description": "petit poney",
                 "valuation": 12.56,
                 "username": self.user.username,
                 "to_account": self.account2.pk,
@@ -688,7 +684,6 @@ class ItemViewTest(TestCase):
             f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
             {
                 "title": "mon",
-                "description": "petit poney",
                 "valuation": 12.56,
             },
             format="json",
@@ -704,7 +699,6 @@ class ItemViewTest(TestCase):
             f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
             {
                 "title": "mon",
-                "description": "petit poney",
                 "valuation": 12.56,
                 "username": "bad username",
             },

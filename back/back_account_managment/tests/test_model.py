@@ -27,7 +27,6 @@ class AccountModelTest(TestCase):
         for _ in range(3):
             Item.objects.create(
                 title="test",
-                description="test",
                 valuation=12,
                 account=self.account,
                 user=self.user,

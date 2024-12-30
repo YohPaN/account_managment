@@ -50,7 +50,7 @@ class Account(models.Model):
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=15)
-    description = models.CharField(max_length=50)
+    description = models.CharField(max_length=50, null=True, blank=True)
     valuation = models.DecimalField(max_digits=15, decimal_places=2)
     account = models.ForeignKey(
         Account, on_delete=models.CASCADE, related_name="items"

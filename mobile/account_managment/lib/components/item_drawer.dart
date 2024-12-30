@@ -194,8 +194,6 @@ class _ItemDrawerState extends State<ItemDrawer> {
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLength: 50,
-                validator: (value) => ValidationHelper.validateInput(
-                    value, ["notEmpty", "notNull"]),
               ),
               const SizedBox(height: 16),
               TextFormField(

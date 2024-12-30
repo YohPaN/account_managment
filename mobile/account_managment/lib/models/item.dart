@@ -1,7 +1,7 @@
 class Item {
   int id;
   String title;
-  String description;
+  String? description;
   String? username;
   double valuation;
   Map<String, String?>? toAccount;
