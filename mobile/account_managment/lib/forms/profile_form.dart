@@ -70,6 +70,7 @@ class _ProfileFormState extends State<ProfileForm> {
         child: Column(
           children: [
             TextFormField(
+              textCapitalization: TextCapitalization.sentences,
               initialValue: profileViewModel.profile?.firstName,
               keyboardType: TextInputType.name,
               maxLength: 15,
@@ -81,6 +82,7 @@ class _ProfileFormState extends State<ProfileForm> {
                   value, ["notEmpty", "notNull", "validTextOnly"]),
             ),
             TextFormField(
+              textCapitalization: TextCapitalization.sentences,
               initialValue: profileViewModel.profile?.lastName,
               keyboardType: TextInputType.name,
               maxLength: 15,
