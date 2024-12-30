@@ -193,6 +193,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               TextFormField(
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
+                keyboardType: TextInputType.multiline,
                 maxLength: 50,
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull"]),
@@ -201,6 +202,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               TextFormField(
                 controller: valuationController,
                 decoration: const InputDecoration(labelText: 'Valuation'),
+                keyboardType: TextInputType.number,
                 maxLength: 15,
                 validator: (value) => ValidationHelper.validateInput(value, [
                   "notEmpty",
