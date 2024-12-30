@@ -114,7 +114,8 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             TextFormField(
               initialValue: profileViewModel.profile?.salary.toString(),
-              keyboardType: TextInputType.number,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Salary'),
               onSaved: (value) {
