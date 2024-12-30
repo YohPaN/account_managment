@@ -57,7 +57,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
       if (widget.item != null) {
         titleController.text = widget.item!.title;
-        descriptionController.text = widget.item!.description;
+        descriptionController.text = widget.item!.description ?? "";
         valuationController.text = widget.item!.valuation.abs().toString();
         _username = widget.item!.username ?? "";
         _toAccount = widget.item!.toAccount?["id"] ?? "";

@@ -26,7 +26,7 @@ class ListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.title),
-                Text(item.description),
+                Text(item.description ?? ""),
               ],
             ),
           ),
