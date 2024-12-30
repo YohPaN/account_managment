@@ -167,7 +167,7 @@ class AccountSerializerTest(TestCase):
         transfert_item = Item.objects.create(
             title="test",
             description="test",
-            valuation=18.27,
+            valuation=-18.27,
             user=self.user,
             account=self.account2,
         )
@@ -207,7 +207,7 @@ class AccountSerializerTest(TestCase):
         item = Item.objects.create(
             title="test",
             description="test",
-            valuation=-58.46,
+            valuation=58.46,
             user=self.user,
             account=self.account2,
         )

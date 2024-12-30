@@ -22,7 +22,7 @@ from back_account_managment.serializers.user_serializer import (
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.db.models import Exists, OuterRef, Q, Sum
+from django.db.models import Case, Exists, F, OuterRef, Q, Sum, Value, When
 from rest_framework import serializers
 
 
@@ -98,15 +98,19 @@ class _AccountSerializer(serializers.ModelSerializer):
             to_account=account, item=OuterRef("pk")
         )
 
-        total = Item.objects.filter(
-            Q(account=account) | Exists(transfert_item),
+        total = Item.objects.annotate(
+            calc_valuation=Case(
+                When(Exists(transfert_item), then=F("valuation") * Value(-1)),
+                default=F("valuation"),
+            )
         ).filter(
+            Q(account=account) | Exists(transfert_item),
             user=user,
-            valuation__gt=0,
+            calc_valuation__gt=0,
         )
 
         if total.count() > 0:
-            return total.aggregate(total=(Sum("valuation")))
+            return total.aggregate(total=(Sum("calc_valuation")))
 
         return {"total": Decimal(0.00)}
 
@@ -117,12 +121,18 @@ class _AccountSerializer(serializers.ModelSerializer):
             to_account=account, item=OuterRef("pk")
         )
 
-        total = Item.objects.filter(
+        total = Item.objects.annotate(
+            calc_valuation=Case(
+                When(Exists(transfert_item), then=F("valuation") * Value(-1)),
+                default=F("valuation"),
+            )
+        ).filter(
             Q(account=account) | Exists(transfert_item),
-        ).filter(valuation__lt=0)
+            calc_valuation__lt=0,
+        )
 
         if total.count() > 0:
-            total = total.aggregate(total=Sum("valuation"))
+            total = total.aggregate(total=Sum("calc_valuation"))
 
             if account.salary_based_split is False:
                 user_proportion = 1 / (
