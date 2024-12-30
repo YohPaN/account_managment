@@ -71,6 +71,7 @@ class _ProfileFormState extends State<ProfileForm> {
           children: [
             TextFormField(
               initialValue: profileViewModel.profile?.firstName,
+              keyboardType: TextInputType.name,
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'First name'),
               onSaved: (value) {
@@ -81,6 +82,7 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             TextFormField(
               initialValue: profileViewModel.profile?.lastName,
+              keyboardType: TextInputType.name,
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Last name'),
               onSaved: (value) {
@@ -101,6 +103,7 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             TextFormField(
               initialValue: profileViewModel.user?.email,
+              keyboardType: TextInputType.emailAddress,
               maxLength: 50,
               decoration: const InputDecoration(labelText: 'Email'),
               onSaved: (value) {
@@ -111,6 +114,8 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             TextFormField(
               initialValue: profileViewModel.profile?.salary.toString(),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Salary'),
               onSaved: (value) {
