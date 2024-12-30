@@ -103,6 +103,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
+                textCapitalization: TextCapitalization.sentences,
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Title'),
                 maxLength: 30,

@@ -70,6 +70,7 @@ class _ProfileFormState extends State<ProfileForm> {
         child: Column(
           children: [
             TextFormField(
+              textCapitalization: TextCapitalization.sentences,
               initialValue: profileViewModel.profile?.firstName,
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'First name'),
@@ -80,6 +81,7 @@ class _ProfileFormState extends State<ProfileForm> {
                   value, ["notEmpty", "notNull", "validTextOnly"]),
             ),
             TextFormField(
+              textCapitalization: TextCapitalization.sentences,
               initialValue: profileViewModel.profile?.lastName,
               maxLength: 15,
               decoration: const InputDecoration(labelText: 'Last name'),
@@ -100,15 +102,14 @@ class _ProfileFormState extends State<ProfileForm> {
                   value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
             ),
             TextFormField(
-              initialValue: profileViewModel.user?.email,
-              maxLength: 50,
-              decoration: const InputDecoration(labelText: 'Email'),
-              onSaved: (value) {
-                formData['email'] = value ?? '';
-              },
-              // validator: (value) => ValidationHelper.validateInput(
-              //     value, ["notEmpty", "notNull", "validEmail"])
-            ),
+                initialValue: profileViewModel.user?.email,
+                maxLength: 50,
+                decoration: const InputDecoration(labelText: 'Email'),
+                onSaved: (value) {
+                  formData['email'] = value ?? '';
+                },
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validEmail"])),
             TextFormField(
               initialValue: profileViewModel.profile?.salary.toString(),
               maxLength: 15,

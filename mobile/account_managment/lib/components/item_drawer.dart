@@ -183,6 +183,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
+                textCapitalization: TextCapitalization.sentences,
                 controller: titleController,
                 decoration: const InputDecoration(labelText: 'Title'),
                 maxLength: 15,
@@ -191,6 +192,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                textCapitalization: TextCapitalization.sentences,
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLength: 50,
