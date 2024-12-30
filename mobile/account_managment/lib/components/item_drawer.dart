@@ -211,6 +211,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               ),
               const SizedBox(height: 16),
               DropdownMenu(
+                label: const Text("Item owner:"),
                 initialSelection: _username,
                 onSelected: (value) => setState(() {
                   _username = value!;
@@ -219,6 +220,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               ),
               const SizedBox(height: 16),
               DropdownMenu(
+                label: const Text("Transfert to:"),
                 initialSelection: _toAccount,
                 onSelected: (value) => setState(() {
                   _toAccount = value!;
