@@ -4,6 +4,7 @@ import 'package:account_managment/components/icon_visibility.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -19,6 +20,23 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController passwordController = TextEditingController();
 
   bool _passwordVisibility = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastUsername();
+  }
+
+  Future<void> _loadLastUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastUsername = prefs.getString('last_username');
+
+    if (lastUsername != null) {
+      setState(() {
+        usernameController.text = lastUsername;
+      });
+    }
+  }
 
   void togglePasswordVisibility() {
     setState(() {
@@ -59,6 +77,11 @@ class _LoginFormState extends State<LoginForm> {
                 if (success == true) {
                   Provider.of<NavigationIndex>(context, listen: false)
                       .changeIndex(0);
+
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString(
+                      'last_username', usernameController.text);
+
                   if (!context.mounted) return;
                   Navigator.pushNamedAndRemoveUntil(
                       context, '/home', (route) => false);

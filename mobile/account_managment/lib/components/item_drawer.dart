@@ -97,15 +97,16 @@ class _ItemDrawerState extends State<ItemDrawer> {
     ];
 
     for (var account in accountViewModel.accounts!) {
-      if (account.permissions.contains("transfert_item")) {
-        accountList.add(DropdownMenuEntry<String>(
-          value: account.id.toString(),
-          label: account.name,
-        ));
-      }
+      accountList.add(DropdownMenuEntry<String>(
+        value: account.id.toString(),
+        label: account.name,
+      ));
     }
     for (var account in accountViewModel.contributorAccounts!) {
-      if (account.permissions.contains("transfert_item")) {
+      if (profileViewModel.user!.hasPermission(
+          account: account,
+          permissionsNeeded: ["transfert_item"],
+          permissions: account.permissions)) {
         accountList.add(DropdownMenuEntry<String>(
           value: account.id.toString(),
           label: account.name,
@@ -213,6 +214,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
               ),
               const SizedBox(height: 16),
               DropdownMenu(
+                expandedInsets: const EdgeInsets.all(50),
+                label: const Text("Item owner:"),
                 initialSelection: _username,
                 onSelected: (value) => setState(() {
                   _username = value!;
@@ -221,6 +224,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
               ),
               const SizedBox(height: 16),
               DropdownMenu(
+                expandedInsets: const EdgeInsets.all(50),
+                label: const Text("Transfert to:"),
                 initialSelection: _toAccount,
                 onSelected: (value) => setState(() {
                   _toAccount = value!;
