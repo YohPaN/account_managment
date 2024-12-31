@@ -111,24 +111,26 @@ class _AccountDrawerState extends State<AccountDrawer> {
                     value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
               ),
               const SizedBox(height: 16),
-              CheckboxListTile(
-                title: const Text("Account based split"),
-                value: isSplit,
-                onChanged: (bool? value) async {
-                  final RepoResponse repoResponse =
-                      await accountViewModel.setSalaryBasedSplit(
-                    accountId: widget.account!.id,
-                    isSplit: value!,
-                  );
-                  if (repoResponse.success) {
-                    setState(() {
-                      isSplit = value;
-                    });
-                  }
-                  Provider.of<InternalNotification>(context, listen: false)
-                      .showMessage(repoResponse.message, repoResponse.success);
-                },
-              ),
+              if (widget.action == "update")
+                CheckboxListTile(
+                  title: const Text("Account based split"),
+                  value: isSplit,
+                  onChanged: (bool? value) async {
+                    final RepoResponse repoResponse =
+                        await accountViewModel.setSalaryBasedSplit(
+                      accountId: widget.account!.id,
+                      isSplit: value!,
+                    );
+                    if (repoResponse.success) {
+                      setState(() {
+                        isSplit = value;
+                      });
+                    }
+                    Provider.of<InternalNotification>(context, listen: false)
+                        .showMessage(
+                            repoResponse.message, repoResponse.success);
+                  },
+                ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: userToAddController,
