@@ -28,4 +28,17 @@ class AuthViewModel extends ChangeNotifier {
     await _storage.delete(key: 'accessToken');
     await _storage.delete(key: 'refreshToken');
   }
+
+  Future<bool> verifToken() async {
+    final String? token = await _storage.read(key: "accessToken");
+
+    if (token != null) {
+      final RepoResponse repoResponse =
+          await authRepository.verifyToken(token: token);
+
+      return repoResponse.success;
+    }
+
+    return false;
+  }
 }
