@@ -2,7 +2,17 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
-from django.db.models import CheckConstraint, Q, Sum
+from django.db.models import (
+    Case,
+    CheckConstraint,
+    Exists,
+    F,
+    OuterRef,
+    Q,
+    Sum,
+    Value,
+    When,
+)
 
 
 class User(AbstractUser):
@@ -42,9 +52,20 @@ class Account(models.Model):
 
     @property
     def total(self):
-        return Item.objects.filter(account=self.pk).aggregate(
-            total_sum=Sum("valuation")
+        transfert_item = Transfert.objects.filter(
+            to_account_id=self.pk, item=OuterRef("pk")
         )
+
+        total = Item.objects.annotate(
+            calc_valuation=Case(
+                When(Exists(transfert_item), then=F("valuation") * Value(-1)),
+                default=F("valuation"),
+            )
+        ).filter(
+            Q(account_id=self.pk) | Exists(transfert_item),
+        )
+
+        return total.aggregate(total_sum=(Sum("calc_valuation")))
 
 
 class Item(models.Model):
