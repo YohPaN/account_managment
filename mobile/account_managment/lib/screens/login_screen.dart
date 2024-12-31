@@ -22,8 +22,6 @@ class LoginScreen extends StatelessWidget {
               ),
             );
           } else {
-            Provider.of<NavigationIndex>(context, listen: false).changeIndex(0);
-
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushNamedAndRemoveUntil(
                   context, '/home', (route) => false);
