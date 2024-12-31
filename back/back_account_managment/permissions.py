@@ -1,4 +1,5 @@
 from back_account_managment.models import (
+    Account,
     AccountUser,
     AccountUserPermission,
     Item,
@@ -114,7 +115,10 @@ class TransfertToAccountPermission(permissions.BasePermission):
 
         to_account = request.data.get("to_account", None)
 
-        if to_account is None:
+        if (
+            to_account is None
+            or Account.objects.get(pk=to_account).user == request.user
+        ):
             return True
 
         account_user = AccountUser.objects.get(
