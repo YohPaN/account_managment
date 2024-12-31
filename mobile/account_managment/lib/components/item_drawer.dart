@@ -97,15 +97,16 @@ class _ItemDrawerState extends State<ItemDrawer> {
     ];
 
     for (var account in accountViewModel.accounts!) {
-      if (account.permissions.contains("transfert_item")) {
-        accountList.add(DropdownMenuEntry<String>(
-          value: account.id.toString(),
-          label: account.name,
-        ));
-      }
+      accountList.add(DropdownMenuEntry<String>(
+        value: account.id.toString(),
+        label: account.name,
+      ));
     }
     for (var account in accountViewModel.contributorAccounts!) {
-      if (account.permissions.contains("transfert_item")) {
+      if (profileViewModel.user!.hasPermission(
+          account: account,
+          permissionsNeeded: ["transfert_item"],
+          permissions: account.permissions)) {
         accountList.add(DropdownMenuEntry<String>(
           value: account.id.toString(),
           label: account.name,
