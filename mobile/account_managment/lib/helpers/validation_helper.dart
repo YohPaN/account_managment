@@ -39,7 +39,7 @@ class ValidationHelper {
   }
 
   static String? validTextOnly(value) {
-    RegExp regExp = RegExp(r'^[a-zA-Z\s]+$');
+    RegExp regExp = RegExp(r'^[a-zA-ZÀ-ÖØ-öø-ÿ\s]+$');
     if (!regExp.hasMatch(value)) {
       return 'Please enter only text';
     }
@@ -47,7 +47,7 @@ class ValidationHelper {
   }
 
   static String? validTextOrDigitOnly(value) {
-    RegExp regExp = RegExp(r'^[a-zA-Z0-9\s]+$');
+    RegExp regExp = RegExp(r'^[a-zA-Z0-9À-ÖØ-öø-ÿ\s]+$');
     if (!regExp.hasMatch(value)) {
       return 'Please enter only text or numbers';
     }
