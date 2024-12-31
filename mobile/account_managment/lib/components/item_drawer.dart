@@ -57,7 +57,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
       if (widget.item != null) {
         titleController.text = widget.item!.title;
-        descriptionController.text = widget.item!.description;
+        descriptionController.text = widget.item!.description ?? "";
         valuationController.text = widget.item!.valuation.abs().toString();
         _username = widget.item!.username ?? "";
         _toAccount = widget.item!.toAccount?["id"] ?? "";
@@ -97,15 +97,16 @@ class _ItemDrawerState extends State<ItemDrawer> {
     ];
 
     for (var account in accountViewModel.accounts!) {
-      if (account.permissions.contains("transfert_item")) {
-        accountList.add(DropdownMenuEntry<String>(
-          value: account.id.toString(),
-          label: account.name,
-        ));
-      }
+      accountList.add(DropdownMenuEntry<String>(
+        value: account.id.toString(),
+        label: account.name,
+      ));
     }
     for (var account in accountViewModel.contributorAccounts!) {
-      if (account.permissions.contains("transfert_item")) {
+      if (profileViewModel.user!.hasPermission(
+          account: account,
+          permissionsNeeded: ["transfert_item"],
+          permissions: account.permissions)) {
         accountList.add(DropdownMenuEntry<String>(
           value: account.id.toString(),
           label: account.name,
@@ -183,6 +184,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
+                textCapitalization: TextCapitalization.sentences,
                 controller: titleController,
                 decoration: const InputDecoration(labelText: 'Title'),
                 maxLength: 15,
@@ -191,16 +193,17 @@ class _ItemDrawerState extends State<ItemDrawer> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                textCapitalization: TextCapitalization.sentences,
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLength: 50,
-                validator: (value) => ValidationHelper.validateInput(
-                    value, ["notEmpty", "notNull"]),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: valuationController,
                 decoration: const InputDecoration(labelText: 'Valuation'),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 maxLength: 15,
                 validator: (value) => ValidationHelper.validateInput(value, [
                   "notEmpty",

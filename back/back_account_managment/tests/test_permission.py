@@ -69,7 +69,6 @@ class IsAccountOwnerPermissionTest(TestCase):
         self.account = Account.objects.create(name="test", user=self.user)
         self.item = Item.objects.create(
             title="test",
-            description="test",
             valuation=21.21,
             user=self.user,
             account=self.account,
@@ -277,7 +276,6 @@ class ManageRessourcePermissionTest(TestCase):
         permission = Permission.objects.get(codename="add_item")
         item = Item.objects.create(
             title="test",
-            description="test",
             valuation=12.56,
             account=self.account,
             user=self.user,
@@ -341,7 +339,6 @@ class IsAccountContributorTest(TestCase):
 
         item = Item.objects.create(
             title="test",
-            description="test",
             valuation=21.21,
             account=self.account,
             user=self.user,

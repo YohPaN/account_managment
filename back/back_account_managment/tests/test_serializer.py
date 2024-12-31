@@ -79,7 +79,6 @@ class AccountSerializerTest(TestCase):
         # Plus / user / account / 57.46
         Item.objects.create(
             title="test",
-            description="test",
             valuation=57.46,
             user=self.user,
             account=self.account,
@@ -87,7 +86,6 @@ class AccountSerializerTest(TestCase):
         # Plus / user2 / account / 51.53
         Item.objects.create(
             title="test",
-            description="test",
             valuation=51.53,
             user=self.user2,
             account=self.account,
@@ -95,7 +93,6 @@ class AccountSerializerTest(TestCase):
         # Plus / user / account2 / 21.45
         Item.objects.create(
             title="test",
-            description="test",
             valuation=21.45,
             user=self.user,
             account=self.account2,
@@ -103,7 +100,6 @@ class AccountSerializerTest(TestCase):
         # Minus / user / account / 45.46
         Item.objects.create(
             title="test",
-            description="test",
             valuation=-45.46,
             user=self.user,
             account=self.account,
@@ -111,7 +107,6 @@ class AccountSerializerTest(TestCase):
         # Minus / user2 / account / 51.89
         Item.objects.create(
             title="test",
-            description="test",
             valuation=-51.89,
             user=self.user2,
             account=self.account,
@@ -119,7 +114,6 @@ class AccountSerializerTest(TestCase):
         # Minus / no user / account / 71.29
         Item.objects.create(
             title="test",
-            description="test",
             valuation=-71.29,
             account=self.account,
         )
@@ -166,7 +160,6 @@ class AccountSerializerTest(TestCase):
     def test_get_own_contribution_with_transfert(self):
         transfert_item = Item.objects.create(
             title="test",
-            description="test",
             valuation=-18.27,
             user=self.user,
             account=self.account2,
@@ -206,7 +199,6 @@ class AccountSerializerTest(TestCase):
     def test_get_need_to_add_with_trasnfert(self):
         item = Item.objects.create(
             title="test",
-            description="test",
             valuation=58.46,
             user=self.user,
             account=self.account2,
@@ -343,7 +335,6 @@ class ItemSerializerTest(TestCase):
         self.account2 = Account.objects.create(name="test", user=self.user)
         self.item = Item.objects.create(
             title="title",
-            description="description",
             valuation=12,
             account=self.account2,
         )

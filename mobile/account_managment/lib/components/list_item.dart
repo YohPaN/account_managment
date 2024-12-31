@@ -26,7 +26,7 @@ class ListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.title),
-                Text(item.description),
+                Text(item.description ?? ""),
               ],
             ),
           ),
@@ -44,7 +44,8 @@ class ListItem extends StatelessWidget {
           ),
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: Text("${item.valuation.toStringAsFixed(2)}€"),
+          child: Text(
+              "${(item.transfertItem ? item.valuation * -1 : item.valuation).toStringAsFixed(2)}€"),
         ),
         if (canManage && !item.transfertItem)
           IconButton(
