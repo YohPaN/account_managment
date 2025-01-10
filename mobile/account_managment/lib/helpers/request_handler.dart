@@ -112,7 +112,9 @@ class RequestHandler {
       if (!success && data == null) {
         return RepoResponse(success: false, message: "No data !");
       } else if (!success && data != null) {
-        if (data.containsKey("code") && data["code"] == "token_not_valid") {
+        if (data.containsKey("code") &&
+            data["code"] == "token_not_valid" &&
+            uri != "token/refresh/") {
           final RepoResponse repoResponse =
               await AuthRepository().refreshToken();
 
