@@ -106,7 +106,7 @@ class RequestHandler {
 
       success = SUCCESS_HTTP_CODE.contains(response.statusCode);
       if (response.body != "") {
-        data = jsonDecode(response.body);
+        data = jsonDecode(utf8.decode(response.bodyBytes));
       }
 
       if (!success && data == null) {
