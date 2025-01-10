@@ -6,6 +6,7 @@ import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/auth_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:crypto/crypto.dart';
 
 class RequestHandler {
   static const storage = FlutterSecureStorage();
@@ -32,10 +33,16 @@ class RequestHandler {
       switch (method) {
         case "GET":
           action = "retrieve";
+          String signature = calculateHMAC(
+            method: method,
+            uri: uri,
+            contentType: contentType,
+          );
+
           response = await http
               .get(
                 buildUri(uri),
-                headers: await buildHeaders(contentType, needAuth),
+                headers: await buildHeaders(contentType, needAuth, signature),
               )
               .timeout(const Duration(seconds: 5));
 
@@ -43,6 +50,12 @@ class RequestHandler {
 
         case "POST":
           action = "create or update";
+          String signature = calculateHMAC(
+            method: method,
+            uri: uri,
+            contentType: contentType,
+            body: body,
+          );
 
           if (body == null) {
             break;
@@ -50,7 +63,7 @@ class RequestHandler {
 
           response = await http.post(
             buildUri(uri),
-            headers: await buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth, signature),
             body: serializeBody(body),
           );
 
@@ -58,13 +71,19 @@ class RequestHandler {
 
         case "PUT":
           action = "update";
+          String signature = calculateHMAC(
+            method: method,
+            uri: uri,
+            contentType: contentType,
+            body: body,
+          );
 
           if (body == null) {
             break;
           }
           response = await http.put(
             buildUri(uri),
-            headers: await buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth, signature),
             body: serializeBody(body),
           );
 
@@ -72,13 +91,19 @@ class RequestHandler {
 
         case "PATCH":
           action = "update";
+          String signature = calculateHMAC(
+            method: method,
+            uri: uri,
+            contentType: contentType,
+            body: body,
+          );
 
           if (body == null) {
             break;
           }
           response = await http.patch(
             buildUri(uri),
-            headers: await buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth, signature),
             body: serializeBody(body),
           );
 
@@ -86,10 +111,15 @@ class RequestHandler {
 
         case "DELETE":
           action = "delete";
+          String signature = calculateHMAC(
+            method: method,
+            uri: uri,
+            contentType: contentType,
+          );
 
           response = await http.delete(
             buildUri(uri),
-            headers: await buildHeaders(contentType, needAuth),
+            headers: await buildHeaders(contentType, needAuth, signature),
           );
           break;
 
@@ -99,7 +129,6 @@ class RequestHandler {
             message: "Method not handle",
           );
       }
-
       if (response == null) {
         return RepoResponse(success: false, message: "No response !");
       }
@@ -165,7 +194,7 @@ class RequestHandler {
   }
 
   static Future<Map<String, String>> buildHeaders(
-      String contentType, bool? needAuth) async {
+      String contentType, bool? needAuth, String signature) async {
     var headers = <String, String>{};
     String? accessToken = await storage.read(key: 'accessToken');
 
@@ -179,6 +208,8 @@ class RequestHandler {
     if (needAuth == true) {
       headers.addEntries({'Authorization': 'Bearer $accessToken'}.entries);
     }
+
+    headers.addEntries({"X-Signature": signature}.entries);
 
     return headers;
   }
@@ -195,5 +226,26 @@ class RequestHandler {
     }
 
     return jsonEncode(body);
+  }
+
+  static calculateHMAC({
+    required String method,
+    required String uri,
+    required String contentType,
+    Map<String, dynamic>? body,
+  }) {
+    var key = utf8.encode(APIConfig.SECRET_API_KEY);
+
+    String concatString = "$method&$uri&$contentType";
+    if (body != null) {
+      concatString = "$concatString&${jsonEncode(body)}";
+    }
+
+    var messageBytes = utf8.encode(concatString);
+
+    var hmac = Hmac(sha256, key);
+    var digest = hmac.convert(messageBytes);
+
+    return digest.toString();
   }
 }

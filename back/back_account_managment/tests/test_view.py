@@ -10,13 +10,18 @@ from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import Permission
-from django.test import TestCase
+from django.test import TestCase, modify_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 
 User = get_user_model()
 
 
+@modify_settings(
+    MIDDLEWARE={
+        "remove": "back_account_managment.middlewares.HMACMiddleware",
+    }
+)
 class UserViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -156,6 +161,11 @@ class UserViewTest(TestCase):
         self.assertTrue(check_password("password", self.user.password))
 
 
+@modify_settings(
+    MIDDLEWARE={
+        "remove": "back_account_managment.middlewares.HMACMiddleware",
+    }
+)
 class RegisterViewTest(TestCase):
     def setUp(self):
         self.c = APIClient()
@@ -242,6 +252,11 @@ class RegisterViewTest(TestCase):
         self.assertEqual(len(User.objects.all()), 0)
 
 
+@modify_settings(
+    MIDDLEWARE={
+        "remove": "back_account_managment.middlewares.HMACMiddleware",
+    }
+)
 class AccountViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -531,6 +546,11 @@ class AccountViewTest(TestCase):
         )
 
 
+@modify_settings(
+    MIDDLEWARE={
+        "remove": "back_account_managment.middlewares.HMACMiddleware",
+    }
+)
 class ItemViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -783,6 +803,11 @@ class ItemViewTest(TestCase):
         self.assertEqual(len(Item.objects.all()), 0)
 
 
+@modify_settings(
+    MIDDLEWARE={
+        "remove": "back_account_managment.middlewares.HMACMiddleware",
+    }
+)
 class AccountUserViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -809,6 +834,11 @@ class AccountUserViewTest(TestCase):
         self.assertEqual(response.data, {"pending_account_request": 1})
 
 
+@modify_settings(
+    MIDDLEWARE={
+        "remove": "back_account_managment.middlewares.HMACMiddleware",
+    }
+)
 class AccountUserPermissionTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
