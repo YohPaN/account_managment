@@ -32,7 +32,13 @@ SECRET_API_KEY = (
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "10.0.2.2", "192.168.1.18", "192.168.1.16"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "10.0.2.2",
+    "192.168.1.18",
+    "192.168.1.16",
+    "192.168.1.12",
+]
 
 AUTH_USER_MODEL = "back_account_managment.User"
 # Application definition
