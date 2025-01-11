@@ -119,3 +119,13 @@ class AccountUserPermission(models.Model):
 class Transfert(models.Model):
     to_account = models.ForeignKey(Account, on_delete=models.CASCADE)
     item = models.OneToOneField(Item, on_delete=models.CASCADE)
+
+
+class LogCode(models.TextChoices):
+    INVALID_SIGNATURE = "INVALID_SIGNATURE"
+
+
+class Log(models.Model):
+    code = models.CharField(max_length=50, choices=LogCode)
+    details = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
