@@ -26,6 +26,7 @@ def verify_hmac(request):
         )
         .replace("'", '"')
         .replace(": ", ":")
+        .replace('", ', '",')
     )
 
     computed_signature = hmac.new(
