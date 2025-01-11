@@ -1,5 +1,6 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/common/navigation_index.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/screens/account_managment_screen.dart';
 import 'package:account_managment/screens/account_screen.dart';
 import 'package:account_managment/screens/profile_screen.dart';
@@ -10,6 +11,7 @@ import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Layout extends StatefulWidget {
   const Layout({super.key});
@@ -56,6 +58,7 @@ class _LayoutState extends State<Layout> {
     var currentPageIndex = Provider.of<NavigationIndex>(context).getIndex;
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     if (profileViewModel.user == null) profileViewModel.getProfile();
 
@@ -73,17 +76,17 @@ class _LayoutState extends State<Layout> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPageIndex,
         destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
+          NavigationDestination(
+            icon: const Icon(Icons.home),
+            label: locale.home.capitalize(),
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.euro),
-            label: 'Accounts',
+          NavigationDestination(
+            icon: const Icon(Icons.euro),
+            label: locale.account("many").capitalize(),
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.account_circle),
-            label: 'Profile',
+          NavigationDestination(
+            icon: const Icon(Icons.account_circle),
+            label: locale.profile.capitalize(),
           ),
           NavigationDestination(
             icon: Badge(
@@ -97,7 +100,7 @@ class _LayoutState extends State<Layout> {
               ),
               child: const Icon(Icons.settings),
             ),
-            label: 'Settings',
+            label: locale.settings.capitalize(),
           ),
         ],
         onDestinationSelected: (index) {
