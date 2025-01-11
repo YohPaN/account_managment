@@ -1,8 +1,10 @@
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -11,6 +13,7 @@ class SettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AccountUserViewModel accountUserViewModel =
         Provider.of<AccountUserViewModel>(context);
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Padding(
@@ -45,10 +48,12 @@ class SettingScreen extends StatelessWidget {
                               title: Column(
                                 children: [
                                   Text(
-                                    "Account: ${accountUserViewModel.accountUsers[index].accountName}",
+                                    "${locale.account("")}: ${accountUserViewModel.accountUsers[index].accountName}"
+                                        .capitalize(),
                                   ),
                                   Text(
-                                    "Admin: ${accountUserViewModel.accountUsers[index].adminUsername}",
+                                    "${locale.admin}: ${accountUserViewModel.accountUsers[index].adminUsername}"
+                                        .capitalize(),
                                   ),
                                   Row(
                                     mainAxisAlignment:
@@ -95,7 +100,7 @@ class SettingScreen extends StatelessWidget {
               },
             ),
             ElevatedButton(
-              child: const Text("Logout"),
+              child: Text(locale.logout.capitalize()),
               onPressed: () {
                 Provider.of<ProfileViewModel>(context, listen: false).clear();
                 Provider.of<AuthViewModel>(context, listen: false).logout();
