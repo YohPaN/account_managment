@@ -1,0 +1,85 @@
+{
+    "login": "login",
+    "username": "username",
+    "password": "password",
+    "action_account": "{action, select, create{create} update{update} delete{delete} other{}} {pronoun, select,  my{my} your{your} other{}} account",
+    "@action_account": {
+        "placeholders": {
+            "action": {
+                "type": "String",
+                "example": "create"
+            },
+            "pronoun": {
+                "type": "String",
+                "example": "my"
+            }
+        }
+    },
+    "first_name": "first name",
+    "last_name": "last name",
+    "email": "email",
+    "salary": "salary",
+    "new_password": "new password",
+    "actual_password": "actual password",
+    "retype_password": "retype password",
+    "update_my_password": "update my password",
+    "action_password": "{action, select, create{create} update{update} delete{delete} other{}} password",
+    "@action_password": {
+        "placeholders": {
+            "action": {
+                "type": "String"
+            }
+        }
+    },
+    "your_contribution": "your contribution",
+    "needs_to_add": "needs to add",
+    "home": "home",
+    "account": "{isSingular, select, many{accounts} other{account}}",
+    "@account": {
+        "placeholders": {
+            "isSingular": {
+                "type": "String"
+            }
+        }
+    },
+    "profile": "profile",
+    "settings": "settings",
+    "title": "title",
+    "description": "description",
+    "valuation": "valuation",
+    "item_owner": "item owner",
+    "transfert_to": "transfert to",
+    "expense": "expense",
+    "income": "income",
+    "action_item": "{action, select, create{create} update{update} delete{delete} other{}} item",
+    "@action_item": {
+        "placeholders": {
+            "action": {
+                "type": "String",
+                "example": "create"
+            }
+        }
+    },
+    "your": "your",
+    "contributor_account": "contributor {isSingular, select, many{accounts}other{account}}",
+    "@contributor_account": {
+        "placeholders": {
+            "isSingular": {
+                "type": "String",
+                "example": "create"
+            }
+        }
+    },
+    "back": "back",
+    "logout": "logout",
+    "admin": "admin",
+    "salary_based_split": "salary based split",
+    "add_users": "add users",
+    "error": "error",
+    "add_self_account_error": "you can't add yourself to your account",
+    "ok": "ok",
+    "create_account_before_manage_permissions": "you have to create the account before managing permissions",
+    "add_user_before_manage_permissions": "you have to add the user before managing his permissions",
+    "permissions": "permissions",
+    "delete": "delete"
+}
