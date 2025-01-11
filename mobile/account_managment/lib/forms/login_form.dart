@@ -1,10 +1,12 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/components/icon_visibility.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -15,7 +17,6 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -47,6 +48,7 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = AuthViewModel();
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     return Form(
       key: _formKey,
@@ -54,12 +56,13 @@ class _LoginFormState extends State<LoginForm> {
         children: [
           TextFormField(
             controller: usernameController,
-            decoration: const InputDecoration(labelText: 'Username'),
+            decoration:
+                InputDecoration(labelText: locale.username.capitalize()),
           ),
           TextFormField(
             controller: passwordController,
             decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: locale.password.capitalize(),
                 suffixIcon: IconButton(
                     onPressed: () => togglePasswordVisibility(),
                     icon: IconVisibility(visibility: _passwordVisibility))),
@@ -91,7 +94,7 @@ class _LoginFormState extends State<LoginForm> {
                       .showMessage(error, success);
                 }
               },
-              child: const Text("Login"),
+              child: Text(locale.login.capitalize()),
             ),
           ),
           const SizedBox(height: 16),
@@ -100,7 +103,7 @@ class _LoginFormState extends State<LoginForm> {
               usernameController.text = "";
               Navigator.pushNamed(context, '/register');
             },
-            child: const Text("Create account"),
+            child: Text(locale.action_account("create", "my").capitalize()),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
-import 'package:account_managment/common/navigation_index.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/forms/login_form.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,9 @@ class LoginScreen extends StatelessWidget {
         if (snapshot.hasData) {
           if (!snapshot.data!) {
             return Scaffold(
-              appBar: AppBar(title: const Text("Login")),
+              appBar: AppBar(
+                  title:
+                      Text(AppLocalizations.of(context)!.login.capitalize())),
               body: const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: LoginForm(),
