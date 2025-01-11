@@ -10,6 +10,7 @@ import 'package:account_managment/models/user.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfileForm extends StatefulWidget {
   final String action;
@@ -37,6 +38,8 @@ class _ProfileFormState extends State<ProfileForm> {
   Widget build(BuildContext context) {
     final profileViewModel = Provider.of<ProfileViewModel>(context);
     final Map<String, String> formData = {};
+    final AppLocalizations locale = AppLocalizations.of(context)!;
+
     User? user = profileViewModel.user;
     Profile? profile = profileViewModel.profile;
 
@@ -74,7 +77,8 @@ class _ProfileFormState extends State<ProfileForm> {
               initialValue: profileViewModel.profile?.firstName,
               keyboardType: TextInputType.name,
               maxLength: 15,
-              decoration: const InputDecoration(labelText: 'First name'),
+              decoration:
+                  InputDecoration(labelText: locale.first_name.capitalize()),
               onSaved: (value) {
                 formData['firstName'] = value ?? '';
               },
@@ -86,7 +90,8 @@ class _ProfileFormState extends State<ProfileForm> {
               initialValue: profileViewModel.profile?.lastName,
               keyboardType: TextInputType.name,
               maxLength: 15,
-              decoration: const InputDecoration(labelText: 'Last name'),
+              decoration:
+                  InputDecoration(labelText: locale.last_name.capitalize()),
               onSaved: (value) {
                 formData['lastName'] = value ?? '';
               },
@@ -96,7 +101,8 @@ class _ProfileFormState extends State<ProfileForm> {
             TextFormField(
               initialValue: profileViewModel.user?.username,
               maxLength: 15,
-              decoration: const InputDecoration(labelText: 'Username'),
+              decoration:
+                  InputDecoration(labelText: locale.username.capitalize()),
               onSaved: (value) {
                 formData['username'] = value ?? '';
               },
@@ -107,7 +113,7 @@ class _ProfileFormState extends State<ProfileForm> {
               initialValue: profileViewModel.user?.email,
               keyboardType: TextInputType.emailAddress,
               maxLength: 50,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(labelText: locale.email.capitalize()),
               onSaved: (value) {
                 formData['email'] = value ?? '';
               },
@@ -119,7 +125,8 @@ class _ProfileFormState extends State<ProfileForm> {
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               maxLength: 15,
-              decoration: const InputDecoration(labelText: 'Salary'),
+              decoration:
+                  InputDecoration(labelText: locale.salary.capitalize()),
               onSaved: (value) {
                 formData['salary'] = value ?? '';
               },
@@ -129,13 +136,13 @@ class _ProfileFormState extends State<ProfileForm> {
             if (widget.action == "create")
               Column(children: [
                 PasswordField(
-                  label: "New password",
+                  label: locale.new_password.capitalize(),
                   index: "newPassword",
                   formData: formData,
                 ),
                 const SizedBox(height: 16),
                 PasswordField(
-                  label: "Retype password",
+                  label: locale.retype_password.capitalize(),
                   index: "retypePassword",
                   formData: formData,
                   comparisonSame: "newPassword",
@@ -158,7 +165,7 @@ class _ProfileFormState extends State<ProfileForm> {
                     },
                   );
                 },
-                child: const Text("Update my password"),
+                child: Text(locale.update_my_password.capitalize()),
               ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -177,7 +184,7 @@ class _ProfileFormState extends State<ProfileForm> {
                 }
               },
               child: Text(
-                "${widget.action} my account".capitalize(),
+                locale.action_account(widget.action, "my").capitalize(),
               ),
             ),
           ],
