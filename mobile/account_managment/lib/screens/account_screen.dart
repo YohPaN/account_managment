@@ -7,6 +7,7 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -17,6 +18,7 @@ class AccountScreen extends StatelessWidget {
         Provider.of<AccountViewModel>(context, listen: false);
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     showModal(String action, [Item? item]) {
       showModalBottomSheet(
@@ -86,10 +88,10 @@ class AccountScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Flexible(
+                                Flexible(
                                     child: Text(
-                                  "Your contribution",
-                                  style: TextStyle(),
+                                  locale.your_contribution.capitalize(),
+                                  style: const TextStyle(),
                                 )),
                                 Text(
                                   accountViewModel.account!.ownContribution !=
@@ -107,10 +109,10 @@ class AccountScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Flexible(
+                                Flexible(
                                     child: Text(
-                                  "Need to add",
-                                  style: TextStyle(),
+                                  locale.needs_to_add.capitalize(),
+                                  style: const TextStyle(),
                                 )),
                                 Text(
                                   accountViewModel.account!.needToAdd != null
