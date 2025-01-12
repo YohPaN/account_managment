@@ -82,5 +82,17 @@
     "add_user_before_manage_permissions": "you have to add the user before managing his permissions",
     "permissions": "permissions",
     "delete": "delete",
-    "me": "me"
+    "me": "me",
+    "amount_of_money": "{amount}",
+    "@amount_of_money": {
+        "placeholders": {
+            "amount": {
+                "type": "num",
+                "format": "compactCurrency",
+                "optionalParameters": {
+                    "decimalDigits": 2
+                }
+            }
+        }
+    }
 }

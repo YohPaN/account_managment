@@ -3,6 +3,7 @@ import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountListItem extends StatelessWidget {
   final Account account;
@@ -46,7 +47,8 @@ class AccountListItem extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: Text("${(account.total ?? 0).toStringAsFixed(2)}€"),
+              child: Text(
+                  AppLocalizations.of(context)!.amount_of_money(account.total)),
             ),
             if (canManage)
               IconButton(

@@ -40,5 +40,6 @@
     "add_user_before_manage_permissions": "vous devez d'abord ajouter l'utilisateur avant de gérer ses permissions",
     "permissions": "permissions",
     "delete": "supprimer",
-    "me": "Moi"
+    "me": "Moi",
+    "amount_of_money": "{amount}"
 }

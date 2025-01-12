@@ -11,7 +11,7 @@ class Account {
   List<Contributor> contributor;
   List<dynamic> permissions;
   String username;
-  double? total;
+  double total;
   bool? salaryBasedSplit;
 
   Account({
@@ -25,7 +25,7 @@ class Account {
     required this.permissions,
     required this.username,
     required this.salaryBasedSplit,
-    this.total,
+    required this.total,
   });
 
   static Account deserialize(jsonAccount) {

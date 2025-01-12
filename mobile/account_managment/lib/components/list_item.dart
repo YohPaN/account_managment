@@ -1,5 +1,6 @@
 import 'package:account_managment/models/item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ListItem extends StatelessWidget {
   final Item item;
@@ -44,8 +45,8 @@ class ListItem extends StatelessWidget {
           ),
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: Text(
-              "${(item.transfertItem ? item.valuation * -1 : item.valuation).toStringAsFixed(2)}€"),
+          child: Text(AppLocalizations.of(context)!.amount_of_money(
+              item.transfertItem ? item.valuation * -1 : item.valuation)),
         ),
         if (canManage && !item.transfertItem)
           IconButton(

@@ -73,7 +73,8 @@ class AccountScreen extends StatelessWidget {
                                       fontWeight: FontWeight.bold),
                                 )),
                                 Text(
-                                  "${accountViewModel.account!.total != null ? accountViewModel.account!.total!.toStringAsFixed(2) : "0.00"}€",
+                                  locale.amount_of_money(
+                                      accountViewModel.account!.total),
                                   style: TextStyle(
                                       fontSize: 24.0,
                                       color: accountViewModel.account!.total !=
