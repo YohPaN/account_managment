@@ -93,7 +93,7 @@ class AccountScreen extends StatelessWidget {
                                 )),
                                 Text(
                                   locale.amount_of_money(accountViewModel
-                                      .account!.ownContribution),
+                                      .account!.ownContribution!),
                                   style: const TextStyle(
                                     fontSize: 18.0,
                                   ),
@@ -110,11 +110,11 @@ class AccountScreen extends StatelessWidget {
                                 )),
                                 Text(
                                   locale.amount_of_money(
-                                      accountViewModel.account!.needToAdd),
+                                      accountViewModel.account!.needToAdd!),
                                   style: TextStyle(
                                       fontSize: 18.0,
                                       color:
-                                          accountViewModel.account!.needToAdd <
+                                          accountViewModel.account!.needToAdd! <
                                                   0
                                               ? Colors.red[600]
                                               : Colors.green[500]),

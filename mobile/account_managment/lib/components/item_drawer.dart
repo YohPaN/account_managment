@@ -220,7 +220,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               const SizedBox(height: 16),
               DropdownMenu(
                 expandedInsets: const EdgeInsets.all(50),
-                label: Text("${locale.item_owner}:"),
+                label: Text("${locale.item_owner}:".capitalize()),
                 initialSelection: _username,
                 onSelected: (value) => setState(() {
                   _username = value!;
@@ -230,7 +230,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               const SizedBox(height: 16),
               DropdownMenu(
                 expandedInsets: const EdgeInsets.all(50),
-                label: Text("${locale.transfert_to}:"),
+                label: Text("${locale.transfert_to}:".capitalize()),
                 initialSelection: _toAccount,
                 onSelected: (value) => setState(() {
                   _toAccount = value!;

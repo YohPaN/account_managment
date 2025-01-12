@@ -6,8 +6,8 @@ class Account {
   String name;
   bool isMain;
   List<Item> items;
-  double ownContribution;
-  double needToAdd;
+  double? ownContribution;
+  double? needToAdd;
   List<Contributor> contributor;
   List<dynamic> permissions;
   String username;
@@ -19,8 +19,8 @@ class Account {
     required this.name,
     required this.isMain,
     required this.items,
-    required this.ownContribution,
-    required this.needToAdd,
+    this.ownContribution,
+    this.needToAdd,
     required this.contributor,
     required this.permissions,
     required this.username,
