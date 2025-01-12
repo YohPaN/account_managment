@@ -1,4 +1,5 @@
 {
+    "@@locale": "en",
     "@@comment": "Common",
     "action": "{action, select, create{create} update{update} delete{delete} other{}}",
     "@action": {

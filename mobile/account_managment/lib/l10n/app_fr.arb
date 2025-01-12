@@ -1,4 +1,5 @@
 {
+    "@@locale": "fr",
     "@@comment": "Common",
     "action": "{action, select, create{créer} update{mettre à jour} delete{supprimer} other{}}",
     "admin": "administrateur",
