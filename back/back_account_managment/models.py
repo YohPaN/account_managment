@@ -68,6 +68,24 @@ class Account(models.Model):
         return total.aggregate(total_sum=(Sum("calc_valuation")))
 
 
+class Category(models.Model):
+    title = models.CharField(max_length=25)
+    color = models.CharField(max_length=50, blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, null=True, blank=True
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True
+    )
+
+    def save(self, **kwargs):
+        if self.account is not None and self.user is not None:
+            return
+
+        return super().save(**kwargs)
+
+
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=15)
@@ -78,6 +96,9 @@ class Item(models.Model):
     )
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True
+    )
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, null=True, blank=True
     )
 
 

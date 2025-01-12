@@ -4,6 +4,7 @@ from back_account_managment.models import (
     Account,
     AccountUser,
     AccountUserPermission,
+    Category,
     Item,
     Profile,
     Transfert,
@@ -24,6 +25,9 @@ from back_account_managment.serializers.account_serializer import (
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountUserSerializer,
+)
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
 )
 from back_account_managment.serializers.item_serializer import (
     ItemWriteSerializer,
@@ -417,3 +421,24 @@ class AccountUserPermissionView(ModelViewSet):
             )
 
         return Response(status=status.HTTP_200_OK)
+
+
+class Category(ModelViewSet):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        category_type = request.data.get("category_type", None)
+
+        if category_type == "PROFILE":
+            request.data["user"] = request.user_id
+
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        category_type = request.data.get("category_type", None)
+
+        if category_type == "PROFILE":
+            request.data["user"] = request.user_id
+
+        return super().update(request, *args, **kwargs)
