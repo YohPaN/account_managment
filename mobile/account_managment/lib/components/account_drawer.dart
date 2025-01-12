@@ -323,7 +323,8 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                   ),
                                 ElevatedButton(
                                   onPressed: () => _removeUser(index),
-                                  child: Text(locale.delete.capitalize()),
+                                  child: Text(
+                                      locale.action("delete").capitalize()),
                                 ),
                               ],
                             ),
@@ -353,9 +354,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                           Navigator.pop(context);
                         }
                       },
-                      child: Text(locale
-                          .action_account(widget.action, "")
-                          .capitalize()),
+                      child: Text(locale.action(widget.action).capitalize()),
                     ),
                   if (widget.action == "update" &&
                       profileViewModel.user!.hasPermission(
@@ -375,8 +374,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                 repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       },
-                      child: Text("${locale.delete} ${locale.account("")}"
-                          .capitalize()),
+                      child: Text(locale.action('delete').capitalize()),
                     )
                 ],
               ),

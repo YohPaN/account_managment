@@ -103,7 +103,8 @@ class _LoginFormState extends State<LoginForm> {
               usernameController.text = "";
               Navigator.pushNamed(context, '/register');
             },
-            child: Text(locale.action_account("create", "my").capitalize()),
+            child: Text(
+                "${locale.action("create").capitalize()} ${locale.possessive("your")} ${locale.account("")}"),
           ),
         ],
       ),

@@ -11,11 +11,10 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations locale = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!
-              .action_account(action, "your")
-              .capitalize())),
+      appBar: AppBar(title: Text(locale.profile.capitalize())),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: action == "create"

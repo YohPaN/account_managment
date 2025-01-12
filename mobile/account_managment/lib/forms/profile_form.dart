@@ -165,7 +165,8 @@ class _ProfileFormState extends State<ProfileForm> {
                     },
                   );
                 },
-                child: Text(locale.update_my_password.capitalize()),
+                child: Text(
+                    "${locale.action(widget.action).capitalize()} ${locale.the("the")} ${locale.password}"),
               ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -184,7 +185,7 @@ class _ProfileFormState extends State<ProfileForm> {
                 }
               },
               child: Text(
-                locale.action_account(widget.action, "my").capitalize(),
+                "${locale.action(widget.action).capitalize()} ${locale.the("the")} ${locale.profile}",
               ),
             ),
           ],

@@ -276,7 +276,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                                 repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       },
-                      child: Text('${locale.delete.capitalize()} item'),
+                      child: Text(locale.action("delete").capitalize()),
                     ),
                   if (profileViewModel.user!.hasPermission(
                     ressource: widget.item,
@@ -298,8 +298,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                           Navigator.pop(context);
                         }
                       },
-                      child:
-                          Text(locale.action_item(widget.action).capitalize()),
+                      child: Text(locale.action(widget.action).capitalize()),
                     ),
                 ],
               ),

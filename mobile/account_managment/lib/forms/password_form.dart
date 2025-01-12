@@ -68,7 +68,7 @@ class _PasswordFormState extends State<PasswordForm> {
                     Navigator.pop(context);
                   }
                 },
-                child: Text(locale.action_password(widget.action).capitalize()),
+                child: Text(locale.action(widget.action).capitalize()),
               ),
             ],
           ),

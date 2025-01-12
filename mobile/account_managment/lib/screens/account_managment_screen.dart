@@ -60,7 +60,7 @@ class AccountManagmentScreen extends StatelessWidget {
                         {await accountViewModel.listAccount()},
                     child: Column(children: [
                       Text(
-                          "${locale.your.capitalize()} ${locale.account("many")}"),
+                          "${locale.possessive("yours").capitalize()} ${locale.account("many")}"),
                       Expanded(
                         child: ListView.builder(
                           itemCount: accountViewModel.accounts?.length ?? 0,
