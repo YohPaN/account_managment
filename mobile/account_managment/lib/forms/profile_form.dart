@@ -74,7 +74,7 @@ class _ProfileFormState extends State<ProfileForm> {
           children: [
             TextFormField(
               textCapitalization: TextCapitalization.sentences,
-              initialValue: profileViewModel.profile?.firstName,
+              initialValue: profile?.firstName,
               keyboardType: TextInputType.name,
               maxLength: 15,
               decoration:
@@ -87,7 +87,7 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             TextFormField(
               textCapitalization: TextCapitalization.sentences,
-              initialValue: profileViewModel.profile?.lastName,
+              initialValue: profile?.lastName,
               keyboardType: TextInputType.name,
               maxLength: 15,
               decoration:
@@ -99,7 +99,7 @@ class _ProfileFormState extends State<ProfileForm> {
                   value, ["notEmpty", "notNull", "validTextOnly"]),
             ),
             TextFormField(
-              initialValue: profileViewModel.user?.username,
+              initialValue: user?.username,
               maxLength: 15,
               decoration:
                   InputDecoration(labelText: locale.username.capitalize()),
@@ -110,18 +110,18 @@ class _ProfileFormState extends State<ProfileForm> {
                   value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
             ),
             TextFormField(
-              initialValue: profileViewModel.user?.email,
-              keyboardType: TextInputType.emailAddress,
-              maxLength: 50,
-              decoration: InputDecoration(labelText: locale.email.capitalize()),
-              onSaved: (value) {
-                formData['email'] = value ?? '';
-              },
-              // validator: (value) => ValidationHelper.validateInput(
-              //     value, ["notEmpty", "notNull", "validEmail"])
-            ),
+                initialValue: user?.email,
+                keyboardType: TextInputType.emailAddress,
+                maxLength: 50,
+                decoration:
+                    InputDecoration(labelText: locale.email.capitalize()),
+                onSaved: (value) {
+                  formData['email'] = value ?? '';
+                },
+                validator: (value) => ValidationHelper.validateInput(
+                    value, ["notEmpty", "notNull", "validEmail"])),
             TextFormField(
-              initialValue: profileViewModel.profile?.salary.toString(),
+              initialValue: profile?.salary.toString(),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               maxLength: 15,

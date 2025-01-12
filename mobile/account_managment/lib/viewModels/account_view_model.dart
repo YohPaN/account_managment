@@ -17,12 +17,7 @@ class AccountViewModel extends ChangeNotifier {
   Account? _account;
   Account? get account => _account;
 
-  int? _accountIdToRetrieve;
-  set accountIdToRetrieve(int? value) {
-    _accountIdToRetrieve = value;
-  }
-
-  int? get accountIdToRetrieve => _accountIdToRetrieve;
+  int? accountIdToRetrieve;
 
   Future<RepoResponse> listAccount() async {
     final RepoResponse repoResponse = await accountRepository.list();

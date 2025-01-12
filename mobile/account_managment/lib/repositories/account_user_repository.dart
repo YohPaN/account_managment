@@ -5,12 +5,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AccountUserRepository {
   final storage = const FlutterSecureStorage();
-  final model_url = "account_user";
+  final modelUrl = "account_user";
 
   Future<RepoResponse> list() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$model_url/",
+      uri: "$modelUrl/",
       contentType: 'application/json',
     );
 
@@ -20,7 +20,7 @@ class AccountUserRepository {
   Future<RepoResponse> count() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$model_url/count/",
+      uri: "$modelUrl/count/",
       contentType: 'application/json',
     );
 
@@ -30,7 +30,7 @@ class AccountUserRepository {
   Future<RepoResponse> create() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$model_url/",
+      uri: "$modelUrl/",
       contentType: 'application/json',
       body: {},
     );
@@ -42,7 +42,7 @@ class AccountUserRepository {
       {required int accountUserId, required String state}) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
-      uri: "$model_url/$accountUserId/",
+      uri: "$modelUrl/$accountUserId/",
       contentType: 'application/json',
       body: {"state": state},
     );

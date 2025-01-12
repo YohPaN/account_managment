@@ -2,12 +2,12 @@ import 'package:account_managment/helpers/request_handler.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 
 class ProfileRepository {
-  final model_url = "users";
+  final modelUrl = "users";
 
   Future<RepoResponse> get() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$model_url/me/",
+      uri: "$modelUrl/me/",
       contentType: 'application/json',
     );
 
@@ -37,7 +37,7 @@ class ProfileRepository {
       String lastName, String email, String salary, String password) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
         method: "PATCH",
-        uri: "$model_url/me/update/",
+        uri: "$modelUrl/me/update/",
         contentType: 'application/json',
         body: {
           'username': username,
@@ -55,7 +55,7 @@ class ProfileRepository {
       String oldPassword, String newPassword) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
         method: "PATCH",
-        uri: "$model_url/password/",
+        uri: "$modelUrl/password/",
         contentType: 'application/json',
         body: {
           'old_password': oldPassword,

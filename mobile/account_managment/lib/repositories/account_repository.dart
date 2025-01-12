@@ -5,12 +5,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AccountRepository {
   final storage = const FlutterSecureStorage();
-  final model_url = "accounts";
+  final modelUrl = "accounts";
 
   Future<RepoResponse> list() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$model_url/",
+      uri: "$modelUrl/",
       contentType: 'application/json',
     );
 
@@ -20,7 +20,7 @@ class AccountRepository {
   Future<RepoResponse> get(int? accountId) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$model_url/${accountId ?? "me"}/",
+      uri: "$modelUrl/${accountId ?? "me"}/",
       contentType: 'application/json',
     );
 
@@ -30,7 +30,7 @@ class AccountRepository {
   Future<RepoResponse> create(String name, List<String> contributors) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$model_url/",
+      uri: "$modelUrl/",
       contentType: 'application/json',
       body: {'name': name, 'contributors': contributors},
     );
@@ -42,7 +42,7 @@ class AccountRepository {
       int accountId, String name, List<String> contributors) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
-      uri: "$model_url/$accountId/",
+      uri: "$modelUrl/$accountId/",
       contentType: 'application/json',
       body: {'name': name, 'contributors': contributors},
     );
@@ -53,7 +53,7 @@ class AccountRepository {
   Future<RepoResponse> delete(int accountId) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "DELETE",
-      uri: "$model_url/$accountId/",
+      uri: "$modelUrl/$accountId/",
       contentType: 'application/json',
     );
 
@@ -70,7 +70,7 @@ class AccountRepository {
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$model_url/$accountId/items/",
+      uri: "$modelUrl/$accountId/items/",
       contentType: 'application/json',
       body: {
         'account': accountId.toString(),
@@ -96,7 +96,7 @@ class AccountRepository {
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PUT",
-      uri: "$model_url/$accountId/items/$itemId/",
+      uri: "$modelUrl/$accountId/items/$itemId/",
       contentType: 'application/json',
       body: {
         'account': accountId.toString(),
@@ -114,7 +114,7 @@ class AccountRepository {
   Future<RepoResponse> deleteItem(int itemId, int accountId) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "DELETE",
-      uri: "$model_url/$accountId/items/$itemId/",
+      uri: "$modelUrl/$accountId/items/$itemId/",
       contentType: 'application/json',
     );
 
@@ -125,7 +125,7 @@ class AccountRepository {
       {required int accountId, required String username}) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$model_url/$accountId/$username/permissions/",
+      uri: "$modelUrl/$accountId/$username/permissions/",
       contentType: 'application/json',
     );
 
@@ -138,7 +138,7 @@ class AccountRepository {
       required List<String> permissions}) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$model_url/$accountId/$username/permissions/",
+      uri: "$modelUrl/$accountId/$username/permissions/",
       contentType: 'application/json',
       body: {
         'permissions': permissions,
@@ -154,7 +154,7 @@ class AccountRepository {
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$model_url/$accountId/split/",
+      uri: "$modelUrl/$accountId/split/",
       contentType: 'application/json',
       body: {
         'is_slit': isSplit ? "True" : "False",
