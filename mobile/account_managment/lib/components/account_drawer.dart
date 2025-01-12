@@ -75,11 +75,11 @@ class _AccountDrawerState extends State<AccountDrawer> {
         Provider.of<ProfileViewModel>(context, listen: false);
 
     createOrUpdate() async {
-      var response;
+      RepoResponse response;
       if (widget.action == "create") {
-        response =
-            accountViewModel.createAccount(nameController.text, _usersToAdd);
-      } else if (widget.action == "update") {
+        response = await accountViewModel.createAccount(
+            nameController.text, _usersToAdd);
+      } else {
         response = await accountViewModel.updateAccount(
             widget.account!.id, nameController.text, _usersToAdd);
       }

@@ -11,6 +11,7 @@ import 'package:crypto/crypto.dart';
 class RequestHandler {
   static const storage = FlutterSecureStorage();
 
+  // ignore: non_constant_identifier_names
   static final List<int> SUCCESS_HTTP_CODE = [
     200,
     201,
@@ -215,7 +216,7 @@ class RequestHandler {
   }
 
   static Uri buildUri(String uri) {
-    return Uri.parse("http://${APIConfig.base_url}:${APIConfig.port}/api/$uri");
+    return Uri.parse("http://${APIConfig.baseUrl}:${APIConfig.port}/api/$uri");
   }
 
   static String serializeBody(Map<String, dynamic> body) {

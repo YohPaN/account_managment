@@ -140,8 +140,7 @@ class AccountScreen extends StatelessWidget {
                                 .getAccount(accountViewModel.account?.id)
                           },
                           child: ListView.builder(
-                            itemCount:
-                                accountViewModel.account!.items.length ?? 0,
+                            itemCount: accountViewModel.account!.items.length,
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: const EdgeInsets.only(
