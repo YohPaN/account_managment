@@ -1,0 +1,97 @@
+{
+    "@@comment": "Common",
+    "action": "{action, select, create{create} update{update} delete{delete} other{}}",
+    "@action": {
+        "placeholders": {
+            "action": {
+                "type": "String"
+            }
+        }
+    },
+    "admin": "admin",
+    "amount_of_money": "{amount}",
+    "@amount_of_money": {
+        "placeholders": {
+            "amount": {
+                "type": "num",
+                "format": "simpleCurrency",
+                "optionalParameters": {
+                    "decimalDigits": 2
+                }
+            }
+        }
+    },
+    "back": "back",
+    "description": "description",
+    "error": "error",
+    "home": "home",
+    "ok": "ok",
+    "settings": "settings",
+    "title": "title",
+    "@@comment": "Single words",
+    "me": "me",
+    "the": "{the, select, the{} other{}}",
+    "@the": {
+        "placeholders": {
+            "the": {
+                "type": "String"
+            }
+        }
+    },
+    "possessive": "{word, select, your{your} yours{your} other{}}",
+    "@possessive": {
+        "description": "your is for single ressource and yours is for multiple. No diff in english",
+        "placeholders": {
+            "word": {
+                "type": "String"
+            }
+        }
+    },
+    "@@comment": "Profile",
+    "email": "email",
+    "first_name": "first name",
+    "last_name": "last name",
+    "login": "login",
+    "logout": "logout",
+    "profile": "profile",
+    "salary": "salary",
+    "username": "username",
+    "@@comment": "Password",
+    "actual_password": "actual password",
+    "new_password": "new password",
+    "password": "password",
+    "retype_password": "retype password",
+    "@@comment": "Account",
+    "account": "{isSingular, select, many{accounts} other{account}}",
+    "@account": {
+        "placeholders": {
+            "isSingular": {
+                "type": "String"
+            }
+        }
+    },
+    "add_self_account_error": "you can't add yourself to your account",
+    "add_users": "add users",
+    "contributor_account": "contributor {isSingular, select, many{accounts}other{account}}",
+    "@contributor_account": {
+        "placeholders": {
+            "isSingular": {
+                "type": "String",
+                "example": "create"
+            }
+        }
+    },
+    "needs_to_add": "needs to add",
+    "salary_based_split": "salary based split",
+    "your_contribution": "your contribution",
+    "@@comment": "Item",
+    "expense": "expense",
+    "income": "income",
+    "item_owner": "item owner",
+    "transfert_to": "transfert to",
+    "valuation": "valuation",
+    "@@comment": "Permissions",
+    "add_user_before_manage_permissions": "you have to add the user before managing his permissions",
+    "create_account_before_manage_permissions": "you have to create the account before managing permissions",
+    "permissions": "permissions"
+}

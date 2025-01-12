@@ -1,10 +1,12 @@
 import 'package:account_managment/components/account_drawer.dart';
 import 'package:account_managment/components/account_list_item.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountManagmentScreen extends StatelessWidget {
   const AccountManagmentScreen({super.key});
@@ -13,6 +15,7 @@ class AccountManagmentScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final accountViewModel = Provider.of<AccountViewModel>(context);
     final profileViewModel = Provider.of<ProfileViewModel>(context);
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     showModal(String action, [Account? account]) {
       showModalBottomSheet(
@@ -56,7 +59,8 @@ class AccountManagmentScreen extends StatelessWidget {
                     onRefresh: () async =>
                         {await accountViewModel.listAccount()},
                     child: Column(children: [
-                      const Text("Your accounts"),
+                      Text(
+                          "${locale.possessive("yours").capitalize()} ${locale.account("many")}"),
                       Expanded(
                         child: ListView.builder(
                           itemCount: accountViewModel.accounts?.length ?? 0,
@@ -70,7 +74,7 @@ class AccountManagmentScreen extends StatelessWidget {
                         ),
                       ),
                       const Divider(color: Colors.black),
-                      const Text("Associate accounts"),
+                      Text(locale.contributor_account("many").capitalize()),
                       Expanded(
                         child: ListView.builder(
                           itemCount:

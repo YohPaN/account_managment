@@ -9,6 +9,7 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountDrawer extends StatefulWidget {
   final Account? account;
@@ -73,6 +74,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
     final accountViewModel = Provider.of<AccountViewModel>(context);
     final profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     createOrUpdate() async {
       RepoResponse response;
@@ -105,7 +107,8 @@ class _AccountDrawerState extends State<AccountDrawer> {
               TextFormField(
                 textCapitalization: TextCapitalization.sentences,
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration:
+                    InputDecoration(labelText: locale.title.capitalize()),
                 maxLength: 30,
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
@@ -113,7 +116,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
               const SizedBox(height: 16),
               if (widget.action == "update")
                 CheckboxListTile(
-                  title: const Text("Account based split"),
+                  title: Text(locale.salary_based_split.capitalize()),
                   value: isSplit,
                   onChanged: (bool? value) async {
                     final RepoResponse repoResponse =
@@ -135,7 +138,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
               TextFormField(
                 controller: userToAddController,
                 decoration: InputDecoration(
-                  labelText: 'User to add',
+                  labelText: locale.add_users.capitalize(),
                   suffixIcon: IconButton(
                     onPressed: () => {
                       if (userToAddController.text != "")
@@ -151,15 +154,15 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: const Text("Error"),
-                                    content: const Text(
-                                        "You can't add yourself to your account"),
+                                    title: Text(locale.error.capitalize()),
+                                    content: Text(locale.add_self_account_error
+                                        .capitalize()),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
                                         },
-                                        child: const Text("OK"),
+                                        child: Text(locale.ok.capitalize()),
                                       ),
                                     ],
                                   );
@@ -228,16 +231,19 @@ class _AccountDrawerState extends State<AccountDrawer> {
                               ),
                               children: [
                                 if (widget.action == "create")
-                                  const Text(
-                                    "You have to create the account before managing permissions",
+                                  Text(
+                                    locale
+                                        .create_account_before_manage_permissions
+                                        .capitalize(),
                                   )
                                 else if (widget.action == "update" &&
                                     !widget.account!.contributor.any(
                                         (contributor) =>
                                             contributor.username ==
                                             _usersToAdd[index].username))
-                                  const Text(
-                                    "You have to add the user before managing his permissions",
+                                  Text(
+                                    locale.add_user_before_manage_permissions
+                                        .capitalize(),
                                   )
                                 else if (widget.account!.username ==
                                     profileViewModel.user!.username)
@@ -259,7 +265,8 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Text("Permissions"),
+                                              Text(locale.permissions
+                                                  .capitalize()),
                                               PermissionCheckbox(
                                                   permissions: permissions,
                                                   permissionsCodename:
@@ -316,7 +323,8 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                   ),
                                 ElevatedButton(
                                   onPressed: () => _removeUser(index),
-                                  child: const Text("Delete"),
+                                  child: Text(
+                                      locale.action("delete").capitalize()),
                                 ),
                               ],
                             ),
@@ -346,7 +354,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                           Navigator.pop(context);
                         }
                       },
-                      child: Text('${widget.action} account'.capitalize()),
+                      child: Text(locale.action(widget.action).capitalize()),
                     ),
                   if (widget.action == "update" &&
                       profileViewModel.user!.hasPermission(
@@ -366,7 +374,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                 repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       },
-                      child: const Text('Delete account'),
+                      child: Text(locale.action('delete').capitalize()),
                     )
                 ],
               ),

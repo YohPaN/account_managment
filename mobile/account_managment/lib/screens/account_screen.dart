@@ -7,6 +7,7 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -17,6 +18,7 @@ class AccountScreen extends StatelessWidget {
         Provider.of<AccountViewModel>(context, listen: false);
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     showModal(String action, [Item? item]) {
       showModalBottomSheet(
@@ -71,13 +73,11 @@ class AccountScreen extends StatelessWidget {
                                       fontWeight: FontWeight.bold),
                                 )),
                                 Text(
-                                  "${accountViewModel.account!.total != null ? accountViewModel.account!.total!.toStringAsFixed(2) : "0.00"}€",
+                                  locale.amount_of_money(
+                                      accountViewModel.account!.total),
                                   style: TextStyle(
                                       fontSize: 24.0,
-                                      color: accountViewModel.account!.total !=
-                                                  null &&
-                                              accountViewModel.account!.total! <
-                                                  0
+                                      color: accountViewModel.account!.total < 0
                                           ? Colors.red[600]
                                           : Colors.green[500]),
                                 ),
@@ -86,18 +86,14 @@ class AccountScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Flexible(
+                                Flexible(
                                     child: Text(
-                                  "Your contribution",
-                                  style: TextStyle(),
+                                  locale.your_contribution.capitalize(),
+                                  style: const TextStyle(),
                                 )),
                                 Text(
-                                  accountViewModel.account!.ownContribution !=
-                                          null
-                                      ? accountViewModel
-                                          .account!.ownContribution!
-                                          .toStringAsFixed(2)
-                                      : "0.00",
+                                  locale.amount_of_money(accountViewModel
+                                      .account!.ownContribution!),
                                   style: const TextStyle(
                                     fontSize: 18.0,
                                   ),
@@ -107,24 +103,19 @@ class AccountScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Flexible(
+                                Flexible(
                                     child: Text(
-                                  "Need to add",
-                                  style: TextStyle(),
+                                  locale.needs_to_add.capitalize(),
+                                  style: const TextStyle(),
                                 )),
                                 Text(
-                                  accountViewModel.account!.needToAdd != null
-                                      ? accountViewModel.account!.needToAdd!
-                                          .toStringAsFixed(2)
-                                      : "0.00",
+                                  locale.amount_of_money(
+                                      accountViewModel.account!.needToAdd!),
                                   style: TextStyle(
                                       fontSize: 18.0,
                                       color:
-                                          accountViewModel.account!.needToAdd !=
-                                                      null &&
-                                                  accountViewModel
-                                                          .account!.needToAdd! <
-                                                      0
+                                          accountViewModel.account!.needToAdd! <
+                                                  0
                                               ? Colors.red[600]
                                               : Colors.green[500]),
                                 ),
