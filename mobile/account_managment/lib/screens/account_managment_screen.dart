@@ -49,8 +49,6 @@ class AccountManagmentScreen extends StatelessWidget {
 
     return Consumer<AccountViewModel>(
       builder: (context, accountViewModel, child) {
-        final AppLocalizations locale = AppLocalizations.of(context)!;
-
         return Scaffold(
           body: FutureBuilder(
             future: accountViewModel.listAccount(),
