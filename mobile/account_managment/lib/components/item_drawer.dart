@@ -7,6 +7,7 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ItemDrawer extends StatefulWidget {
   final String action;
@@ -71,6 +72,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
         Provider.of<AccountViewModel>(context, listen: false);
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
+    final AppLocalizations locale = AppLocalizations.of(context)!;
 
     switchButton(index) {
       setState(() {
@@ -85,7 +87,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
     final List<DropdownMenuEntry<String>> menuEntries = [
       DropdownMenuEntry<String>(
         value: accountViewModel.account!.username,
-        label: "Me",
+        label: locale.me.capitalize(),
       ),
     ];
 
@@ -186,7 +188,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
               TextFormField(
                 textCapitalization: TextCapitalization.sentences,
                 controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration:
+                    InputDecoration(labelText: locale.title.capitalize()),
                 maxLength: 15,
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
@@ -195,13 +198,15 @@ class _ItemDrawerState extends State<ItemDrawer> {
               TextFormField(
                 textCapitalization: TextCapitalization.sentences,
                 controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
+                decoration:
+                    InputDecoration(labelText: locale.description.capitalize()),
                 maxLength: 50,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: valuationController,
-                decoration: const InputDecoration(labelText: 'Valuation'),
+                decoration:
+                    InputDecoration(labelText: locale.valuation.capitalize()),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 maxLength: 15,
@@ -215,7 +220,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               const SizedBox(height: 16),
               DropdownMenu(
                 expandedInsets: const EdgeInsets.all(50),
-                label: const Text("Item owner:"),
+                label: Text("${locale.item_owner}:"),
                 initialSelection: _username,
                 onSelected: (value) => setState(() {
                   _username = value!;
@@ -225,7 +230,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
               const SizedBox(height: 16),
               DropdownMenu(
                 expandedInsets: const EdgeInsets.all(50),
-                label: const Text("Transfert to:"),
+                label: Text("${locale.transfert_to}:"),
                 initialSelection: _toAccount,
                 onSelected: (value) => setState(() {
                   _toAccount = value!;
@@ -245,7 +250,10 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   minWidth: 80.0,
                 ),
                 isSelected: _selectButton,
-                children: const [Text("Expense"), Text("Income")],
+                children: [
+                  Text(locale.expense.capitalize()),
+                  Text(locale.income.capitalize())
+                ],
               ),
               const SizedBox(height: 16),
               Row(
@@ -268,7 +276,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
                                 repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       },
-                      child: const Text('Delete Item'),
+                      child: Text('${locale.delete.capitalize()} item'),
                     ),
                   if (profileViewModel.user!.hasPermission(
                     ressource: widget.item,
@@ -290,7 +298,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
                           Navigator.pop(context);
                         }
                       },
-                      child: Text('${widget.action} Item'.capitalize()),
+                      child:
+                          Text(locale.action_item(widget.action).capitalize()),
                     ),
                 ],
               ),

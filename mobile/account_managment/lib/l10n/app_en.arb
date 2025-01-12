@@ -81,5 +81,6 @@
     "create_account_before_manage_permissions": "you have to create the account before managing permissions",
     "add_user_before_manage_permissions": "you have to add the user before managing his permissions",
     "permissions": "permissions",
-    "delete": "delete"
+    "delete": "delete",
+    "me": "me"
 }

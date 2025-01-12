@@ -39,5 +39,6 @@
     "create_account_before_manage_permissions": "vous devez d'abord créer le compte avant de gérer les permissions",
     "add_user_before_manage_permissions": "vous devez d'abord ajouter l'utilisateur avant de gérer ses permissions",
     "permissions": "permissions",
-    "delete": "supprimer"
+    "delete": "supprimer",
+    "me": "Moi"
 }
