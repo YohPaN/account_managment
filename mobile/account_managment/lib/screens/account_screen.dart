@@ -77,10 +77,7 @@ class AccountScreen extends StatelessWidget {
                                       accountViewModel.account!.total),
                                   style: TextStyle(
                                       fontSize: 24.0,
-                                      color: accountViewModel.account!.total !=
-                                                  null &&
-                                              accountViewModel.account!.total! <
-                                                  0
+                                      color: accountViewModel.account!.total < 0
                                           ? Colors.red[600]
                                           : Colors.green[500]),
                                 ),
@@ -95,12 +92,8 @@ class AccountScreen extends StatelessWidget {
                                   style: const TextStyle(),
                                 )),
                                 Text(
-                                  accountViewModel.account!.ownContribution !=
-                                          null
-                                      ? accountViewModel
-                                          .account!.ownContribution!
-                                          .toStringAsFixed(2)
-                                      : "0.00",
+                                  locale.amount_of_money(accountViewModel
+                                      .account!.ownContribution),
                                   style: const TextStyle(
                                     fontSize: 18.0,
                                   ),
@@ -116,18 +109,13 @@ class AccountScreen extends StatelessWidget {
                                   style: const TextStyle(),
                                 )),
                                 Text(
-                                  accountViewModel.account!.needToAdd != null
-                                      ? accountViewModel.account!.needToAdd!
-                                          .toStringAsFixed(2)
-                                      : "0.00",
+                                  locale.amount_of_money(
+                                      accountViewModel.account!.needToAdd),
                                   style: TextStyle(
                                       fontSize: 18.0,
                                       color:
-                                          accountViewModel.account!.needToAdd !=
-                                                      null &&
-                                                  accountViewModel
-                                                          .account!.needToAdd! <
-                                                      0
+                                          accountViewModel.account!.needToAdd <
+                                                  0
                                               ? Colors.red[600]
                                               : Colors.green[500]),
                                 ),
