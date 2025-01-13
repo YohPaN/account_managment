@@ -4,7 +4,14 @@ from rest_framework import serializers
 
 class CategoryMeta:
     model = Category
-    fields = ["title", "color", "icon", "account", "user"]
+    fields = [
+        "title",
+        "color",
+        "icon",
+        "content_type",
+        "object_id",
+        "content_object",
+    ]
 
 
 class _CategorySerializer(serializers.ModelSerializer):

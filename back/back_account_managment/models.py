@@ -1,6 +1,8 @@
 import uuid
 
 from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import (
     Case,
@@ -72,18 +74,34 @@ class Category(models.Model):
     title = models.CharField(max_length=25)
     color = models.CharField(max_length=50, blank=True)
     icon = models.CharField(max_length=50, blank=True)
-    account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, null=True, blank=True
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, null=True, blank=True
     )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=True, blank=True
-    )
+    object_id = models.CharField(max_length=50, blank=True)
+    content_object = GenericForeignKey("content_type", "object_id")
 
     def save(self, **kwargs):
-        if self.account is not None and self.user is not None:
+        if (self.content_type is None and self.object_id is not None) or (
+            self.content_type is not None and self.object_id is None
+        ):
             return
 
         return super().save(**kwargs)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+
+class AccountCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+
+class UserCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Item(models.Model):

@@ -2,12 +2,14 @@ import json
 
 from back_account_managment.models import (
     Account,
+    AccountCategory,
     AccountUser,
     AccountUserPermission,
     Category,
     Item,
     Profile,
     Transfert,
+    UserCategory,
 )
 from back_account_managment.permissions import (
     IsAccountContributor,
@@ -40,7 +42,8 @@ from back_account_managment.serializers.user_serializer import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
-from django.db.models import Exists, OuterRef
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -423,22 +426,78 @@ class AccountUserPermissionView(ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
-class Category(ModelViewSet):
+class CategoryView(ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        category_type = request.data.get("category_type", None)
+    def get_queryset(self):
+        account_id = self.request.GET.get("account_id", None)
+        account_category = None
+        user_category = None
 
-        if category_type == "PROFILE":
-            request.data["user"] = request.user_id
+        if account_id is not None:
+            account = Account.objects.get(pk=account_id)
+
+            account_category = Category.objects.filter(
+                Exists(
+                    AccountCategory.objects.filter(
+                        account=account, category=OuterRef("pk")
+                    )
+                )
+            )
+
+        if account_id is None or self.request.user == account.user:
+            user_category = Category.objects.filter(
+                Exists(
+                    UserCategory.objects.filter(
+                        user=self.request.user, category=OuterRef("pk")
+                    )
+                )
+            )
+
+        if account_category is not None:
+            if user_category is not None:
+                queryset = self.queryset.filter(
+                    Q(content_type=None)
+                    | Q(Exists(account_category) | Q(Exists(user_category)))
+                )
+            else:
+                queryset = self.queryset.filter(
+                    Q(content_type=None) | Q(Exists(account_category))
+                )
+        else:
+            queryset = self.queryset.filter(content_type=None)
+
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        account_id = request.data.get("account_id", None)
+
+        if account_id is not None:
+            request.data["object_id"] = account_id
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                Account
+            ).pk
+        else:
+            request.data["object_id"] = str(request.user.pk)
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                User
+            ).pk
 
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        category_type = request.data.get("category_type", None)
+        account_id = request.data.get("account_id", None)
 
-        if category_type == "PROFILE":
-            request.data["user"] = request.user_id
+        if account_id is not None:
+            request.data["object_id"] = account_id
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                Account
+            ).pk
+        else:
+            request.data["object_id"] = str(request.user.pk)
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                User
+            ).pk
 
         return super().update(request, *args, **kwargs)
