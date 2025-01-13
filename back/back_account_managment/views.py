@@ -43,7 +43,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -325,10 +325,13 @@ class ItemView(ModelViewSet):
 
         username = self.request.data.get("username", None)
         to_account = self.request.data.get("to_account", None)
+        category_id = self.request.data.get("category_id", None)
 
         user = get_object_or_404(User, username=username) if username else None
+        category = get_object_or_404(Category, pk=category_id)
 
         item = serializer.save(
+            category=category,
             account=account,
             user=user,
         )
@@ -339,10 +342,13 @@ class ItemView(ModelViewSet):
     def perform_update(self, serializer):
         username = self.request.data.get("username", None)
         to_account = self.request.data.get("to_account", None)
+        category_id = self.request.data.get("category_id", None)
 
         user = get_object_or_404(User, username=username) if username else None
+        category = get_object_or_404(Category, pk=category_id)
 
         item = serializer.save(
+            category=category,
             user=user,
         )
 
@@ -431,20 +437,22 @@ class CategoryView(ModelViewSet):
     queryset = Category.objects.all()
 
     def get_queryset(self):
-        account_id = self.request.GET.get("account_id", None)
+        account_id = self.request.data.get("account_id", None)
         account_category = None
         user_category = None
+
+        default_category = Category.objects.filter(content_type=None)
 
         if account_id is not None:
             account = Account.objects.get(pk=account_id)
 
-            account_category = Category.objects.filter(
-                Exists(
-                    AccountCategory.objects.filter(
-                        account=account, category=OuterRef("pk")
-                    )
+        account_category = Category.objects.filter(
+            Exists(
+                AccountCategory.objects.filter(
+                    account_id=account_id, category=OuterRef("pk")
                 )
             )
+        )
 
         if account_id is None or self.request.user == account.user:
             user_category = Category.objects.filter(
@@ -455,18 +463,10 @@ class CategoryView(ModelViewSet):
                 )
             )
 
-        if account_category is not None:
-            if user_category is not None:
-                queryset = self.queryset.filter(
-                    Q(content_type=None)
-                    | Q(Exists(account_category) | Q(Exists(user_category)))
-                )
-            else:
-                queryset = self.queryset.filter(
-                    Q(content_type=None) | Q(Exists(account_category))
-                )
+            queryset = default_category | account_category | user_category
+
         else:
-            queryset = self.queryset.filter(content_type=None)
+            queryset = default_category | account_category
 
         return queryset
 

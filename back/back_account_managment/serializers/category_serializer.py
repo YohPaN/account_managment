@@ -10,7 +10,6 @@ class CategoryMeta:
         "icon",
         "content_type",
         "object_id",
-        "content_object",
     ]
 
 

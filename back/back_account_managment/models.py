@@ -107,7 +107,7 @@ class UserCategory(models.Model):
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=15)
-    description = models.CharField(max_length=50, null=True, blank=True)
+    description = models.CharField(max_length=50, blank=True)
     valuation = models.DecimalField(max_digits=15, decimal_places=2)
     account = models.ForeignKey(
         Account, on_delete=models.CASCADE, related_name="items"
@@ -118,6 +118,16 @@ class Item(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, null=True, blank=True
     )
+
+    def save(self, **kwargs):
+        account_category = AccountCategory.objects.filter(
+            account=self.account, category=self.category
+        ).first()
+
+        if account_category is None:
+            return
+
+        return super().save(**kwargs)
 
 
 class AccountUserState(models.TextChoices):
