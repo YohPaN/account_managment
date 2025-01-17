@@ -21,3 +21,17 @@ class _CategorySerializer(serializers.ModelSerializer):
 class CategorySerializer(_CategorySerializer):
     class Meta(CategoryMeta):
         pass
+
+
+class CategoryWriteSerializer(_CategorySerializer):
+    class Meta(CategoryMeta):
+        fields = [
+            field
+            for field in CategoryMeta.fields
+            if field
+            in [
+                "title",
+                "color",
+                "icon",
+            ]
+        ]

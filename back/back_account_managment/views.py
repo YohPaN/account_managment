@@ -30,6 +30,7 @@ from back_account_managment.serializers.account_user_serializer import (
 )
 from back_account_managment.serializers.category_serializer import (
     CategorySerializer,
+    CategoryWriteSerializer,
 )
 from back_account_managment.serializers.item_serializer import (
     ItemWriteSerializer,
@@ -47,6 +48,7 @@ from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -437,6 +439,9 @@ class CategoryView(ModelViewSet):
     queryset = Category.objects.all()
 
     def get_queryset(self):
+        if self.request.method not in SAFE_METHODS:
+            return super().get_queryset()
+
         account_id = self.request.data.get("account_id", None)
         account_category = None
         user_category = None
@@ -470,6 +475,12 @@ class CategoryView(ModelViewSet):
 
         return queryset
 
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return CategoryWriteSerializer
+
+        return super().get_serializer_class()
+
     def create(self, request, *args, **kwargs):
         account_id = request.data.get("account_id", None)
 
@@ -485,19 +496,3 @@ class CategoryView(ModelViewSet):
             ).pk
 
         return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        account_id = request.data.get("account_id", None)
-
-        if account_id is not None:
-            request.data["object_id"] = account_id
-            request.data["content_type"] = ContentType.objects.get_for_model(
-                Account
-            ).pk
-        else:
-            request.data["object_id"] = str(request.user.pk)
-            request.data["content_type"] = ContentType.objects.get_for_model(
-                User
-            ).pk
-
-        return super().update(request, *args, **kwargs)
