@@ -327,13 +327,10 @@ class ItemView(ModelViewSet):
 
         username = self.request.data.get("username", None)
         to_account = self.request.data.get("to_account", None)
-        category_id = self.request.data.get("category_id", None)
 
         user = get_object_or_404(User, username=username) if username else None
-        category = get_object_or_404(Category, pk=category_id)
 
         item = serializer.save(
-            category=category,
             account=account,
             user=user,
         )

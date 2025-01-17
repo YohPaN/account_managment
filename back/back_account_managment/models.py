@@ -124,12 +124,13 @@ class Item(models.Model):
     )
 
     def save(self, **kwargs):
-        account_category = AccountCategory.objects.filter(
-            account=self.account, category=self.category
-        ).first()
+        if self.category:
+            account_category = AccountCategory.objects.filter(
+                account=self.account, category=self.category
+            )
 
-        if account_category is None:
-            return
+            if not account_category.exists():
+                return
 
         return super().save(**kwargs)
 
