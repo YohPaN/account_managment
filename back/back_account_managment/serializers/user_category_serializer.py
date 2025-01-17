@@ -13,7 +13,7 @@ class UserCategoryMeta:
 
 
 class _UserCategorySerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         pass
