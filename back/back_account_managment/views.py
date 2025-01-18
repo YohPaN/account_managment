@@ -1,4 +1,5 @@
 import json
+from itertools import chain
 
 from back_account_managment.models import (
     Account,
@@ -9,7 +10,6 @@ from back_account_managment.models import (
     Item,
     Profile,
     Transfert,
-    UserCategory,
 )
 from back_account_managment.permissions import (
     IsAccountContributor,
@@ -438,38 +438,34 @@ class CategoryView(ModelViewSet):
         if self.request.method not in SAFE_METHODS:
             return super().get_queryset()
 
-        account_id = self.request.data.get("account_id", None)
-        account_category = None
-        user_category = None
+        account_id = self.request.query_params.get("account", None)
 
-        default_category = Category.objects.filter(content_type=None)
+        user_category = Category.objects.filter(
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=self.request.user.pk,
+        )
 
-        if account_id is not None:
-            account = Account.objects.get(pk=account_id)
+        # if no account_id, we aretrieve user categories
+        if account_id is None:
+            return user_category
+
+        # if an account_id, we test if the call is made by the owner
+        account = Account.objects.get(pk=account_id)
 
         account_category = Category.objects.filter(
             Exists(
                 AccountCategory.objects.filter(
-                    account_id=account_id, category=OuterRef("pk")
+                    account=account, category=OuterRef("pk")
                 )
             )
         )
 
-        if account_id is None or self.request.user == account.user:
-            user_category = Category.objects.filter(
-                Exists(
-                    UserCategory.objects.filter(
-                        user=self.request.user, category=OuterRef("pk")
-                    )
-                )
-            )
+        if account.user != self.request.user:
+            return account_category
 
-            queryset = default_category | account_category | user_category
+        default_category = Category.objects.filter(content_type=None)
 
-        else:
-            queryset = default_category | account_category
-
-        return queryset
+        return list(chain(default_category, account_category, user_category))
 
     def get_serializer_class(self):
         if self.request.method == "PUT":
@@ -492,3 +488,11 @@ class CategoryView(ModelViewSet):
             ).pk
 
         return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        category = serializer.save()
+
+        if category.content_type.model_class() is Account:
+            AccountCategory.objects.create(
+                category=category, account_id=category.object_id
+            )

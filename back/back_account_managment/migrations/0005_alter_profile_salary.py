@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('back_account_managment', '0004_account_is_main'),
+        ("back_account_managment", "0004_account_is_main"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='profile',
-            name='salary',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=15, null=True),
+            model_name="profile",
+            name="salary",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=15, null=True
+            ),
         ),
     ]

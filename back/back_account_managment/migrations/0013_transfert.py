@@ -7,16 +7,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('back_account_managment', '0012_account_salary_based_split'),
+        ("back_account_managment", "0012_account_salary_based_split"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Transfert',
+            name="Transfert",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('item', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='back_account_managment.item')),
-                ('to_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='back_account_managment.account')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "item",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="back_account_managment.item",
+                    ),
+                ),
+                (
+                    "to_account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="back_account_managment.account",
+                    ),
+                ),
             ],
         ),
     ]
