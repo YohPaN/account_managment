@@ -81,10 +81,8 @@ class Category(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
 
     def save(self, **kwargs):
-        if (self.content_type is None and self.object_id is not None) or (
-            self.content_type is not None and self.object_id is None
-        ):
-            return
+        # We are testing that both are not None
+        assert self.content_type != self.object_id
 
         return super().save(**kwargs)
 
@@ -129,8 +127,7 @@ class Item(models.Model):
                 account=self.account, category=self.category
             )
 
-            if not account_category.exists():
-                return
+            assert account_category.exists()
 
         return super().save(**kwargs)
 

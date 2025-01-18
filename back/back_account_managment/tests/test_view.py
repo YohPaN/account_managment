@@ -2,14 +2,18 @@ import json
 from decimal import Decimal
 
 from back_account_managment.models import (
+    AccountCategory,
     AccountUserPermission,
+    Category,
     Profile,
     Transfert,
+    UserCategory,
 )
 from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -36,6 +40,21 @@ class UserViewTest(TestCase):
             user=self.user,
         )
 
+        self.category_under_user = Category.objects.create(
+            title="test_category",
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=self.user,
+        )
+
+        self.other_category = Category.objects.create(
+            title="test",
+        )
+
+        self.user_category = UserCategory.objects.create(
+            user=self.user,
+            category=self.category_under_user,
+        )
+
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
@@ -46,11 +65,16 @@ class UserViewTest(TestCase):
         self.assertIn("username", response.data)
         self.assertIn("email", response.data)
         self.assertIn("profile", response.data)
+        self.assertIn("categories", response.data)
         self.assertEqual(response.data["username"], "jonDoe")
         self.assertEqual(response.data["email"], "jon@doe.test")
         self.assertEqual(response.data["profile"]["first_name"], "test")
         self.assertEqual(response.data["profile"]["last_name"], "test")
         self.assertEqual(response.data["profile"]["salary"], "20.12")
+        self.assertEqual(len(response.data["categories"]), 1)
+        self.assertEqual(
+            response.data["categories"][0]["title"], "test_category"
+        )
 
     def test_update_profile(self):
         response = self.c.patch(
@@ -581,10 +605,24 @@ class ItemViewTest(TestCase):
             user=self.user,
         )
 
+        self.category = Category.objects.create(
+            title="category",
+        )
+
+        self.category_not_under_account = Category.objects.create(
+            title="other category",
+        )
+
+        self.account_category = AccountCategory.objects.create(
+            account=self.account,
+            category=self.category,
+        )
+
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
     def test_create_item(self):
+        self.assertFalse(Item.objects.filter(category=self.category).exists())
         response = self.c.post(
             f"/api/accounts/{self.account.pk}/items/",
             {
@@ -592,12 +630,17 @@ class ItemViewTest(TestCase):
                 "description": "petit poney",
                 "valuation": 12.56,
                 "username": self.user.username,
+                "category_id": self.category.pk,
             },
             format="json",
         )
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(Item.objects.filter(account=self.account)), 2)
+        self.assertEqual(
+            len(Item.objects.filter(category=self.category)),
+            1,
+        )
 
     def test_create_item_without_username(self):
         response = self.c.post(
@@ -645,6 +688,20 @@ class ItemViewTest(TestCase):
             len(Transfert.objects.filter(to_account=self.account2)), 1
         )
 
+    def test_create_item_with_a_category_not_under_category(self):
+        with self.assertRaises(AssertionError):
+            self.c.post(
+                f"/api/accounts/{self.account.pk}/items/",
+                {
+                    "title": "mon",
+                    "description": "petit poney",
+                    "valuation": 12.56,
+                    "username": self.user.username,
+                    "category_id": self.category_not_under_account.pk,
+                },
+                format="json",
+            )
+
     def test_update_item(self):
         response = self.c.put(
             f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
@@ -661,6 +718,73 @@ class ItemViewTest(TestCase):
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(self.item.title, "mon")
+
+    def test_update_item_and_category(self):
+        self.assertIsNone(self.item.category)
+
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "category_id": self.category.pk,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(self.item.title, "mon")
+        self.assertEqual(self.item.category, self.category)
+
+        AccountCategory.objects.create(
+            account=self.account,
+            category=self.category_not_under_account,
+        )
+
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "category_id": self.category_not_under_account.pk,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertEqual(self.item.category, self.category_not_under_account)
+
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertIsNone(self.item.category)
+
+    def test_update_item_with_category_not_under_account(self):
+        with self.assertRaises(AssertionError):
+            self.c.put(
+                f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+                {
+                    "title": "mon",
+                    "description": "petit poney",
+                    "valuation": 12.56,
+                    "category_id": self.category_not_under_account.pk,
+                },
+                format="json",
+            )
 
     def test_update_item_with_another_user_under_item(self):
         response = self.c.put(
