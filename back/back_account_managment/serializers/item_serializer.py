@@ -1,4 +1,7 @@
 from back_account_managment.models import Item, Transfert
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
+)
 from back_account_managment.serializers.user_serializer import (
     UsernameUserSerilizer,
 )
@@ -15,6 +18,8 @@ class ItemMeta:
         "account",
         "user",
         "to_account",
+        "category",
+        "category_id",
     ]
     read_only_fields = ["account"]
 
@@ -22,6 +27,8 @@ class ItemMeta:
 class _ItemSerializer(serializers.ModelSerializer):
     user = UsernameUserSerilizer()
     to_account = serializers.SerializerMethodField()
+    category = CategorySerializer()
+    category_id = serializers.IntegerField(required=False)
 
     class Meta:
         pass
@@ -40,7 +47,14 @@ class ItemWriteSerializer(_ItemSerializer):
         fields = [
             field
             for field in ItemMeta.fields
-            if field in ["title", "description", "valuation", "account"]
+            if field
+            in [
+                "title",
+                "description",
+                "valuation",
+                "account",
+                "category_id",
+            ]
         ]
 
 
@@ -58,5 +72,6 @@ class ItemReadSerializer(_ItemSerializer):
                 "account",
                 "user",
                 "to_account",
+                "category",
             ]
         ]

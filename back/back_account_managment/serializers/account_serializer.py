@@ -2,8 +2,10 @@ from decimal import Decimal
 
 from back_account_managment.models import (
     Account,
+    AccountCategory,
     AccountUser,
     AccountUserPermission,
+    Category,
     Item,
     Profile,
     Transfert,
@@ -13,6 +15,9 @@ from back_account_managment.serializers.account_user_permission_serializer impor
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountAccountUserSerializer,
+)
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
 )
 from back_account_managment.serializers.item_serializer import (
     ItemReadSerializer,
@@ -41,6 +46,7 @@ class AccountMeta:
         "user",
         "salary_based_split",
         "transfert_items",
+        "categories",
     ]
 
 
@@ -53,6 +59,8 @@ class _AccountSerializer(serializers.ModelSerializer):
 
     own_contribution = serializers.SerializerMethodField()
     need_to_add = serializers.SerializerMethodField()
+
+    categories = serializers.SerializerMethodField()
 
     class Meta:
         pass
@@ -177,6 +185,17 @@ class _AccountSerializer(serializers.ModelSerializer):
 
         return {"total": Decimal(0.00)}
 
+    def get_categories(self, obj):
+        categories = Category.objects.filter(
+            Exists(
+                AccountCategory.objects.filter(
+                    account=obj, category=OuterRef("pk")
+                )
+            )
+        )
+
+        return CategorySerializer(categories, many=True).data
+
 
 class AccountListSerializer(_AccountSerializer):
     user = UsernameUserSerilizer()
@@ -196,6 +215,7 @@ class AccountListSerializer(_AccountSerializer):
                 "total",
                 "user",
                 "salary_based_split",
+                "categories",
             ]
         ]
 
@@ -220,6 +240,7 @@ class AccountSerializer(_AccountSerializer):
                 "total",
                 "transfert_items",
                 "user",
+                "categories",
             ]
         ]
 

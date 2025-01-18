@@ -1,9 +1,12 @@
 import json
+from itertools import chain
 
 from back_account_managment.models import (
     Account,
+    AccountCategory,
     AccountUser,
     AccountUserPermission,
+    Category,
     Item,
     Profile,
     Transfert,
@@ -25,6 +28,10 @@ from back_account_managment.serializers.account_serializer import (
 from back_account_managment.serializers.account_user_serializer import (
     AccountUserSerializer,
 )
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
+    CategoryWriteSerializer,
+)
 from back_account_managment.serializers.item_serializer import (
     ItemWriteSerializer,
 )
@@ -36,10 +43,12 @@ from back_account_managment.serializers.user_serializer import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -48,7 +57,7 @@ User = get_user_model()
 
 
 class UserView(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.prefetch_related("user_categories__category").all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
@@ -334,8 +343,10 @@ class ItemView(ModelViewSet):
         to_account = self.request.data.get("to_account", None)
 
         user = get_object_or_404(User, username=username) if username else None
+        category_id = self.request.data.get("category_id", None)
 
         item = serializer.save(
+            category_id=category_id,
             user=user,
         )
 
@@ -417,3 +428,71 @@ class AccountUserPermissionView(ModelViewSet):
             )
 
         return Response(status=status.HTTP_200_OK)
+
+
+class CategoryView(ModelViewSet):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+    def get_queryset(self):
+        if self.request.method not in SAFE_METHODS:
+            return super().get_queryset()
+
+        account_id = self.request.query_params.get("account", None)
+
+        user_category = Category.objects.filter(
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=self.request.user.pk,
+        )
+
+        # if no account_id, we aretrieve user categories
+        if account_id is None:
+            return user_category
+
+        # if an account_id, we test if the call is made by the owner
+        account = Account.objects.get(pk=account_id)
+
+        account_category = Category.objects.filter(
+            Exists(
+                AccountCategory.objects.filter(
+                    account=account, category=OuterRef("pk")
+                )
+            )
+        )
+
+        if account.user != self.request.user:
+            return account_category
+
+        default_category = Category.objects.filter(content_type=None)
+
+        return list(chain(default_category, account_category, user_category))
+
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return CategoryWriteSerializer
+
+        return super().get_serializer_class()
+
+    def create(self, request, *args, **kwargs):
+        account_id = request.data.get("account_id", None)
+
+        if account_id is not None:
+            request.data["object_id"] = account_id
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                Account
+            ).pk
+        else:
+            request.data["object_id"] = str(request.user.pk)
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                User
+            ).pk
+
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        category = serializer.save()
+
+        if category.content_type.model_class() is Account:
+            AccountCategory.objects.create(
+                category=category, account_id=category.object_id
+            )

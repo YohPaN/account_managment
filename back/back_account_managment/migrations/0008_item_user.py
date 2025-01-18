@@ -8,14 +8,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('back_account_managment', '0007_alter_accountuser_account_alter_item_account_and_more'),
+        (
+            "back_account_managment",
+            "0007_alter_accountuser_account_alter_item_account_and_more",
+        ),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='item',
-            name='user',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="item",
+            name="user",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
             preserve_default=False,
         ),
     ]

@@ -2,26 +2,25 @@ import json
 from decimal import Decimal
 
 from back_account_managment.models import (
+    AccountCategory,
     AccountUserPermission,
+    Category,
     Profile,
     Transfert,
+    UserCategory,
 )
 from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import Permission
-from django.test import TestCase, modify_settings
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
 User = get_user_model()
 
 
-@modify_settings(
-    MIDDLEWARE={
-        "remove": "back_account_managment.middlewares.HMACMiddleware",
-    }
-)
 class UserViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -41,6 +40,21 @@ class UserViewTest(TestCase):
             user=self.user,
         )
 
+        self.category_under_user = Category.objects.create(
+            title="test_category",
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=self.user,
+        )
+
+        self.other_category = Category.objects.create(
+            title="test",
+        )
+
+        self.user_category = UserCategory.objects.create(
+            user=self.user,
+            category=self.category_under_user,
+        )
+
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
@@ -51,11 +65,16 @@ class UserViewTest(TestCase):
         self.assertIn("username", response.data)
         self.assertIn("email", response.data)
         self.assertIn("profile", response.data)
+        self.assertIn("categories", response.data)
         self.assertEqual(response.data["username"], "jonDoe")
         self.assertEqual(response.data["email"], "jon@doe.test")
         self.assertEqual(response.data["profile"]["first_name"], "test")
         self.assertEqual(response.data["profile"]["last_name"], "test")
         self.assertEqual(response.data["profile"]["salary"], "20.12")
+        self.assertEqual(len(response.data["categories"]), 1)
+        self.assertEqual(
+            response.data["categories"][0]["title"], "test_category"
+        )
 
     def test_update_profile(self):
         response = self.c.patch(
@@ -161,11 +180,6 @@ class UserViewTest(TestCase):
         self.assertTrue(check_password("password", self.user.password))
 
 
-@modify_settings(
-    MIDDLEWARE={
-        "remove": "back_account_managment.middlewares.HMACMiddleware",
-    }
-)
 class RegisterViewTest(TestCase):
     def setUp(self):
         self.c = APIClient()
@@ -252,11 +266,6 @@ class RegisterViewTest(TestCase):
         self.assertEqual(len(User.objects.all()), 0)
 
 
-@modify_settings(
-    MIDDLEWARE={
-        "remove": "back_account_managment.middlewares.HMACMiddleware",
-    }
-)
 class AccountViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -282,6 +291,42 @@ class AccountViewTest(TestCase):
             user=self.user, name="first name"
         )
 
+        self.account2 = Account.objects.create(
+            user=self.user2, name="first name"
+        )
+
+        self.default_category = Category.objects.create(
+            title="default_category",
+        )
+
+        self.category_for_account = Category.objects.create(
+            title="category_for_account",
+            content_type=ContentType.objects.get_for_model(Account),
+            object_id=self.account,
+        )
+
+        self.category_for_account2 = Category.objects.create(
+            title="category_for_account2",
+            content_type=ContentType.objects.get_for_model(Account),
+            object_id=self.account2,
+        )
+
+        self.category_for_user = Category.objects.create(
+            title="category_for_user",
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=self.user.pk,
+        )
+
+        self.account_category = AccountCategory.objects.create(
+            account=self.account,
+            category=self.category_for_account,
+        )
+
+        self.account2_category = AccountCategory.objects.create(
+            account=self.account2,
+            category=self.category_for_account2,
+        )
+
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
@@ -295,14 +340,51 @@ class AccountViewTest(TestCase):
         AccountUser.objects.create(
             account=account_approved, user=self.user, state="APPROVED"
         )
+        category_for_account = Category.objects.create(
+            title="locale_category",
+            content_type=ContentType.objects.get_for_model(Account),
+            object_id=account_approved,
+        )
+        AccountCategory.objects.create(
+            account=account_approved,
+            category=category_for_account,
+        )
 
         response = self.c.get("/api/accounts/")
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertIn("own", response.data)
         self.assertIn("contributor_account", response.data)
+        self.assertIn("categories", response.data["own"][0])
+        self.assertIn("categories", response.data["contributor_account"][0])
+
+        self_account = [
+            account
+            for account in response.data["own"]
+            if account["id"] == self.account.pk
+        ]
+
+        self.assertTrue(
+            any(
+                category["title"] == self.category_for_account.title
+                for category in self_account[0]["categories"]
+            )
+        )
+
+        self.assertTrue(
+            any(
+                category["title"] == category_for_account.title
+                for category in response.data["contributor_account"][0][
+                    "categories"
+                ]
+            )
+        )
         self.assertEqual(len(response.data["own"]), 2)
         self.assertEqual(len(response.data["contributor_account"]), 1)
+        self.assertEqual(len(self_account[0]["categories"]), 1)
+        self.assertEqual(
+            len(response.data["contributor_account"][0]["categories"]), 1
+        )
 
     def test_get_current_user_account(self):
         response = self.c.get("/api/accounts/me/")
@@ -327,7 +409,7 @@ class AccountViewTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 3)
+        self.assertEqual(len(Account.objects.all()), 4)
         self.assertIsNotNone(Account.objects.get(name="test account"))
 
     def test_create_account_with_contributors(self):
@@ -346,7 +428,7 @@ class AccountViewTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 3)
+        self.assertEqual(len(Account.objects.all()), 4)
         self.assertIsNotNone(Account.objects.get(name="test account"))
         self.assertEqual(len(AccountUser.objects.all()), 1)
         self.assertIsNotNone(
@@ -416,7 +498,7 @@ class AccountViewTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertEqual(len(Account.objects.all()), 2)
 
     def test_destroy_account_with_contributors(self):
         account_user = AccountUser.objects.create(
@@ -435,7 +517,7 @@ class AccountViewTest(TestCase):
         )
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(len(Account.objects.all()), 1)
+        self.assertEqual(len(Account.objects.all()), 2)
         self.assertEqual(len(AccountUser.objects.all()), 0)
 
     def test_destroy_main_account(self):
@@ -546,11 +628,6 @@ class AccountViewTest(TestCase):
         )
 
 
-@modify_settings(
-    MIDDLEWARE={
-        "remove": "back_account_managment.middlewares.HMACMiddleware",
-    }
-)
 class ItemViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -601,10 +678,24 @@ class ItemViewTest(TestCase):
             user=self.user,
         )
 
+        self.category = Category.objects.create(
+            title="category",
+        )
+
+        self.category_not_under_account = Category.objects.create(
+            title="other category",
+        )
+
+        self.account_category = AccountCategory.objects.create(
+            account=self.account,
+            category=self.category,
+        )
+
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
     def test_create_item(self):
+        self.assertFalse(Item.objects.filter(category=self.category).exists())
         response = self.c.post(
             f"/api/accounts/{self.account.pk}/items/",
             {
@@ -612,12 +703,17 @@ class ItemViewTest(TestCase):
                 "description": "petit poney",
                 "valuation": 12.56,
                 "username": self.user.username,
+                "category_id": self.category.pk,
             },
             format="json",
         )
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(Item.objects.filter(account=self.account)), 2)
+        self.assertEqual(
+            len(Item.objects.filter(category=self.category)),
+            1,
+        )
 
     def test_create_item_without_username(self):
         response = self.c.post(
@@ -665,6 +761,20 @@ class ItemViewTest(TestCase):
             len(Transfert.objects.filter(to_account=self.account2)), 1
         )
 
+    def test_create_item_with_a_category_not_under_account(self):
+        with self.assertRaises(AssertionError):
+            self.c.post(
+                f"/api/accounts/{self.account.pk}/items/",
+                {
+                    "title": "mon",
+                    "description": "petit poney",
+                    "valuation": 12.56,
+                    "username": self.user.username,
+                    "category_id": self.category_not_under_account.pk,
+                },
+                format="json",
+            )
+
     def test_update_item(self):
         response = self.c.put(
             f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
@@ -681,6 +791,73 @@ class ItemViewTest(TestCase):
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(self.item.title, "mon")
+
+    def test_update_item_and_category(self):
+        self.assertIsNone(self.item.category)
+
+        response = self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "category_id": self.category.pk,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(self.item.title, "mon")
+        self.assertEqual(self.item.category, self.category)
+
+        AccountCategory.objects.create(
+            account=self.account,
+            category=self.category_not_under_account,
+        )
+
+        self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+                "category_id": self.category_not_under_account.pk,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertEqual(self.item.category, self.category_not_under_account)
+
+        self.c.put(
+            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            {
+                "title": "mon",
+                "description": "petit poney",
+                "valuation": 12.56,
+            },
+            format="json",
+        )
+
+        self.item.refresh_from_db()
+
+        self.assertIsNone(self.item.category)
+
+    def test_update_item_with_category_not_under_account(self):
+        with self.assertRaises(AssertionError):
+            self.c.put(
+                f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+                {
+                    "title": "mon",
+                    "description": "petit poney",
+                    "valuation": 12.56,
+                    "category_id": self.category_not_under_account.pk,
+                },
+                format="json",
+            )
 
     def test_update_item_with_another_user_under_item(self):
         response = self.c.put(
@@ -803,11 +980,6 @@ class ItemViewTest(TestCase):
         self.assertEqual(len(Item.objects.all()), 0)
 
 
-@modify_settings(
-    MIDDLEWARE={
-        "remove": "back_account_managment.middlewares.HMACMiddleware",
-    }
-)
 class AccountUserViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -834,11 +1006,6 @@ class AccountUserViewTest(TestCase):
         self.assertEqual(response.data, {"pending_account_request": 1})
 
 
-@modify_settings(
-    MIDDLEWARE={
-        "remove": "back_account_managment.middlewares.HMACMiddleware",
-    }
-)
 class AccountUserPermissionTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
@@ -1037,4 +1204,245 @@ class AccountUserPermissionTest(TestCase):
                 )
             ),
             0,
+        )
+
+
+class CategoryViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(
+            username="jonDoe",
+            email="jon@doe.test",
+        )
+
+        self.user2 = User.objects.create(
+            username="testeur",
+            email="test@eur.test",
+        )
+
+        self.account = Account.objects.create(
+            user=self.user, name="first name", is_main=True
+        )
+
+        self.account2 = Account.objects.create(
+            user=self.user2, name="first name"
+        )
+
+        self.default_category = Category.objects.create(
+            title="default_category",
+        )
+
+        self.category_for_account = Category.objects.create(
+            title="category_for_account",
+            content_type=ContentType.objects.get_for_model(Account),
+            object_id=self.account,
+        )
+
+        self.category_for_account2 = Category.objects.create(
+            title="category_for_account2",
+            content_type=ContentType.objects.get_for_model(Account),
+            object_id=self.account2,
+        )
+
+        self.category_for_user = Category.objects.create(
+            title="category_for_user",
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=self.user.pk,
+        )
+
+        self.account_category = AccountCategory.objects.create(
+            account=self.account,
+            category=self.category_for_account,
+        )
+
+        self.account2_category = AccountCategory.objects.create(
+            account=self.account2,
+            category=self.category_for_account2,
+        )
+
+        self.c = APIClient()
+        self.c.force_authenticate(user=self.user)
+
+    def test_list_user_category(self):
+        """List user categories"""
+        response = self.c.get("/api/categories/")
+
+        self.assertFalse(
+            any(
+                item["title"] == self.default_category.title
+                for item in response.data
+            )
+        )
+        self.assertFalse(
+            any(
+                item["title"] == self.category_for_account.title
+                for item in response.data
+            )
+        )
+        self.assertFalse(
+            any(
+                item["title"] == self.category_for_account2.title
+                for item in response.data
+            )
+        )
+        self.assertTrue(
+            any(
+                item["title"] == self.category_for_user.title
+                for item in response.data
+            )
+        )
+
+    def test_list_account_category_own_account(self):
+        """List default categories, account categories and own categories"""
+        response = self.c.get(f"/api/categories/?account={self.account.pk}")
+
+        self.assertTrue(
+            any(
+                item["title"] == self.default_category.title
+                for item in response.data
+            )
+        )
+        self.assertTrue(
+            any(
+                item["title"] == self.category_for_account.title
+                for item in response.data
+            )
+        )
+        self.assertFalse(
+            any(
+                item["title"] == self.category_for_account2.title
+                for item in response.data
+            )
+        )
+        self.assertTrue(
+            any(
+                item["title"] == self.category_for_user.title
+                for item in response.data
+            )
+        )
+
+    def test_list_account_category_on_none_own_account(self):
+        """List account categories (don't depend on the category content_type)"""  # noqa
+        response = self.c.get(f"/api/categories/?account={self.account2.pk}")
+
+        self.assertFalse(
+            any(
+                item["title"] == self.default_category.title
+                for item in response.data
+            )
+        )
+        self.assertFalse(
+            any(
+                item["title"] == self.category_for_account.title
+                for item in response.data
+            )
+        )
+        self.assertTrue(
+            any(
+                item["title"] == self.category_for_account2.title
+                for item in response.data
+            )
+        )
+        self.assertFalse(
+            any(
+                item["title"] == self.category_for_user.title
+                for item in response.data
+            )
+        )
+
+    def test_create_account_category(self):
+        category_count = Category.objects.filter(
+            object_id=self.account.pk
+        ).count()
+
+        account_category_count = AccountCategory.objects.filter(
+            account=self.account
+        ).count()
+
+        self.c.post(
+            "/api/categories/",
+            {
+                "title": "new title",
+                "account_id": self.account.pk,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            Category.objects.filter(object_id=self.account.pk).count(),
+            category_count + 1,
+        )
+
+        self.assertEqual(
+            AccountCategory.objects.filter(account=self.account).count(),
+            account_category_count + 1,
+        )
+
+    def test_update_account_category(self):
+        self.c.put(
+            f"/api/categories/{self.category_for_account.pk}/",
+            {
+                "title": "new title",
+            },
+            format="json",
+        )
+
+        self.category_for_account.refresh_from_db()
+
+        self.assertEqual(self.category_for_account.title, "new title")
+
+    def test_update_content_type_account_category(self):
+        self.c.put(
+            f"/api/categories/{self.category_for_account.pk}/",
+            {
+                "content_type": ContentType.objects.get_for_model(User).pk,
+            },
+            format="json",
+        )
+
+        self.category_for_account.refresh_from_db()
+
+        self.assertEqual(
+            self.category_for_account.content_type,
+            ContentType.objects.get_for_model(Account),
+        )
+
+    def test_create_user_category(self):
+        user_category_count = Category.objects.filter(
+            object_id=self.user.pk
+        ).count()
+
+        self.c.post(
+            "/api/categories/",
+            {
+                "title": "new title",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            Category.objects.filter(object_id=self.user.pk).count(),
+            user_category_count + 1,
+        )
+
+    def test_update_user_category(self):
+        self.c.put(
+            f"/api/categories/{self.category_for_user.pk}/",
+            {
+                "title": "new title",
+            },
+            format="json",
+        )
+
+        self.category_for_user.refresh_from_db()
+
+        self.assertEqual(self.category_for_user.title, "new title")
+
+    def test_delete_category(self):
+        user_category_count = Category.objects.all().count()
+
+        self.c.delete(f"/api/categories/{self.category_for_user.pk}/")
+
+        self.assertEqual(
+            Category.objects.all().count(),
+            user_category_count - 1,
         )

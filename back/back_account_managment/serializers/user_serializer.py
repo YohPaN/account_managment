@@ -1,3 +1,7 @@
+from back_account_managment.models import Category
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
+)
 from back_account_managment.serializers.profile_serializer import (
     ProfileSerializer,
 )
@@ -7,14 +11,27 @@ from rest_framework import serializers
 
 class UserMeta:
     model = get_user_model()
-    fields = ["username", "email", "password", "profile"]
+    fields = [
+        "username",
+        "email",
+        "password",
+        "profile",
+        "categories",
+    ]
 
 
 class _UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
+    categories = serializers.SerializerMethodField()
 
     class Meta:
         pass
+
+    def get_categories(self, obj):
+        categories = Category.objects.filter(
+            user_categories__user=obj
+        ).distinct()
+        return CategorySerializer(categories, many=True).data
 
 
 class RegisterUserSerializer(_UserSerializer):
@@ -31,9 +48,14 @@ class UserSerializer(_UserSerializer):
         fields = [
             field
             for field in UserMeta.fields
-            if field in ["username", "email", "profile"]
+            if field
+            in [
+                "username",
+                "email",
+                "profile",
+                "categories",
+            ]
         ]
-        fields = ["username", "email", "profile"]
 
 
 class UsernameUserSerilizer(_UserSerializer):

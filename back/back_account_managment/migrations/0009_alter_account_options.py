@@ -6,12 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('back_account_managment', '0008_item_user'),
+        ("back_account_managment", "0008_item_user"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='account',
-            options={'permissions': [('link_user_item', 'Can link a user to an item')]},
+            name="account",
+            options={
+                "permissions": [
+                    ("link_user_item", "Can link a user to an item")
+                ]
+            },
         ),
     ]
