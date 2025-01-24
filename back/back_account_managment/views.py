@@ -19,6 +19,9 @@ from back_account_managment.permissions import (
     ManageRessourcePermission,
     TransfertToAccountPermission,
 )
+from back_account_managment.serializers.account_category_serializer import (
+    AccountCategorySerializer,
+)
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
@@ -495,4 +498,50 @@ class CategoryView(ModelViewSet):
         if category.content_type.model_class() is Account:
             AccountCategory.objects.create(
                 category=category, account_id=category.object_id
+            )
+
+
+class AccountCategoryView(ModelViewSet):
+    queryset = AccountCategory.objects.all()
+    serializer_class = AccountCategorySerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            category = Category.objects.get(
+                pk=request.data.get("category", None)
+            )
+
+            account = Account.objects.get(pk=request.data.get("account", None))
+
+            if category.content_type == ContentType.objects.get_for_model(
+                Account
+            ):
+                account_category = AccountCategory.objects.filter(
+                    category=category
+                )
+
+                if (
+                    account_category.exists()
+                    and account_category.first().account != account
+                ):
+                    return Response(
+                        {"detail": "The category is link to another account"},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+
+            AccountCategory.objects.get_or_create(
+                account=account, category=category
+            )
+
+            return Response(
+                status=status.HTTP_201_CREATED,
+            )
+        except Category.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Account.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
             )
