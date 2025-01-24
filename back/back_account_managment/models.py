@@ -67,7 +67,7 @@ class Account(models.Model):
             Q(account_id=self.pk) | Exists(transfert_item),
         )
 
-        return total.aggregate(total_sum=(Sum("calc_valuation")))
+        return total.aggregate(total_sum=(Sum("calc_valuation", default=0)))
 
 
 class Category(models.Model):

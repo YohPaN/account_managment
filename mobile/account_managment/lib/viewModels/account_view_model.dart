@@ -1,8 +1,10 @@
 import 'package:account_managment/models/account.dart';
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/account_repository.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AccountViewModel extends ChangeNotifier {
@@ -32,6 +34,14 @@ class AccountViewModel extends ChangeNotifier {
           items.add(Item.deserialize(item));
         }
 
+        final List<CategoryApp> categories = [];
+
+        for (var category in account["categories"]) {
+          categories.add(
+            CategoryApp.deserialize(category),
+          );
+        }
+
         final List<Contributor> contributors = [];
 
         for (var contributor in account["contributors"]) {
@@ -42,6 +52,7 @@ class AccountViewModel extends ChangeNotifier {
 
         final accountToAdd = Account.deserialize(account);
         accountToAdd.items = items;
+        accountToAdd.categories = categories;
         accountToAdd.contributor = contributors;
         accounts.add(
           accountToAdd,
@@ -92,6 +103,14 @@ class AccountViewModel extends ChangeNotifier {
         items.add(Item.deserialize(transfertItem, true));
       }
 
+      final List<CategoryApp> categories = [];
+
+      for (var category in repoResponse.data!["categories"]) {
+        categories.add(
+          CategoryApp.deserialize(category),
+        );
+      }
+
       final List<Contributor> contributors = [];
 
       for (var contributor in repoResponse.data!["contributors"]) {
@@ -102,6 +121,7 @@ class AccountViewModel extends ChangeNotifier {
 
       final accountToAdd = Account.deserialize(repoResponse.data);
       accountToAdd.items = items;
+      accountToAdd.categories = categories;
       accountToAdd.contributor = contributors;
 
       _account = accountToAdd;

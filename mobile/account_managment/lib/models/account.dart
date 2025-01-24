@@ -1,3 +1,4 @@
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/models/item.dart';
 
@@ -8,6 +9,7 @@ class Account {
   List<Item> items;
   double? ownContribution;
   double? needToAdd;
+  List<CategoryApp> categories;
   List<Contributor> contributor;
   List<dynamic> permissions;
   String username;
@@ -19,6 +21,7 @@ class Account {
     required this.name,
     required this.isMain,
     required this.items,
+    required this.categories,
     this.ownContribution,
     this.needToAdd,
     required this.contributor,
@@ -41,6 +44,7 @@ class Account {
           ? jsonAccount["need_to_add"]["total"]
           : null,
       contributor: [],
+      categories: [],
       permissions: jsonAccount["permissions"],
       username: jsonAccount["user"]["username"],
       total: jsonAccount["total"]["total_sum"],

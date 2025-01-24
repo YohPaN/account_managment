@@ -1,6 +1,8 @@
+import 'package:account_managment/components/category_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
+import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +15,33 @@ class SettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AccountUserViewModel accountUserViewModel =
         Provider.of<AccountUserViewModel>(context);
+    final ProfileViewModel profileViewModel =
+        Provider.of<ProfileViewModel>(context);
+    final CategoryViewModel categoryViewModel =
+        Provider.of<CategoryViewModel>(context);
     final AppLocalizations locale = AppLocalizations.of(context)!;
+
+    showModal() {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled: true,
+        builder: (BuildContext drawerContext) {
+          return MultiProvider(
+            providers: [
+              InheritedProvider<CategoryViewModel>(
+                update: (context, value) {
+                  return categoryViewModel;
+                },
+              ),
+            ],
+            child: const CategoryDrawer(),
+          );
+        },
+      );
+    }
 
     return Scaffold(
       body: Padding(
@@ -98,6 +126,91 @@ class SettingScreen extends StatelessWidget {
                 }
                 return const Center(child: CircularProgressIndicator());
               },
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(locale.categories.capitalize()),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: profileViewModel.categories.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              left: 16, right: 16, top: 8, bottom: 8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Colors.white,
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  offset: Offset(0.0, 1.0),
+                                  blurRadius: 4.0,
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              title: Column(
+                                children: [
+                                  Text(
+                                    "${locale.account("")}: ${accountUserViewModel.accountUsers[index].accountName}"
+                                        .capitalize(),
+                                  ),
+                                  Text(
+                                    "${locale.admin}: ${accountUserViewModel.accountUsers[index].adminUsername}"
+                                        .capitalize(),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () async =>
+                                            await accountUserViewModel
+                                                .partialUpdateAccountUser(
+                                                    accountUserId:
+                                                        accountUserViewModel
+                                                            .accountUsers[index]
+                                                            .id,
+                                                    state: "DISAPPROVED"),
+                                        child: const Icon(
+                                          Icons.close,
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async =>
+                                            await accountUserViewModel
+                                                .partialUpdateAccountUser(
+                                                    accountUserId:
+                                                        accountUserViewModel
+                                                            .accountUsers[index]
+                                                            .id,
+                                                    state: "APPROVED"),
+                                        child: const Icon(
+                                          Icons.check,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                          onPressed: () => showModal(),
+                          child: Text("add category")),
+                    ],
+                  )
+                ],
+              ),
             ),
             ElevatedButton(
               child: Text(locale.logout.capitalize()),

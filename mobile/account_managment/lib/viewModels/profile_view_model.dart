@@ -1,7 +1,9 @@
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/profile.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/models/user.dart';
 import 'package:account_managment/repositories/profile_repository.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ProfileViewModel extends ChangeNotifier {
@@ -13,12 +15,18 @@ class ProfileViewModel extends ChangeNotifier {
   Profile? _profile;
   Profile? get profile => _profile;
 
+  final List<CategoryApp> _categories = [];
+  List<CategoryApp> get categories => _categories;
+
   Future<RepoResponse> getProfile() async {
     final RepoResponse repoResponse = await profileRepository.get();
 
     if (repoResponse.success) {
       _user = User.deserialize(repoResponse.data);
       _profile = Profile.deserialize(repoResponse.data!["profile"]);
+      for (var category in repoResponse.data!["categories"]) {
+        _categories.add(CategoryApp.deserialize(category));
+      }
     }
 
     return repoResponse;
