@@ -57,7 +57,7 @@ User = get_user_model()
 
 
 class UserView(ModelViewSet):
-    queryset = User.objects.prefetch_related("user_categories__category").all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 

@@ -6,6 +6,7 @@ from back_account_managment.serializers.profile_serializer import (
     ProfileSerializer,
 )
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 
@@ -29,8 +30,10 @@ class _UserSerializer(serializers.ModelSerializer):
 
     def get_categories(self, obj):
         categories = Category.objects.filter(
-            user_categories__user=obj
-        ).distinct()
+            object_id=obj.pk,
+            content_type=ContentType.objects.get_for_model(get_user_model()),
+        )
+
         return CategorySerializer(categories, many=True).data
 
 

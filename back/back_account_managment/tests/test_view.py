@@ -7,7 +7,6 @@ from back_account_managment.models import (
     Category,
     Profile,
     Transfert,
-    UserCategory,
 )
 from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
@@ -43,16 +42,11 @@ class UserViewTest(TestCase):
         self.category_under_user = Category.objects.create(
             title="test_category",
             content_type=ContentType.objects.get_for_model(User),
-            object_id=self.user,
+            object_id=self.user.pk,
         )
 
         self.other_category = Category.objects.create(
             title="test",
-        )
-
-        self.user_category = UserCategory.objects.create(
-            user=self.user,
-            category=self.category_under_user,
         )
 
         self.c = APIClient()

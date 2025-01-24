@@ -97,15 +97,6 @@ class AccountCategory(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
 
-class UserCategory(models.Model):
-    category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, related_name="user_categories"
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="user_categories"
-    )
-
-
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=15)
