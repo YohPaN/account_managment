@@ -11,13 +11,9 @@ from back_account_managment.models import (
 from back_account_managment.serializers.account_serializer import (
     AccountSerializer,
 )
-from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
-    AccountUserPermissionsSerializer,
-)
 from back_account_managment.serializers.item_serializer import _ItemSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 
@@ -288,42 +284,6 @@ class AccountSerializerTest(TestCase):
         # user_part = 168.64
         # user has already put 57.46
         self.assertEqual(need_to_add["total"], Decimal("-111.18"))
-
-
-class AccountUserPermissionSerializerTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(
-            username="test", email="test@test.test"
-        )
-
-        self.account = Account.objects.create(name="test", user=self.user)
-
-        self.account_user = AccountUser.objects.create(
-            account=self.account, user=self.user
-        )
-
-        self.content_type = ContentType.objects.create(
-            app_label="test", model="model"
-        )
-
-        self.permission = Permission.objects.create(
-            codename="test_code",
-            name="Test perm",
-            content_type=self.content_type,
-        )
-
-        self.account_user_permission = AccountUserPermission.objects.create(
-            account_user=self.account_user, permissions=self.permission
-        )
-
-    def test_get_permission_code(self):
-        serializer = AccountUserPermissionsSerializer(
-            self.account_user_permission
-        )
-
-        self.assertEqual(
-            serializer.data, {"permissions_codename": "test_code"}
-        )
 
 
 class ItemSerializerTest(TestCase):
