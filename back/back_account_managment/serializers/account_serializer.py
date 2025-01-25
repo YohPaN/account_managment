@@ -2,10 +2,8 @@ from decimal import Decimal
 
 from back_account_managment.models import (
     Account,
-    AccountCategory,
     AccountUser,
     AccountUserPermission,
-    Category,
     Item,
     Profile,
     Transfert,
@@ -60,7 +58,7 @@ class _AccountSerializer(serializers.ModelSerializer):
     own_contribution = serializers.SerializerMethodField()
     need_to_add = serializers.SerializerMethodField()
 
-    categories = serializers.SerializerMethodField()
+    categories = CategorySerializer(many=True)
 
     class Meta:
         pass
@@ -184,17 +182,6 @@ class _AccountSerializer(serializers.ModelSerializer):
             }
 
         return {"total": Decimal(0.00)}
-
-    def get_categories(self, obj):
-        categories = Category.objects.filter(
-            Exists(
-                AccountCategory.objects.filter(
-                    account=obj, category=OuterRef("pk")
-                )
-            )
-        )
-
-        return CategorySerializer(categories, many=True).data
 
 
 class AccountListSerializer(_AccountSerializer):

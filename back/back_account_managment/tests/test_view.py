@@ -1005,7 +1005,6 @@ class AccountUserViewTest(TestCase):
         response = self.c.get("/api/account_user/")
 
         self.assertTrue(status.is_success(response.status_code))
-        print(response.data)
 
 
 class AccountUserPermissionTest(TestCase):

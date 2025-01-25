@@ -70,6 +70,7 @@ class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
     salary_based_split = models.BooleanField(default=False)
+    categories = models.ManyToManyField(Category, through="AccountCategory")
 
     class Meta:
         permissions = [

@@ -47,7 +47,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -146,7 +146,20 @@ class RegisterView(APIView):
 
 
 class AccountView(ModelViewSet):
-    queryset = Account.objects.prefetch_related("items").all()
+    queryset = Account.objects.prefetch_related(
+        "items",
+        Prefetch(
+            "categories",
+            queryset=Category.objects.filter(
+                Exists(
+                    AccountCategory.objects.filter(
+                        account=OuterRef("account__pk"),
+                        category=OuterRef("pk"),
+                    )
+                )
+            ),
+        ),
+    ).all()
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
@@ -159,12 +172,14 @@ class AccountView(ModelViewSet):
         return context
 
     def list(self, request):
-        own_accounts = Account.objects.filter(user=request.user)
+        queryset = self.get_queryset()
+
+        own_accounts = queryset.filter(user=request.user)
 
         contributor_account_user = AccountUser.objects.filter(
             account=OuterRef("pk"), user=request.user, state="APPROVED"
         )
-        contributor_accounts = Account.objects.filter(
+        contributor_accounts = queryset.filter(
             Exists(contributor_account_user)
         )
 
