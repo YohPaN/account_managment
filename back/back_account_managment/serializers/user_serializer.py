@@ -23,18 +23,10 @@ class UserMeta:
 
 class _UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
-    categories = serializers.SerializerMethodField()
+    categories = CategorySerializer(many=True)
 
     class Meta:
         pass
-
-    def get_categories(self, obj):
-        categories = Category.objects.filter(
-            object_id=obj.pk,
-            content_type=ContentType.objects.get_for_model(get_user_model()),
-        )
-
-        return CategorySerializer(categories, many=True).data
 
 
 class RegisterUserSerializer(_UserSerializer):

@@ -1,7 +1,10 @@
 import uuid
 
 from django.contrib.auth.models import AbstractUser, Permission
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import (
+    GenericForeignKey,
+    GenericRelation,
+)
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import (
@@ -17,10 +20,33 @@ from django.db.models import (
 )
 
 
+class Category(models.Model):
+    title = models.CharField(max_length=25)
+    color = models.CharField(max_length=50, blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, null=True, blank=True
+    )
+    object_id = models.CharField(max_length=50, blank=True)
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    def save(self, **kwargs):
+        # We are testing that both are not None
+        assert self.content_type != self.object_id
+
+        return super().save(**kwargs)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=15, unique=True)
     email = models.EmailField(max_length=50, unique=True)
+    categories = GenericRelation(Category)
 
     first_name = None
     last_name = None
@@ -68,28 +94,6 @@ class Account(models.Model):
         )
 
         return total.aggregate(total_sum=(Sum("calc_valuation", default=0)))
-
-
-class Category(models.Model):
-    title = models.CharField(max_length=25)
-    color = models.CharField(max_length=50, blank=True)
-    icon = models.CharField(max_length=50, blank=True)
-    content_type = models.ForeignKey(
-        ContentType, on_delete=models.CASCADE, null=True, blank=True
-    )
-    object_id = models.CharField(max_length=50, blank=True)
-    content_object = GenericForeignKey("content_type", "object_id")
-
-    def save(self, **kwargs):
-        # We are testing that both are not None
-        assert self.content_type != self.object_id
-
-        return super().save(**kwargs)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["content_type", "object_id"]),
-        ]
 
 
 class AccountCategory(models.Model):
