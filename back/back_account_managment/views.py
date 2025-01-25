@@ -146,7 +146,7 @@ class RegisterView(APIView):
 
 
 class AccountView(ModelViewSet):
-    queryset = Account.objects.all()
+    queryset = Account.objects.prefetch_related("items").all()
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
@@ -159,22 +159,24 @@ class AccountView(ModelViewSet):
         return context
 
     def list(self, request):
+        own_accounts = Account.objects.filter(user=request.user)
+
         contributor_account_user = AccountUser.objects.filter(
             account=OuterRef("pk"), user=request.user, state="APPROVED"
         )
-        own_accounts = Account.objects.filter(user=request.user)
-
         contributor_accounts = Account.objects.filter(
             Exists(contributor_account_user)
         )
 
-        own_account_serialized = AccountListSerializer(own_accounts, many=True)
-        own_account_serialized.context.update({"request": self.request})
-        contributor_account_serialized = AccountListSerializer(
-            contributor_accounts, many=True
+        own_account_serialized = AccountListSerializer(
+            own_accounts,
+            many=True,
+            context={"request": request},
         )
-        contributor_account_serialized.context.update(
-            {"request": self.request}
+        contributor_account_serialized = AccountListSerializer(
+            contributor_accounts,
+            many=True,
+            context={"request": request},
         )
 
         return Response(
@@ -366,7 +368,9 @@ class ItemView(ModelViewSet):
 
 
 class AccountUserView(ModelViewSet):
-    queryset = AccountUser.objects.all()
+    queryset = AccountUser.objects.select_related(
+        "account", "account__user"
+    ).all()
     serializer_class = AccountUserSerializer
     permission_classes = [
         permissions.IsAuthenticated,

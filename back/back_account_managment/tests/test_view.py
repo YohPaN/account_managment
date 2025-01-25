@@ -977,10 +977,12 @@ class ItemViewTest(TestCase):
 class AccountUserViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
-            username="test", email="test@test.test"
+            username="username", email="test@test.test"
         )
 
-        self.account = Account.objects.create(name="test", user=self.user)
+        self.account = Account.objects.create(
+            name="account_name", user=self.user
+        )
 
         self.account_user = AccountUser.objects.create(
             account=self.account, user=self.user
@@ -998,6 +1000,12 @@ class AccountUserViewTest(TestCase):
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(response.data, {"pending_account_request": 1})
+
+    def test_list(self):
+        response = self.c.get("/api/account_user/")
+
+        self.assertTrue(status.is_success(response.status_code))
+        print(response.data)
 
 
 class AccountUserPermissionTest(TestCase):

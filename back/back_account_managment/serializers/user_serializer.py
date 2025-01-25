@@ -1,4 +1,3 @@
-from back_account_managment.models import Category
 from back_account_managment.serializers.category_serializer import (
     CategorySerializer,
 )
@@ -6,7 +5,6 @@ from back_account_managment.serializers.profile_serializer import (
     ProfileSerializer,
 )
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 
