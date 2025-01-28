@@ -5,6 +5,7 @@ from rest_framework import serializers
 class CategoryMeta:
     model = Category
     fields = [
+        "id",
         "title",
         "color",
         "icon",

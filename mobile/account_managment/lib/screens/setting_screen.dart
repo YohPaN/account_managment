@@ -153,42 +153,26 @@ class SettingScreen extends StatelessWidget {
                             child: ListTile(
                               title: Column(
                                 children: [
-                                  Text(
-                                    "${locale.account("")}: ${accountUserViewModel.accountUsers[index].accountName}"
-                                        .capitalize(),
-                                  ),
-                                  Text(
-                                    "${locale.admin}: ${accountUserViewModel.accountUsers[index].adminUsername}"
-                                        .capitalize(),
-                                  ),
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      ElevatedButton(
-                                        onPressed: () async =>
-                                            await accountUserViewModel
-                                                .partialUpdateAccountUser(
-                                                    accountUserId:
-                                                        accountUserViewModel
-                                                            .accountUsers[index]
-                                                            .id,
-                                                    state: "DISAPPROVED"),
-                                        child: const Icon(
-                                          Icons.close,
-                                        ),
+                                      Icon(
+                                        IconData(profileViewModel
+                                            .categories[index].icon),
                                       ),
+                                      Text(
+                                        profileViewModel.categories[index].title
+                                            .capitalize(),
+                                      ),
+                                      Icon(Icons.circle,
+                                          size: 16,
+                                          color: Color(profileViewModel
+                                              .categories[index].color)),
                                       ElevatedButton(
-                                        onPressed: () async =>
-                                            await accountUserViewModel
-                                                .partialUpdateAccountUser(
-                                                    accountUserId:
-                                                        accountUserViewModel
-                                                            .accountUsers[index]
-                                                            .id,
-                                                    state: "APPROVED"),
+                                        onPressed: () => showModal(),
                                         child: const Icon(
-                                          Icons.check,
+                                          Icons.mode,
                                         ),
                                       ),
                                     ],
