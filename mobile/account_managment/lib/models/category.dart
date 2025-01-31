@@ -19,4 +19,10 @@ class CategoryApp {
       icon: int.parse(jsonCategory["icon"]),
     );
   }
+
+  void update(data) {
+    title = data["title"];
+    color = int.parse(data["color"]);
+    icon = int.parse(data["icon"]);
+  }
 }

@@ -94,6 +94,22 @@
     "transfert_to": "transfert to",
     "valuation": "valuation",
     "@@comment": "Category",
+    "category": "{isSingular, plural, =1{category} other{categories}}",
+    "@category": {
+        "placeholders": {
+            "isSingular": {
+                "type": "num"
+            }
+        }
+    },
+    "create_category": "create {isSingular, plural, =0{category} other{categories}}",
+    "@create_category": {
+        "placeholders": {
+            "isSingular": {
+                "type": "num"
+            }
+        }
+    },
     "icon": "icon",
     "color": "coulor",
     "@@comment": "Permissions",

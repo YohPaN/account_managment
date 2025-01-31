@@ -30,8 +30,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<CategoryViewModel>(
           create: (context) => CategoryViewModel(),
         ),
-        ChangeNotifierProvider(
-          create: (context) => ProfileViewModel(),
+        ChangeNotifierProvider<ProfileViewModel>(
+          create: (context) => ProfileViewModel(
+            categoryViewModel:
+                Provider.of<CategoryViewModel>(context, listen: false),
+          ),
         )
       ],
       child: ToastificationWrapper(

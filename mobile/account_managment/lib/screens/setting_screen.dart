@@ -1,5 +1,6 @@
 import 'package:account_managment/components/category_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
@@ -15,13 +16,10 @@ class SettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AccountUserViewModel accountUserViewModel =
         Provider.of<AccountUserViewModel>(context);
-    final ProfileViewModel profileViewModel =
-        Provider.of<ProfileViewModel>(context);
-    final CategoryViewModel categoryViewModel =
-        Provider.of<CategoryViewModel>(context);
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
-    showModal() {
+    showModal(String action, CategoryViewModel categoryViewModel,
+        [CategoryApp? category]) {
       showModalBottomSheet(
         context: context,
         shape: const RoundedRectangleBorder(
@@ -37,7 +35,10 @@ class SettingScreen extends StatelessWidget {
                 },
               ),
             ],
-            child: const CategoryDrawer(),
+            child: CategoryDrawer(
+              action: action,
+              category: category,
+            ),
           );
         },
       );
@@ -127,74 +128,86 @@ class SettingScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               },
             ),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(locale.categories.capitalize()),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: profileViewModel.categories.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16, right: 16, top: 8, bottom: 8),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                              color: Colors.white,
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black,
-                                  offset: Offset(0.0, 1.0),
-                                  blurRadius: 4.0,
+            Consumer<CategoryViewModel>(
+              builder: (context, categoryViewModel, child) {
+                return Expanded(
+                  child: Column(
+                    children: [
+                      Text(locale.categories.capitalize()),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: categoryViewModel.categories.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 16, right: 16, top: 8, bottom: 8),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  color: Colors.white,
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      offset: Offset(0.0, 1.0),
+                                      blurRadius: 4.0,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: ListTile(
-                              title: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                child: ListTile(
+                                  title: Column(
                                     children: [
-                                      Icon(
-                                        IconData(profileViewModel
-                                            .categories[index].icon),
-                                      ),
-                                      Text(
-                                        profileViewModel.categories[index].title
-                                            .capitalize(),
-                                      ),
-                                      Icon(Icons.circle,
-                                          size: 16,
-                                          color: Color(profileViewModel
-                                              .categories[index].color)),
-                                      ElevatedButton(
-                                        onPressed: () => showModal(),
-                                        child: const Icon(
-                                          Icons.mode,
-                                        ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Icon(
+                                            IconData(categoryViewModel
+                                                .categories[index].icon),
+                                          ),
+                                          Text(
+                                            categoryViewModel
+                                                .categories[index].title
+                                                .capitalize(),
+                                          ),
+                                          Icon(Icons.circle,
+                                              size: 16,
+                                              color: Color(categoryViewModel
+                                                  .categories[index].color)),
+                                          ElevatedButton(
+                                            onPressed: () => showModal(
+                                              "update",
+                                              categoryViewModel,
+                                              categoryViewModel
+                                                  .categories[index],
+                                            ),
+                                            child: const Icon(
+                                              Icons.mode,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                            );
+                          },
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () =>
+                                showModal("create", categoryViewModel),
+                            child: Text(locale.create_category(1).capitalize()),
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                          onPressed: () => showModal(),
-                          child: Text("add category")),
+                        ],
+                      )
                     ],
-                  )
-                ],
-              ),
+                  ),
+                );
+              },
             ),
             ElevatedButton(
               child: Text(locale.logout.capitalize()),

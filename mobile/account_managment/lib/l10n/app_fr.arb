@@ -46,6 +46,8 @@
     "transfert_to": "transférer à",
     "valuation": "évaluation",
     "@@comment": "Category",
+    "category": "{isSingular, plural, =0{categorie} other{categories}}",
+    "create_category": "créer {isSingular, plural, =1{une categorie} other{des categories}}",
     "icon": "icone",
     "color": "couleur",
     "@@comment": "Permissions",

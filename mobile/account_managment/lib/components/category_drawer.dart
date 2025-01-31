@@ -1,15 +1,24 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:provider/provider.dart';
 
 class CategoryDrawer extends StatefulWidget {
+  final String action;
+  final CategoryApp? category;
+
   @override
-  const CategoryDrawer({super.key});
+  const CategoryDrawer({
+    super.key,
+    required this.action,
+    required this.category,
+  });
 
   @override
   _CategoryDrawerState createState() => _CategoryDrawerState();
@@ -22,11 +31,41 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.action == "update") {
+      titleController.text = widget.category!.title;
+      iconController.text = widget.category!.icon.toString();
+      colorController.text = widget.category!.color.toString();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final CategoryViewModel categoryViewModel =
         Provider.of<CategoryViewModel>(context);
 
     final AppLocalizations locale = AppLocalizations.of(context)!;
+
+    Future<RepoResponse> submit({
+      required String title,
+      required String icon,
+      required String color,
+    }) async {
+      if (widget.action == "create") {
+        return await categoryViewModel.createCategory(
+          title: title,
+          icon: icon,
+          color: color,
+        );
+      } else {
+        return await categoryViewModel.updateCategory(
+            categoryId: widget.category!.id,
+            title: title,
+            icon: icon,
+            color: color);
+      }
+    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -76,8 +115,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        RepoResponse repoResponse =
-                            await categoryViewModel.createCategory(
+                        RepoResponse repoResponse = await submit(
                           title: titleController.text,
                           icon: iconController.text,
                           color: colorController.text,
@@ -86,25 +124,23 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                                 listen: false)
                             .showMessage(
                                 repoResponse.message, repoResponse.success);
-                        // Navigator.pop(context);
+                        Navigator.pop(context);
                       }
                     },
-                    child: Text(locale.create.capitalize()),
+                    child: Text(locale.action(widget.action).capitalize()),
                   ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final RepoResponse repoResponse = await categoryViewModel
+                          .deleteCategory(categoryId: widget.category!.id);
 
-                  // ElevatedButton(
-                  //   onPressed: () async {
-                  //     final RepoResponse repoResponse = await accountViewModel
-                  //         .deleteAccount(widget.account!.id);
-
-                  //     Provider.of<InternalNotification>(context,
-                  //             listen: false)
-                  //         .showMessage(
-                  //             repoResponse.message, repoResponse.success);
-                  //     Navigator.pop(context);
-                  //   },
-                  //   child: Text(locale.action('delete').capitalize()),
-                  // )
+                      Provider.of<InternalNotification>(context, listen: false)
+                          .showMessage(
+                              repoResponse.message, repoResponse.success);
+                      Navigator.pop(context);
+                    },
+                    child: Text(locale.action('delete').capitalize()),
+                  )
                 ],
               ),
             ],

@@ -28,6 +28,38 @@ class CategoryRepository {
     return repoResponse;
   }
 
+  Future<RepoResponse> update({
+    required int categoryId,
+    required String title,
+    required String icon,
+    required String color,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "PUT",
+      uri: "$modelUrl/$categoryId/",
+      contentType: 'application/json',
+      body: {
+        'title': title,
+        'icon': icon,
+        'color': color,
+      },
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> delete({
+    required int categoryId,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "DELETE",
+      uri: "$modelUrl/$categoryId/",
+      contentType: 'application/json',
+    );
+
+    return repoResponse;
+  }
+
   Future<RepoResponse> link(
       {required int account, required int category}) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
