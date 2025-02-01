@@ -53,7 +53,13 @@ class AccountListItem extends StatelessWidget {
             if (canManage)
               IconButton(
                 onPressed: () {
-                  callbackFunc("update", account);
+                  Provider.of<AccountViewModel>(context, listen: false)
+                      .account = account;
+                  Navigator.pushNamed(
+                    context,
+                    "account_managment",
+                    arguments: "update",
+                  );
                 },
                 icon: const Icon(Icons.mode),
               ),

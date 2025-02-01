@@ -33,6 +33,7 @@
     "retype_password": "retaper le mot de passe",
     "@@comment": "Account",
     "account": "{isSingular, select, many{comptes} other{compte}}",
+    "account_managment": "gestion des comptes",
     "add_self_account_error": "vous ne pouvez pas vous ajouter à votre compte",
     "add_users": "ajouter des utilisateurs",
     "contributor_account": "compte de contributeur {isSingular, select, many{comptes} other{compte}}",

@@ -224,6 +224,7 @@ class AccountSerializer(_AccountSerializer):
                 "need_to_add",
                 "own_contribution",
                 "permissions",
+                "salary_based_split",
                 "total",
                 "transfert_items",
                 "user",

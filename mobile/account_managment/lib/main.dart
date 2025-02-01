@@ -2,6 +2,7 @@ import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/common/router.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
@@ -29,6 +30,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<CategoryViewModel>(
           create: (context) => CategoryViewModel(),
+        ),
+        ChangeNotifierProvider<AccountViewModel>(
+          create: (context) => AccountViewModel(),
         ),
         ChangeNotifierProvider<ProfileViewModel>(
           create: (context) => ProfileViewModel(

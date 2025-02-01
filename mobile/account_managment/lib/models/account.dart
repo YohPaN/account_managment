@@ -51,4 +51,9 @@ class Account {
       salaryBasedSplit: jsonAccount["salary_based_split"],
     );
   }
+
+  Future<void> update(data) async {
+    name = data["name"];
+    salaryBasedSplit = data["salary_based_split"];
+  }
 }

@@ -73,6 +73,7 @@
             }
         }
     },
+    "account_managment": "account managment",
     "add_self_account_error": "you can't add yourself to your account",
     "add_users": "add users",
     "contributor_account": "contributor {isSingular, select, many{accounts}other{account}}",

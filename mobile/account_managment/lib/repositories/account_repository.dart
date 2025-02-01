@@ -27,24 +27,26 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> create(String name, List<String> contributors) async {
+  Future<RepoResponse> create(String name) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/",
       contentType: 'application/json',
-      body: {'name': name, 'contributors': contributors},
+      body: {'name': name},
     );
 
     return repoResponse;
   }
 
-  Future<RepoResponse> update(
-      int accountId, String name, List<String> contributors) async {
+  Future<RepoResponse> update({
+    required int id,
+    required String name,
+  }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
-      uri: "$modelUrl/$accountId/",
+      uri: "$modelUrl/$id/",
       contentType: 'application/json',
-      body: {'name': name, 'contributors': contributors},
+      body: {'name': name},
     );
 
     return repoResponse;

@@ -1,12 +1,11 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/screens/account_managment_screen.dart';
+import 'package:account_managment/screens/account_list_screen.dart';
 import 'package:account_managment/screens/account_screen.dart';
 import 'package:account_managment/screens/profile_screen.dart';
 import 'package:account_managment/screens/setting_screen.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
-import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +22,7 @@ class Layout extends StatefulWidget {
 class _LayoutState extends State<Layout> {
   final List<Widget> allDestinations = [
     const AccountScreen(),
-    const AccountManagmentScreen(),
+    const AccountListScreen(),
     ProfileScreen(action: "update"),
     const SettingScreen(),
   ];
@@ -65,14 +64,7 @@ class _LayoutState extends State<Layout> {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(),
-      body: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-            create: (context) => AccountViewModel(),
-          ),
-        ],
-        child: allDestinations[currentPageIndex],
-      ),
+      body: allDestinations[currentPageIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPageIndex,
         destinations: [

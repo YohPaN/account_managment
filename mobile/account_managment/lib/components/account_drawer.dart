@@ -76,17 +76,17 @@ class _AccountDrawerState extends State<AccountDrawer> {
         Provider.of<ProfileViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
-    createOrUpdate() async {
-      RepoResponse response;
-      if (widget.action == "create") {
-        response = await accountViewModel.createAccount(
-            nameController.text, _usersToAdd);
-      } else {
-        response = await accountViewModel.updateAccount(
-            widget.account!.id, nameController.text, _usersToAdd);
-      }
-      return response;
-    }
+    // createOrUpdate() async {
+    //   RepoResponse response;
+    //   if (widget.action == "create") {
+    //     response = await accountViewModel.createAccount(
+    //         nameController.text, _usersToAdd);
+    //   } else {
+    //     response = await accountViewModel.updateAccount(
+    //         widget.account!.id, nameController.text, _usersToAdd);
+    //   }
+    //   return response;
+    // }
 
     if (widget.action == "update" && widget.account != null) {
       nameController.text = widget.account!.name;
@@ -119,19 +119,19 @@ class _AccountDrawerState extends State<AccountDrawer> {
                   title: Text(locale.salary_based_split.capitalize()),
                   value: isSplit,
                   onChanged: (bool? value) async {
-                    final RepoResponse repoResponse =
-                        await accountViewModel.setSalaryBasedSplit(
-                      accountId: widget.account!.id,
-                      isSplit: value!,
-                    );
-                    if (repoResponse.success) {
-                      setState(() {
-                        isSplit = value;
-                      });
-                    }
-                    Provider.of<InternalNotification>(context, listen: false)
-                        .showMessage(
-                            repoResponse.message, repoResponse.success);
+                    // final RepoResponse repoResponse =
+                    //     await accountViewModel.setSalaryBasedSplit(
+                    //   accountId: widget.account!.id,
+                    //   isSplit: value!,
+                    // );
+                    //   if (repoResponse.success) {
+                    //     setState(() {
+                    //       isSplit = value;
+                    //     });
+                    //   }
+                    //   Provider.of<InternalNotification>(context, listen: false)
+                    //       .showMessage(
+                    //           repoResponse.message, repoResponse.success);
                   },
                 ),
               const SizedBox(height: 16),
@@ -346,11 +346,11 @@ class _AccountDrawerState extends State<AccountDrawer> {
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          RepoResponse repoResponse = await createOrUpdate();
-                          Provider.of<InternalNotification>(context,
-                                  listen: false)
-                              .showMessage(
-                                  repoResponse.message, repoResponse.success);
+                          // RepoResponse repoResponse = await createOrUpdate();
+                          // Provider.of<InternalNotification>(context,
+                          //         listen: false)
+                          //     .showMessage(
+                          //         repoResponse.message, repoResponse.success);
                           Navigator.pop(context);
                         }
                       },

@@ -239,9 +239,14 @@ class AccountView(ModelViewSet):
         if serializer.is_valid():
             serializer.save()
 
-        user_contributors = User.objects.filter(
-            username__in=json.loads(request.data["contributors"])
-        ).exclude(username=account.user.username)
+        contributors = request.data.get("contributors", None)
+        user_contributors = (
+            User.objects.filter(username__in=json.loads(contributors)).exclude(
+                username=account.user.username
+            )
+            if contributors
+            else []
+        )
 
         account_users = AccountUser.objects.filter(account=account)
         account_user_set = set(
@@ -264,7 +269,7 @@ class AccountView(ModelViewSet):
                 user=User.objects.get(username=contributor), account=account
             ).delete()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk):
         account = self.get_object()
@@ -316,7 +321,10 @@ class AccountView(ModelViewSet):
             account.salary_based_split = split
             account.save()
 
-            return Response(status=status.HTTP_200_OK)
+            return Response(
+                data=self.get_serializer(account).data,
+                status=status.HTTP_200_OK,
+            )
 
         return Response(
             {"error": "You must include 'split' field"},
