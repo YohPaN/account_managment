@@ -331,6 +331,28 @@ class AccountView(ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    @action(detail=True, methods=["post"], url_path="contributors")
+    def update_contributors(self, request, pk=None):
+        account = self.get_object()
+
+        contributor_to_add = request.data.get("user_username", None)
+
+        if AccountUser.objects.filter(
+            account=account, user__username=contributor_to_add
+        ).exists():
+            return Response(
+                {"error": f"{contributor_to_add} is already a contributor"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        AccountUser.objects.create(
+            user=User.objects.get(username=contributor_to_add), account=account
+        )
+
+        return Response(
+            data=self.get_serializer(account).data, status=status.HTTP_200_OK
+        )
+
 
 class ItemView(ModelViewSet):
     serializer_class = ItemWriteSerializer

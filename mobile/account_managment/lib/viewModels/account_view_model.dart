@@ -181,6 +181,23 @@ class AccountViewModel extends ChangeNotifier {
     return repoResponse;
   }
 
+  Future<RepoResponse> addContributor({
+    required String userUsername,
+  }) async {
+    final RepoResponse repoResponse = await accountRepository.addContributor(
+      id: account!.id,
+      username: userUsername,
+    );
+
+    if (repoResponse.success) {
+      await account!.update(repoResponse.data);
+    }
+
+    notifyListeners();
+
+    return repoResponse;
+  }
+
   Future<RepoResponse> createItem({
     required String title,
     required String description,

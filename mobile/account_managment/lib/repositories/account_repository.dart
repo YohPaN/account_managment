@@ -62,6 +62,20 @@ class AccountRepository {
     return repoResponse;
   }
 
+  Future<RepoResponse> addContributor({
+    required int id,
+    required String username,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$modelUrl/$id/contributors/",
+      contentType: 'application/json',
+      body: {'user_username': username},
+    );
+
+    return repoResponse;
+  }
+
   Future<RepoResponse> createItem({
     required String title,
     required String description,
