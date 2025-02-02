@@ -1,5 +1,6 @@
 import 'package:account_managment/components/account_based_split_checkbox.dart';
 import 'package:account_managment/components/contributor_managment.dart';
+import 'package:account_managment/components/contributors_list.dart';
 import 'package:account_managment/forms/account_form.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,17 @@ class AccountManagmentScreen extends StatelessWidget {
           AccountForm(action: action),
           if (action == "update") ...[
             const AccountBasedSplitCheckboxState(),
-            const ContributorManagment(),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Column(
+                children: [
+                  Text(locale.contributor_account("many").capitalize()),
+                  const ContributorManagment(),
+                  const ContributorsList(),
+                ],
+              ),
+            ),
           ],
         ],
       ),

@@ -3,43 +3,31 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class PermissionCheckbox extends StatefulWidget {
-  final List<String> permissions;
-  final String permissionsCodename;
+class PermissionCheckbox extends StatelessWidget {
+  final bool permission;
   final String username;
-  final int? accountId;
+  final String permissionsCodename;
 
   const PermissionCheckbox({
     super.key,
-    required this.permissions,
-    required this.permissionsCodename,
+    required this.permission,
     required this.username,
-    this.accountId,
+    required this.permissionsCodename,
   });
 
   @override
-  _PermissionCheckboxState createState() => _PermissionCheckboxState();
-}
-
-class _PermissionCheckboxState extends State<PermissionCheckbox> {
-  @override
   Widget build(BuildContext context) {
-    final accountViewModel =
+    final AccountViewModel accountViewModel =
         Provider.of<AccountViewModel>(context, listen: false);
 
     return CheckboxListTile(
-      title: Text(widget.permissionsCodename.replaceAll("_", " ").capitalize()),
-      value: widget.permissions.contains(widget.permissionsCodename),
+      title: Text(permissionsCodename.replaceAll("_", " ").capitalize()),
+      value: permission,
       onChanged: (bool? value) async {
-        value!
-            ? widget.permissions.add(widget.permissionsCodename)
-            : widget.permissions.remove(widget.permissionsCodename);
-
         await accountViewModel.manageItemPermissions(
-            accountId: widget.accountId,
-            username: widget.username,
-            permissions: widget.permissions);
-        setState(() {});
+          username: username,
+          permission: permissionsCodename,
+        );
       },
     );
   }

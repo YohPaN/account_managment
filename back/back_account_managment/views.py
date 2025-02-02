@@ -1,4 +1,3 @@
-import json
 from itertools import chain
 
 from back_account_managment.models import (
@@ -216,16 +215,11 @@ class AccountView(ModelViewSet):
         )
 
         if serializer.is_valid():
-            account = serializer.save()
+            serializer.save()
 
-            for contributor in json.loads(request.data["contributors"]):
-                if contributor != request.user.username:
-                    AccountUser.objects.create(
-                        account=account,
-                        user=User.objects.get(username=contributor),
-                    )
-
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(
+                data=serializer.data, status=status.HTTP_201_CREATED
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -238,36 +232,6 @@ class AccountView(ModelViewSet):
 
         if serializer.is_valid():
             serializer.save()
-
-        contributors = request.data.get("contributors", None)
-        user_contributors = (
-            User.objects.filter(username__in=json.loads(contributors)).exclude(
-                username=account.user.username
-            )
-            if contributors
-            else []
-        )
-
-        account_users = AccountUser.objects.filter(account=account)
-        account_user_set = set(
-            account_user.user.username for account_user in account_users
-        )
-        user_contributors_set = set(
-            user_contributor.username for user_contributor in user_contributors
-        )
-
-        contributor_to_remove = account_user_set - user_contributors_set
-        contributor_to_add = user_contributors_set - account_user_set
-
-        for contributor in contributor_to_add:
-            AccountUser.objects.create(
-                user=User.objects.get(username=contributor), account=account
-            )
-
-        for contributor in contributor_to_remove:
-            AccountUser.objects.filter(
-                user=User.objects.get(username=contributor), account=account
-            ).delete()
 
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
@@ -337,6 +301,12 @@ class AccountView(ModelViewSet):
 
         contributor_to_add = request.data.get("user_username", None)
 
+        if contributor_to_add == account.user.username:
+            return Response(
+                {"error": "You can't add yourself as a contributor"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if AccountUser.objects.filter(
             account=account, user__username=contributor_to_add
         ).exists():
@@ -345,9 +315,15 @@ class AccountView(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        AccountUser.objects.create(
-            user=User.objects.get(username=contributor_to_add), account=account
-        )
+        user = User.objects.filter(username=contributor_to_add)
+
+        if not user.exists():
+            return Response(
+                {"error": f"{contributor_to_add} doesn't exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        AccountUser.objects.create(user=user.first(), account=account)
 
         return Response(
             data=self.get_serializer(account).data, status=status.HTTP_200_OK
@@ -463,23 +439,22 @@ class AccountUserPermissionView(ModelViewSet):
 
         account_user = self.get_queryset()
 
-        permissions_to_remove = AccountUserPermission.objects.exclude(
-            account_user=account_user,
-            permissions__codename__in=request.data["permissions"],
-        ).filter(account_user=account_user)
-
-        for account_user_permission in permissions_to_remove:
-            account_user_permission.delete()
-
-        for permission_codename in json.loads(request.data["permissions"]):
-            permission = Permission.objects.get(codename=permission_codename)
-
+        account_user_permissions, created = (
             AccountUserPermission.objects.get_or_create(
                 account_user=account_user,
-                permissions=permission,
+                permissions=Permission.objects.get(
+                    codename=self.request.data["permission"]
+                ),
             )
+        )
 
-        return Response(status=status.HTTP_200_OK)
+        if not created:
+            account_user_permissions.delete()
+
+        return Response(
+            data={"enabled": created},
+            status=status.HTTP_200_OK,
+        )
 
 
 class CategoryView(ModelViewSet):

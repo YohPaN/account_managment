@@ -11,10 +11,10 @@ class Account {
   double? needToAdd;
   List<CategoryApp> categories;
   List<Contributor> contributor;
-  List<dynamic> permissions;
+  List<String> permissions;
   String username;
   double total;
-  bool? salaryBasedSplit;
+  bool salaryBasedSplit;
 
   Account({
     required this.id,
@@ -45,7 +45,7 @@ class Account {
           : null,
       contributor: [],
       categories: [],
-      permissions: jsonAccount["permissions"],
+      permissions: List<String>.from(jsonAccount["permissions"]),
       username: jsonAccount["user"]["username"],
       total: jsonAccount["total"]["total_sum"],
       salaryBasedSplit: jsonAccount["salary_based_split"],
@@ -53,7 +53,9 @@ class Account {
   }
 
   Future<void> update(data) async {
-    name = data["name"];
-    salaryBasedSplit = data["salary_based_split"];
+    if (data["name"] != null) name = data["name"];
+    if (data["salary_based_split"] != null) {
+      salaryBasedSplit = data["salary_based_split"];
+    }
   }
 }

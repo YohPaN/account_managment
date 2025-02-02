@@ -148,16 +148,17 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> manageItemPermissions(
-      {int? accountId,
-      required String username,
-      required List<String> permissions}) async {
+  Future<RepoResponse> manageItemPermissions({
+    required int id,
+    required String username,
+    required String permission,
+  }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$modelUrl/$accountId/$username/permissions/",
+      uri: "$modelUrl/$id/$username/permissions/",
       contentType: 'application/json',
       body: {
-        'permissions': permissions,
+        'permission': permission,
       },
     );
 

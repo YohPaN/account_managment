@@ -250,7 +250,7 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                   FutureBuilder(
                                     future:
                                         accountViewModel.listItemPermissions(
-                                      accountId: widget.account!.id,
+                                      // accountId: widget.account!.id,
                                       username: _usersToAdd[index].username,
                                     ),
                                     builder: (context, snapshot) {
@@ -260,43 +260,43 @@ class _AccountDrawerState extends State<AccountDrawer> {
                                             ...snapshot
                                                 .data!.data?["permissions"],
                                           ];
-
-                                          return Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(locale.permissions
-                                                  .capitalize()),
-                                              PermissionCheckbox(
-                                                  permissions: permissions,
-                                                  permissionsCodename:
-                                                      "add_item",
-                                                  accountId: widget.account!.id,
-                                                  username: _usersToAdd[index]
-                                                      .username),
-                                              PermissionCheckbox(
-                                                  permissions: permissions,
-                                                  permissionsCodename:
-                                                      "change_item",
-                                                  accountId: widget.account!.id,
-                                                  username: _usersToAdd[index]
-                                                      .username),
-                                              PermissionCheckbox(
-                                                  permissions: permissions,
-                                                  permissionsCodename:
-                                                      "delete_item",
-                                                  accountId: widget.account!.id,
-                                                  username: _usersToAdd[index]
-                                                      .username),
-                                              PermissionCheckbox(
-                                                  permissions: permissions,
-                                                  permissionsCodename:
-                                                      "transfert_item",
-                                                  accountId: widget.account!.id,
-                                                  username: _usersToAdd[index]
-                                                      .username),
-                                            ],
-                                          );
+                                          return Container();
+                                          // return Column(
+                                          //   crossAxisAlignment:
+                                          //       CrossAxisAlignment.start,
+                                          //   children: [
+                                          //     Text(locale.permissions
+                                          //         .capitalize()),
+                                          //     PermissionCheckbox(
+                                          //         permissions: permissions,
+                                          //         permissionsCodename:
+                                          //             "add_item",
+                                          //         accountId: widget.account!.id,
+                                          //         username: _usersToAdd[index]
+                                          //             .username),
+                                          //     PermissionCheckbox(
+                                          //         permissions: permissions,
+                                          //         permissionsCodename:
+                                          //             "change_item",
+                                          //         accountId: widget.account!.id,
+                                          //         username: _usersToAdd[index]
+                                          //             .username),
+                                          //     PermissionCheckbox(
+                                          //         permissions: permissions,
+                                          //         permissionsCodename:
+                                          //             "delete_item",
+                                          //         accountId: widget.account!.id,
+                                          //         username: _usersToAdd[index]
+                                          //             .username),
+                                          //     PermissionCheckbox(
+                                          //         permissions: permissions,
+                                          //         permissionsCodename:
+                                          //             "transfert_item",
+                                          //         accountId: widget.account!.id,
+                                          //         username: _usersToAdd[index]
+                                          //             .username),
+                                          //   ],
+                                          // );
                                         } else {
                                           return Center(
                                             child: Padding(
