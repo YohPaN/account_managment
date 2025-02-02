@@ -18,24 +18,26 @@ class AccountManagmentScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(locale.account_managment.capitalize()),
       ),
-      body: Column(
-        children: [
-          AccountForm(action: action),
-          if (action == "update") ...[
-            const AccountBasedSplitCheckboxState(),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Column(
-                children: [
-                  Text(locale.contributor_account("many").capitalize()),
-                  const ContributorManagment(),
-                  const ContributorsList(),
-                ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            AccountForm(action: action),
+            if (action == "update") ...[
+              const AccountBasedSplitCheckboxState(),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Column(
+                  children: [
+                    Text(locale.contributor_account("many").capitalize()),
+                    const ContributorManagment(),
+                    const ContributorsList(),
+                  ],
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
