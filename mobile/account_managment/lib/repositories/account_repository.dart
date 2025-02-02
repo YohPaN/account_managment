@@ -68,7 +68,21 @@ class AccountRepository {
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$modelUrl/$id/contributors/",
+      uri: "$modelUrl/$id/contributors/add/",
+      contentType: 'application/json',
+      body: {'user_username': username},
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> removeContributor({
+    required int id,
+    required String username,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$modelUrl/$id/contributors/remove/",
       contentType: 'application/json',
       body: {'user_username': username},
     );

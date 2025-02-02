@@ -57,5 +57,12 @@ class Account {
     if (data["salary_based_split"] != null) {
       salaryBasedSplit = data["salary_based_split"];
     }
+    if (data["contributors"] != null) {
+      contributor = [];
+
+      for (var contributor in data["contributors"]) {
+        this.contributor.add(Contributor.deserialize(contributor));
+      }
+    }
   }
 }

@@ -295,7 +295,7 @@ class AccountView(ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    @action(detail=True, methods=["post"], url_path="contributors")
+    @action(detail=True, methods=["post"], url_path="contributors/add")
     def update_contributors(self, request, pk=None):
         account = self.get_object()
 
@@ -324,6 +324,34 @@ class AccountView(ModelViewSet):
             )
 
         AccountUser.objects.create(user=user.first(), account=account)
+
+        return Response(
+            data=self.get_serializer(account).data, status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["post"], url_path="contributors/remove")
+    def remove_contributors(self, request, pk=None):
+        account = self.get_object()
+
+        contributor_to_remove = request.data.get("user_username", None)
+
+        if not AccountUser.objects.filter(
+            account=account, user__username=contributor_to_remove
+        ).exists():
+            return Response(
+                {"error": f"{contributor_to_remove} is not a contributor"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(username=contributor_to_remove)
+
+        if not user.exists():
+            return Response(
+                {"error": f"{contributor_to_remove} doesn't exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        AccountUser.objects.get(user=user.first(), account=account).delete()
 
         return Response(
             data=self.get_serializer(account).data, status=status.HTTP_200_OK
