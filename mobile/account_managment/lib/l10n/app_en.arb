@@ -111,6 +111,15 @@
             }
         }
     },
+    "category_type": "{type, select, account{account} profile{profile} other{default}} categories",
+    "@category_type": {
+        "placeholders": {
+            "type": {
+                "type": "String"
+            }
+        }
+    },
+    "no_category": "no categories",
     "icon": "icon",
     "color": "coulor",
     "@@comment": "Permissions",

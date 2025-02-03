@@ -60,8 +60,10 @@ class CategoryRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> link(
-      {required int account, required int category}) async {
+  Future<RepoResponse> link({
+    required int account,
+    required int category,
+  }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "account-categories/",
@@ -70,6 +72,33 @@ class CategoryRepository {
         'account': account,
         'category': category,
       },
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> unlink({
+    required int account,
+    required int category,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "account-categories/unlink/",
+      contentType: 'application/json',
+      body: {
+        'account': account,
+        'category': category,
+      },
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> getDefault() async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "GET",
+      uri: "$modelUrl/default/",
+      contentType: 'application/json',
     );
 
     return repoResponse;

@@ -49,6 +49,8 @@
     "@@comment": "Category",
     "category": "{isSingular, plural, =0{categorie} other{categories}}",
     "create_category": "créer {isSingular, plural, =1{une categorie} other{des categories}}",
+    "category_type": "categorie {type, select, account{du compte} profile{du profile} other{par défault}}",
+    "no_category": "aucune categorie",
     "icon": "icone",
     "color": "couleur",
     "@@comment": "Permissions",

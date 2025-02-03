@@ -1,8 +1,8 @@
 class CategoryApp {
   int id;
   String title;
-  int color;
-  int icon;
+  int? color;
+  int? icon;
 
   CategoryApp({
     required this.id,
@@ -15,8 +15,9 @@ class CategoryApp {
     return CategoryApp(
       id: jsonCategory["id"],
       title: jsonCategory["title"],
-      color: int.parse(jsonCategory["color"]),
-      icon: int.parse(jsonCategory["icon"]),
+      color:
+          jsonCategory["color"] != "" ? int.parse(jsonCategory["color"]) : null,
+      icon: jsonCategory["icon"] != "" ? int.parse(jsonCategory["icon"]) : null,
     );
   }
 

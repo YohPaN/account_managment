@@ -28,16 +28,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthViewModel>(
           create: (context) => AuthViewModel(),
         ),
-        ChangeNotifierProvider<CategoryViewModel>(
-          create: (context) => CategoryViewModel(),
+        ChangeNotifierProvider<ProfileViewModel>(
+          create: (context) => ProfileViewModel(),
         ),
         ChangeNotifierProvider<AccountViewModel>(
           create: (context) => AccountViewModel(),
         ),
-        ChangeNotifierProvider<ProfileViewModel>(
-          create: (context) => ProfileViewModel(
-            categoryViewModel:
-                Provider.of<CategoryViewModel>(context, listen: false),
+        ChangeNotifierProvider<CategoryViewModel>(
+          create: (context) => CategoryViewModel(
+            profileViewModel:
+                Provider.of<ProfileViewModel>(context, listen: false),
+            accountViewModel:
+                Provider.of<AccountViewModel>(context, listen: false),
           ),
         )
       ],

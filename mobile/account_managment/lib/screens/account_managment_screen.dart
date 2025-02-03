@@ -1,4 +1,5 @@
 import 'package:account_managment/components/account_based_split_checkbox.dart';
+import 'package:account_managment/components/account_category_managment.dart.dart';
 import 'package:account_managment/components/contributor_managment.dart';
 import 'package:account_managment/components/contributors_list.dart';
 import 'package:account_managment/forms/account_form.dart';
@@ -32,6 +33,9 @@ class AccountManagmentScreen extends StatelessWidget {
                     Text(locale.contributor_account("many").capitalize()),
                     const ContributorManagment(),
                     const ContributorsList(),
+                    const Divider(),
+                    Text(locale.categories.capitalize()),
+                    const AccountCategoryManagment(),
                   ],
                 ),
               ),

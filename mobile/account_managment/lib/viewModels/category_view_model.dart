@@ -1,13 +1,22 @@
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/category_repository.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class CategoryViewModel extends ChangeNotifier {
   final CategoryRepository accountCategoryRepository = CategoryRepository();
+  final ProfileViewModel profileViewModel;
+  final AccountViewModel accountViewModel;
 
-  final List<CategoryApp> categories = [];
+  CategoryViewModel({
+    required this.accountViewModel,
+    required this.profileViewModel,
+  });
+
+  final List<CategoryApp> defaultCategories = [];
 
   Future<RepoResponse> createCategory({
     required String title,
@@ -23,6 +32,14 @@ class CategoryViewModel extends ChangeNotifier {
     );
 
     if (repoResponse.success) {
+      List<CategoryApp> categories;
+
+      if (accountId != null) {
+        categories = accountViewModel.account!.categories;
+      } else {
+        categories = profileViewModel.profile!.categories;
+      }
+
       categories.add(CategoryApp.deserialize(repoResponse.data));
     }
 
@@ -36,6 +53,7 @@ class CategoryViewModel extends ChangeNotifier {
     required String title,
     required String icon,
     required String color,
+    required String categoryType,
   }) async {
     final RepoResponse repoResponse = await accountCategoryRepository.update(
       categoryId: categoryId,
@@ -45,6 +63,14 @@ class CategoryViewModel extends ChangeNotifier {
     );
 
     if (repoResponse.success) {
+      List<CategoryApp> categories;
+
+      if (categoryType == "account") {
+        categories = accountViewModel.account!.categories;
+      } else {
+        categories = profileViewModel.profile!.categories;
+      }
+
       for (var i = 0; i < categories.length; i++) {
         if (categories[i].id == categoryId) {
           categories[i].update(repoResponse.data);
@@ -60,22 +86,64 @@ class CategoryViewModel extends ChangeNotifier {
 
   Future<RepoResponse> deleteCategory({
     required int categoryId,
+    required String categoryType,
   }) async {
     final RepoResponse repoResponse = await accountCategoryRepository.delete(
       categoryId: categoryId,
     );
 
-    categories.removeWhere((category) => category.id == categoryId);
+    if (repoResponse.success) {
+      List<CategoryApp> categories;
+
+      if (categoryType == "account") {
+        categories = accountViewModel.account!.categories;
+      } else {
+        categories = profileViewModel.profile!.categories;
+      }
+
+      categories.removeWhere((category) => category.id == categoryId);
+    }
 
     notifyListeners();
 
     return repoResponse;
   }
 
-  Future<RepoResponse> linkCategoryToAccount(
-      {required int category, required int account}) async {
-    final RepoResponse repoResponse = await accountCategoryRepository.link(
-        account: account, category: category);
+  Future<RepoResponse> linkCategoryToAccount({
+    required int categoryId,
+    required int accountId,
+    required bool linked,
+  }) async {
+    final RepoResponse repoResponse;
+
+    if (linked) {
+      repoResponse = await accountCategoryRepository.link(
+        account: accountId,
+        category: categoryId,
+      );
+    } else {
+      repoResponse = await accountCategoryRepository.unlink(
+        account: accountId,
+        category: categoryId,
+      );
+    }
+
+    notifyListeners();
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> getDefaultCategory() async {
+    final RepoResponse repoResponse =
+        await accountCategoryRepository.getDefault();
+
+    if (repoResponse.success) {
+      for (var category in repoResponse.data) {
+        defaultCategories.add(CategoryApp.deserialize(category));
+      }
+    }
+
+    notifyListeners();
 
     return repoResponse;
   }

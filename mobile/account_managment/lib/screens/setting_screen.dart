@@ -16,10 +16,11 @@ class SettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AccountUserViewModel accountUserViewModel =
         Provider.of<AccountUserViewModel>(context);
+    final CategoryViewModel categoryViewModel =
+        Provider.of<CategoryViewModel>(context);
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
-    showModal(String action, CategoryViewModel categoryViewModel,
-        [CategoryApp? category]) {
+    showModal(String action, [CategoryApp? category]) {
       showModalBottomSheet(
         context: context,
         shape: const RoundedRectangleBorder(
@@ -38,6 +39,7 @@ class SettingScreen extends StatelessWidget {
             child: CategoryDrawer(
               action: action,
               category: category,
+              categoryType: "profile",
             ),
           );
         },
@@ -128,15 +130,16 @@ class SettingScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               },
             ),
-            Consumer<CategoryViewModel>(
-              builder: (context, categoryViewModel, child) {
+            Consumer<ProfileViewModel>(
+              builder: (context, profileViewModel, child) {
                 return Expanded(
                   child: Column(
                     children: [
                       Text(locale.categories.capitalize()),
                       Expanded(
                         child: ListView.builder(
-                          itemCount: categoryViewModel.categories.length,
+                          itemCount:
+                              profileViewModel.profile!.categories.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(
@@ -161,24 +164,29 @@ class SettingScreen extends StatelessWidget {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Icon(
-                                            IconData(categoryViewModel
-                                                .categories[index].icon),
+                                            IconData(profileViewModel.profile!
+                                                    .categories[index].icon ??
+                                                0),
                                           ),
                                           Text(
-                                            categoryViewModel
+                                            profileViewModel.profile!
                                                 .categories[index].title
                                                 .capitalize(),
                                           ),
-                                          Icon(Icons.circle,
-                                              size: 16,
-                                              color: Color(categoryViewModel
-                                                  .categories[index].color)),
+                                          Icon(
+                                            Icons.circle,
+                                            size: 16,
+                                            color: Color(profileViewModel
+                                                    .profile!
+                                                    .categories[index]
+                                                    .color ??
+                                                0),
+                                          ),
                                           ElevatedButton(
                                             onPressed: () => showModal(
                                               "update",
-                                              categoryViewModel,
-                                              categoryViewModel
-                                                  .categories[index],
+                                              profileViewModel
+                                                  .profile!.categories[index],
                                             ),
                                             child: const Icon(
                                               Icons.mode,
@@ -198,8 +206,7 @@ class SettingScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           ElevatedButton(
-                            onPressed: () =>
-                                showModal("create", categoryViewModel),
+                            onPressed: () => showModal("create"),
                             child: Text(locale.create_category(1).capitalize()),
                           ),
                         ],

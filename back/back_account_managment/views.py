@@ -528,6 +528,15 @@ class CategoryView(ModelViewSet):
 
         return super().get_serializer_class()
 
+    @action(methods=["get"], detail=False, url_path="default")
+    def get_defaut_categories(self, *args, **kwargs):
+        default_category = Category.objects.filter(content_type=None)
+
+        return Response(
+            data=self.get_serializer(default_category, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
     def create(self, request, *args, **kwargs):
         account_id = request.data.get("account_id", None)
 
@@ -557,7 +566,7 @@ class AccountCategoryView(ModelViewSet):
     queryset = AccountCategory.objects.all()
     serializer_class = AccountCategorySerializer
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request):
         try:
             category = Category.objects.get(
                 pk=request.data.get("category", None)
@@ -587,6 +596,32 @@ class AccountCategoryView(ModelViewSet):
 
             return Response(
                 status=status.HTTP_201_CREATED,
+            )
+        except Category.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Account.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(methods=["post"], detail=False, url_path="unlink")
+    def unlink(self, request):
+        try:
+            category = Category.objects.get(
+                pk=request.data.get("category", None)
+            )
+
+            account = Account.objects.get(pk=request.data.get("account", None))
+
+            AccountCategory.objects.filter(
+                account=account, category=category
+            ).delete()
+
+            return Response(
+                status=status.HTTP_204_NO_CONTENT,
             )
         except Category.DoesNotExist as e:
             return Response(

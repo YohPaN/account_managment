@@ -2,8 +2,8 @@ import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
@@ -11,12 +11,14 @@ import 'package:provider/provider.dart';
 
 class CategoryDrawer extends StatefulWidget {
   final String action;
+  final String categoryType;
   final CategoryApp? category;
 
   @override
   const CategoryDrawer({
     super.key,
     required this.action,
+    required this.categoryType,
     required this.category,
   });
 
@@ -57,13 +59,20 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
           title: title,
           icon: icon,
           color: color,
+          accountId: widget.categoryType == "account"
+              ? Provider.of<AccountViewModel>(context, listen: false)
+                  .account!
+                  .id
+              : null,
         );
       } else {
         return await categoryViewModel.updateCategory(
-            categoryId: widget.category!.id,
-            title: title,
-            icon: icon,
-            color: color);
+          categoryId: widget.category!.id,
+          title: title,
+          icon: icon,
+          color: color,
+          categoryType: widget.categoryType,
+        );
       }
     }
 
@@ -129,18 +138,23 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                     },
                     child: Text(locale.action(widget.action).capitalize()),
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final RepoResponse repoResponse = await categoryViewModel
-                          .deleteCategory(categoryId: widget.category!.id);
+                  if (widget.action == "update")
+                    ElevatedButton(
+                      onPressed: () async {
+                        final RepoResponse repoResponse =
+                            await categoryViewModel.deleteCategory(
+                          categoryId: widget.category!.id,
+                          categoryType: widget.categoryType,
+                        );
 
-                      Provider.of<InternalNotification>(context, listen: false)
-                          .showMessage(
-                              repoResponse.message, repoResponse.success);
-                      Navigator.pop(context);
-                    },
-                    child: Text(locale.action('delete').capitalize()),
-                  )
+                        Provider.of<InternalNotification>(context,
+                                listen: false)
+                            .showMessage(
+                                repoResponse.message, repoResponse.success);
+                        Navigator.pop(context);
+                      },
+                      child: Text(locale.action('delete').capitalize()),
+                    )
                 ],
               ),
             ],
