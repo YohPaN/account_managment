@@ -121,11 +121,20 @@ class CategoryViewModel extends ChangeNotifier {
         account: accountId,
         category: categoryId,
       );
+      if (repoResponse.success) {
+        accountViewModel.account!.categories.add(CategoryApp.deserialize(
+          repoResponse.data,
+        ));
+      }
     } else {
       repoResponse = await accountCategoryRepository.unlink(
         account: accountId,
         category: categoryId,
       );
+      if (repoResponse.success) {
+        accountViewModel.account!.categories
+            .removeWhere((category) => category.id == categoryId);
+      }
     }
 
     notifyListeners();

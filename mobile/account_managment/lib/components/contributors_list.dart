@@ -1,9 +1,11 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/components/permission_managment.dart';
+import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContributorsList extends StatefulWidget {
   const ContributorsList({super.key});
@@ -17,6 +19,8 @@ class _ContributorsListState extends State<ContributorsList> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations locale = AppLocalizations.of(context)!;
+
     return Consumer<AccountViewModel>(
       builder: (context, accountViewModel, child) {
         _controllers.clear();
@@ -71,7 +75,7 @@ class _ContributorsListState extends State<ContributorsList> {
                             .showMessage(
                                 repoResponse.message, repoResponse.success);
                       },
-                      child: child)
+                      child: Text(locale.action("create").capitalize()))
                 ],
               ),
             );

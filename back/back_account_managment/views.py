@@ -595,6 +595,7 @@ class AccountCategoryView(ModelViewSet):
             )
 
             return Response(
+                data=CategoryWriteSerializer(category).data,
                 status=status.HTTP_201_CREATED,
             )
         except Category.DoesNotExist as e:

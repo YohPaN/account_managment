@@ -31,6 +31,7 @@ class CategoryWriteSerializer(_CategorySerializer):
             for field in CategoryMeta.fields
             if field
             in [
+                "id",
                 "title",
                 "color",
                 "icon",
