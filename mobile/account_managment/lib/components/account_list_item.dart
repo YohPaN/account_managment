@@ -7,13 +7,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountListItem extends StatelessWidget {
   final Account account;
-  final Function callbackFunc;
   final bool canManage;
 
   const AccountListItem({
     super.key,
     required this.account,
-    required this.callbackFunc,
     required this.canManage,
   });
 

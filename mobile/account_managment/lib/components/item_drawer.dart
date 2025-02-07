@@ -114,7 +114,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
       )
     ];
 
-    for (var account in accountViewModel.accounts!) {
+    for (var account in accountViewModel.accounts) {
       accountList.add(DropdownMenuEntry<String>(
         value: account.id.toString(),
         label: account.name,

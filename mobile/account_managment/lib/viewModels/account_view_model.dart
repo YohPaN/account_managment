@@ -112,14 +112,22 @@ class AccountViewModel extends ChangeNotifier {
         items.add(deserializedItem);
       }
 
-      for (var transfertItem in repoResponse.data!["transfert_items"]) {
-        items.add(Item.deserialize(transfertItem, true));
-      }
-
       final List<CategoryApp> categories = [];
 
       for (var category in repoResponse.data!["categories"]) {
         categories.add(
+          CategoryApp.deserialize(category),
+        );
+      }
+
+      for (var transfertItem in repoResponse.data!["transfert_items"]) {
+        items.add(Item.deserialize(transfertItem, true));
+      }
+
+      final List<CategoryApp> accountCategories = [];
+
+      for (var category in repoResponse.data!["account_categories"]) {
+        accountCategories.add(
           CategoryApp.deserialize(category),
         );
       }
@@ -135,16 +143,13 @@ class AccountViewModel extends ChangeNotifier {
       final accountToAdd = Account.deserialize(repoResponse.data);
       accountToAdd.items = items;
       accountToAdd.categories = categories;
+      accountToAdd.accountCategories = accountCategories;
       accountToAdd.contributor = contributors;
 
       account = accountToAdd;
     }
 
     accountIdToRetrieve = null;
-
-    if (_accounts == null) {
-      listAccount();
-    }
 
     return repoResponse;
   }

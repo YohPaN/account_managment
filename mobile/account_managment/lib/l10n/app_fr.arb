@@ -53,6 +53,7 @@
     "no_category": "aucune categorie",
     "icon": "icone",
     "color": "couleur",
+    "without_category": "Sans catégorie",
     "@@comment": "Permissions",
     "add_user_before_manage_permissions": "vous devez ajouter l'utilisateur avant de gérer ses permissions",
     "create_account_before_manage_permissions": "vous devez créer le compte avant de gérer les permissions",

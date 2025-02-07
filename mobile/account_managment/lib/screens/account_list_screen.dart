@@ -1,7 +1,5 @@
-import 'package:account_managment/components/account_drawer.dart';
 import 'package:account_managment/components/account_list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
@@ -13,39 +11,8 @@ class AccountListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accountViewModel = Provider.of<AccountViewModel>(context);
     final profileViewModel = Provider.of<ProfileViewModel>(context);
     final AppLocalizations locale = AppLocalizations.of(context)!;
-
-    showModal(String action, [Account? account]) {
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        isScrollControlled: true,
-        builder: (BuildContext drawerContext) {
-          return MultiProvider(
-            providers: [
-              InheritedProvider<AccountViewModel>(
-                update: (context, value) {
-                  return accountViewModel;
-                },
-              ),
-              InheritedProvider<ProfileViewModel>(
-                update: (context, value) {
-                  return profileViewModel;
-                },
-              ),
-            ],
-            child: AccountDrawer(
-              account: account,
-              action: action,
-            ),
-          );
-        },
-      );
-    }
 
     return Consumer<AccountViewModel>(
       builder: (context, accountViewModel, child) {
@@ -63,11 +30,10 @@ class AccountListScreen extends StatelessWidget {
                           "${locale.possessive("yours").capitalize()} ${locale.account("many")}"),
                       Expanded(
                         child: ListView.builder(
-                          itemCount: accountViewModel.accounts?.length ?? 0,
+                          itemCount: accountViewModel.accounts.length,
                           itemBuilder: (context, index) {
                             return AccountListItem(
-                              account: accountViewModel.accounts![index],
-                              callbackFunc: showModal,
+                              account: accountViewModel.accounts[index],
                               canManage: true,
                             );
                           },
@@ -83,7 +49,6 @@ class AccountListScreen extends StatelessWidget {
                             return AccountListItem(
                               account:
                                   accountViewModel.contributorAccounts![index],
-                              callbackFunc: showModal,
                               canManage: profileViewModel.user!.hasPermission(
                                 account: accountViewModel
                                     .contributorAccounts![index],
