@@ -66,6 +66,13 @@ class AccountForm extends StatelessWidget {
                   RepoResponse repoResponse = await submit(nameController.text);
                   Provider.of<InternalNotification>(context, listen: false)
                       .showMessage(repoResponse.message, repoResponse.success);
+                  if (repoResponse.success) {
+                    Navigator.popAndPushNamed(
+                      context,
+                      "account_managment",
+                      arguments: "update",
+                    );
+                  }
                 }
               },
               child: Text(locale.action(action).capitalize()),

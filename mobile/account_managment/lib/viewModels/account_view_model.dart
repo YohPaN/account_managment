@@ -156,7 +156,9 @@ class AccountViewModel extends ChangeNotifier {
         await accountRepository.create(accountName);
 
     if (repoResponse.success) {
-      _accounts.add(Account.deserialize(repoResponse.data));
+      Account newAccount = Account.deserialize(repoResponse.data);
+      _accounts.add(newAccount);
+      account = newAccount;
     }
 
     notifyListeners();
