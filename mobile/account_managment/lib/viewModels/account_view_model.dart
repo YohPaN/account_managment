@@ -41,6 +41,14 @@ class AccountViewModel extends ChangeNotifier {
           );
         }
 
+        final List<CategoryApp> accountCategories = [];
+
+        for (var category in account["account_categories"]) {
+          accountCategories.add(
+            CategoryApp.deserialize(category),
+          );
+        }
+
         final List<Contributor> contributors = [];
 
         for (var contributor in account["contributors"]) {
@@ -53,6 +61,7 @@ class AccountViewModel extends ChangeNotifier {
         accountToAdd.items = items;
         accountToAdd.categories = categories;
         accountToAdd.contributor = contributors;
+        accountToAdd.accountCategories = accountCategories;
         accounts.add(
           accountToAdd,
         );

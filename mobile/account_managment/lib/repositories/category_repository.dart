@@ -9,10 +9,11 @@ class CategoryRepository {
 
   Future<RepoResponse> list({
     required int accountId,
+    required String categoryType,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$modelUrl/?account=$accountId",
+      uri: "$modelUrl/?category=$categoryType&account=$accountId",
       contentType: 'application/json',
     );
 
@@ -109,7 +110,7 @@ class CategoryRepository {
   Future<RepoResponse> getDefault() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
-      uri: "$modelUrl/default/",
+      uri: "$modelUrl/?category=default",
       contentType: 'application/json',
     );
 

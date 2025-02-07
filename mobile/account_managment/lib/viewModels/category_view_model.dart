@@ -21,8 +21,10 @@ class CategoryViewModel extends ChangeNotifier {
 
   Future<RepoResponse> listCategory({
     required int accountId,
+    required String categoryType,
   }) async {
     final RepoResponse repoResponse = await accountCategoryRepository.list(
+      categoryType: categoryType,
       accountId: accountId,
     );
 
@@ -142,7 +144,7 @@ class CategoryViewModel extends ChangeNotifier {
         category: categoryId,
       );
       if (repoResponse.success) {
-        accountViewModel.account!.categories.add(CategoryApp.deserialize(
+        accountViewModel.account!.accountCategories.add(CategoryApp.deserialize(
           repoResponse.data,
         ));
       }
@@ -152,7 +154,7 @@ class CategoryViewModel extends ChangeNotifier {
         category: categoryId,
       );
       if (repoResponse.success) {
-        accountViewModel.account!.categories
+        accountViewModel.account!.accountCategories
             .removeWhere((category) => category.id == categoryId);
       }
     }

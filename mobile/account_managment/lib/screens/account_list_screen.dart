@@ -124,7 +124,11 @@ class AccountListScreen extends StatelessWidget {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              showModal("create");
+              Navigator.pushNamed(
+                context,
+                "account_managment",
+                arguments: "create",
+              );
             },
             foregroundColor: Theme.of(context).colorScheme.primary,
             backgroundColor: Theme.of(context).colorScheme.surface,

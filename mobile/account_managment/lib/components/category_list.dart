@@ -40,8 +40,8 @@ class CategoryList extends StatelessWidget {
                           if (!accountCategory) {
                             return CheckboxListTile(
                               title: Text(categories[index].title),
-                              value: accountViewModel.account!.categories.any(
-                                  (category) =>
+                              value: accountViewModel.account!.accountCategories
+                                  .any((category) =>
                                       category.id == categories[index].id),
                               onChanged: (bool? value) async {
                                 final RepoResponse repoResponse =

@@ -10,6 +10,7 @@ class Account {
   double? ownContribution;
   double? needToAdd;
   List<CategoryApp> categories;
+  List<CategoryApp> accountCategories;
   List<Contributor> contributor;
   List<String> permissions;
   String username;
@@ -22,6 +23,7 @@ class Account {
     required this.isMain,
     required this.items,
     required this.categories,
+    required this.accountCategories,
     this.ownContribution,
     this.needToAdd,
     required this.contributor,
@@ -45,6 +47,7 @@ class Account {
           : null,
       contributor: [],
       categories: [],
+      accountCategories: [],
       permissions: List<String>.from(jsonAccount["permissions"]),
       username: jsonAccount["user"]["username"],
       total: jsonAccount["total"]["total_sum"],

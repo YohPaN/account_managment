@@ -25,8 +25,10 @@ class AccountForm extends StatelessWidget {
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
     final accountViewModel = Provider.of<AccountViewModel>(context);
-    final TextEditingController nameController =
-        TextEditingController(text: accountViewModel.account?.name ?? '');
+    final TextEditingController nameController = TextEditingController(
+        text: accountViewModel.account?.name != null && action == 'update'
+            ? accountViewModel.account?.name
+            : '');
 
     Future<RepoResponse> submit(String accountName) async {
       if (action == "create") {

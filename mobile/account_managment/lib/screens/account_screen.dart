@@ -22,8 +22,10 @@ class AccountScreen extends StatelessWidget {
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
     showModal(String action, [Item? item]) async {
-      await Provider.of<CategoryViewModel>(context, listen: false)
-          .listCategory(accountId: accountViewModel.account!.id);
+      await Provider.of<CategoryViewModel>(context, listen: false).listCategory(
+        categoryType: "account_categories",
+        accountId: accountViewModel.account!.id,
+      );
 
       showModalBottomSheet(
         context: context,

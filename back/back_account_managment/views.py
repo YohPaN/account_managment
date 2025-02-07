@@ -147,17 +147,7 @@ class RegisterView(APIView):
 class AccountView(ModelViewSet):
     queryset = Account.objects.prefetch_related(
         "items",
-        Prefetch(
-            "categories",
-            queryset=Category.objects.filter(
-                Exists(
-                    AccountCategory.objects.filter(
-                        account=OuterRef("account__pk"),
-                        category=OuterRef("pk"),
-                    )
-                )
-            ),
-        ),
+        "account_categories",
     ).all()
     serializer_class = AccountSerializer
     permission_classes = [
@@ -215,10 +205,11 @@ class AccountView(ModelViewSet):
         )
 
         if serializer.is_valid():
-            serializer.save()
+            account = serializer.save()
 
             return Response(
-                data=serializer.data, status=status.HTTP_201_CREATED
+                data=self.get_serializer(account).data,
+                status=status.HTTP_201_CREATED,
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -494,28 +485,39 @@ class CategoryView(ModelViewSet):
             return super().get_queryset()
 
         account_id = self.request.query_params.get("account", None)
+        category = self.request.query_params.get("category", None)
 
-        user_category = Category.objects.filter(
-            content_type=ContentType.objects.get_for_model(User),
-            object_id=self.request.user.pk,
-        )
+        queryset = self.queryset
 
-        # if no account_id, we aretrieve user categories
-        if account_id is None:
-            return user_category
+        match category:
+            case "default":
+                return queryset.filter(content_type=None)
 
-        # if an account_id, we test if the call is made by the owner
-        account = Account.objects.get(pk=account_id)
-
-        account_category = Category.objects.filter(
-            Exists(
-                AccountCategory.objects.filter(
-                    account=account, category=OuterRef("pk")
+            case "user":
+                return queryset.filter(
+                    content_type=ContentType.objects.get_for_model(User),
+                    object_id=self.request.user.pk,
                 )
-            )
-        )
 
-        return account_category
+            case "account":
+                return queryset.filter(
+                    content_type=ContentType.objects.get_for_model(Account),
+                    object_id=account_id,
+                )
+
+            case "account_categories":
+                account = Account.objects.get(pk=account_id)
+
+                return queryset.filter(
+                    Exists(
+                        AccountCategory.objects.filter(
+                            account=account, category=OuterRef("pk")
+                        )
+                    )
+                )
+
+            case _:
+                return None
 
     def get_serializer_class(self):
         if self.request.method == "PUT":
