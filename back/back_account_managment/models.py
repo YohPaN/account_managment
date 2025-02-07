@@ -116,7 +116,7 @@ class Item(models.Model):
         User, on_delete=models.CASCADE, null=True, blank=True
     )
     category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, null=True, blank=True
+        Category, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     def save(self, **kwargs):
