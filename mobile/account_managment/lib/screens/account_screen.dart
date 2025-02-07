@@ -4,6 +4,7 @@ import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,10 @@ class AccountScreen extends StatelessWidget {
         Provider.of<ProfileViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
-    showModal(String action, [Item? item]) {
+    showModal(String action, [Item? item]) async {
+      await Provider.of<CategoryViewModel>(context, listen: false)
+          .listCategory(accountId: accountViewModel.account!.id);
+
       showModalBottomSheet(
         context: context,
         shape: const RoundedRectangleBorder(

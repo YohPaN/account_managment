@@ -17,6 +17,26 @@ class CategoryViewModel extends ChangeNotifier {
   });
 
   final List<CategoryApp> defaultCategories = [];
+  final List<CategoryApp> categories = [];
+
+  Future<RepoResponse> listCategory({
+    required int accountId,
+  }) async {
+    final RepoResponse repoResponse = await accountCategoryRepository.list(
+      accountId: accountId,
+    );
+
+    if (repoResponse.success) {
+      categories.clear();
+      repoResponse.data.forEach((category) {
+        categories.add(CategoryApp.deserialize(category));
+      });
+    }
+
+    notifyListeners();
+
+    return repoResponse;
+  }
 
   Future<RepoResponse> createCategory({
     required String title,

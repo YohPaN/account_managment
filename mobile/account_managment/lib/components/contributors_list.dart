@@ -75,7 +75,7 @@ class _ContributorsListState extends State<ContributorsList> {
                             .showMessage(
                                 repoResponse.message, repoResponse.success);
                       },
-                      child: Text(locale.action("create").capitalize()))
+                      child: Text(locale.action("delete").capitalize()))
                 ],
               ),
             );

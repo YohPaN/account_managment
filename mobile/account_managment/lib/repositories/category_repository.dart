@@ -7,6 +7,18 @@ class CategoryRepository {
   final storage = const FlutterSecureStorage();
   final modelUrl = "categories";
 
+  Future<RepoResponse> list({
+    required int accountId,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "GET",
+      uri: "$modelUrl/?account=$accountId",
+      contentType: 'application/json',
+    );
+
+    return repoResponse;
+  }
+
   Future<RepoResponse> create({
     required String title,
     required String icon,
