@@ -515,12 +515,7 @@ class CategoryView(ModelViewSet):
             )
         )
 
-        if account.user != self.request.user:
-            return account_category
-
-        default_category = Category.objects.filter(content_type=None)
-
-        return list(chain(default_category, account_category, user_category))
+        return account_category
 
     def get_serializer_class(self):
         if self.request.method == "PUT":

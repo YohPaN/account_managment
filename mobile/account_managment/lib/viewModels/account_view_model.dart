@@ -95,7 +95,12 @@ class AccountViewModel extends ChangeNotifier {
     if (repoResponse.success && repoResponse.data != null) {
       final List<Item> items = [];
       for (var item in repoResponse.data!["items"]) {
-        items.add(Item.deserialize(item));
+        Item deserializedItem = Item.deserialize(item);
+        if (item["category"] != null) {
+          CategoryApp categoryItem = CategoryApp.deserialize(item["category"]);
+          deserializedItem.category = categoryItem;
+        }
+        items.add(deserializedItem);
       }
 
       for (var transfertItem in repoResponse.data!["transfert_items"]) {
@@ -219,6 +224,7 @@ class AccountViewModel extends ChangeNotifier {
     required String title,
     required String description,
     required String valuation,
+    required int? categoryId,
     required String? username,
     required String? toAccount,
   }) async {
@@ -226,6 +232,7 @@ class AccountViewModel extends ChangeNotifier {
       title: title,
       description: description,
       valuation: valuation,
+      categoryId: categoryId,
       accountId: account!.id,
       username: username,
       toAccount: toAccount,
@@ -240,6 +247,7 @@ class AccountViewModel extends ChangeNotifier {
     required String title,
     required String description,
     required String valuation,
+    required int? categoryId,
     required String? username,
     required String? toAccount,
     required int itemId,
@@ -248,6 +256,7 @@ class AccountViewModel extends ChangeNotifier {
         title: title,
         description: description,
         valuation: valuation,
+        categoryId: categoryId,
         accountId: account!.id,
         username: username,
         toAccount: toAccount,

@@ -95,6 +95,7 @@ class AccountRepository {
     required String description,
     required String valuation,
     required int accountId,
+    int? categoryId,
     String? username,
     String? toAccount,
   }) async {
@@ -109,6 +110,7 @@ class AccountRepository {
         'title': title,
         'description': description,
         'valuation': valuation,
+        if (categoryId != null) 'category_id': categoryId.toString(),
       },
     );
 
@@ -120,8 +122,9 @@ class AccountRepository {
     required String description,
     required String valuation,
     required int accountId,
-    required String? username,
-    required String? toAccount,
+    int? categoryId,
+    String? username,
+    String? toAccount,
     required int itemId,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
@@ -132,6 +135,7 @@ class AccountRepository {
         'account': accountId.toString(),
         if (username != null) 'username': username,
         if (toAccount != null) 'to_account': toAccount,
+        if (categoryId != null) 'category_id': categoryId.toString(),
         'title': title,
         'description': description,
         'valuation': valuation,

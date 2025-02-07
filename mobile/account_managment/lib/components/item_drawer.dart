@@ -68,6 +68,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
         valuationController.text = widget.item!.valuation.abs().toString();
         _username = widget.item!.username ?? "";
         _toAccount = widget.item!.toAccount?["id"] ?? "";
+        _category = widget.item!.category?.id.toString() ?? "";
       }
     }
   }
@@ -181,6 +182,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
+          categoryId: _category != "" ? int.parse(_category) : null,
           username: _username != "" ? _username : null,
           toAccount: _toAccount != "" ? _toAccount : null,
         );
@@ -189,6 +191,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
+          categoryId: _category != "" ? int.parse(_category) : null,
           username: _username != "" ? _username : null,
           toAccount: _toAccount != "" ? _toAccount : null,
           itemId: widget.item!.id,
