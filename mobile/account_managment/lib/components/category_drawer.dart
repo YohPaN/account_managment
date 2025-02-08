@@ -63,7 +63,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
       return showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Pick a color!'),
+          title: Text(locale.pick_color.capitalize()),
           content: SingleChildScrollView(
             child: BlockPicker(
               pickerColor: currentColor,
@@ -72,7 +72,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: const Text('Got it'),
+              child: Text(locale.ok.capitalize()),
               onPressed: () {
                 setState(() => currentColor = pickerColor);
                 Navigator.of(context).pop();
@@ -86,7 +86,10 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
     Future<void> pickIcon() async {
       IconPickerIcon? icon = await showIconPicker(
         context,
-        configuration: const SinglePickerConfiguration(
+        configuration: SinglePickerConfiguration(
+          title: Text(locale.pick_icon.capitalize()),
+          closeChild: Text(locale.close.capitalize()),
+          searchHintText: locale.search.capitalize(),
           iconPackModes: [IconPack.material],
         ),
       );
