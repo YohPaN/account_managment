@@ -1,16 +1,24 @@
+import 'package:account_managment/components/item_category_list.dart';
 import 'package:account_managment/components/item_drawer.dart';
-import 'package:account_managment/components/list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
+
+  @override
+  _AccountScreenState createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
+  final List<ExpansionTileController> _controllers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +28,12 @@ class AccountScreen extends StatelessWidget {
         Provider.of<ProfileViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
-    showModal(String action, [Item? item]) {
+    showModal(String action, [Item? item]) async {
+      await Provider.of<CategoryViewModel>(context, listen: false).listCategory(
+        categoryType: "account_categories",
+        accountId: accountViewModel.account!.id,
+      );
+
       showModalBottomSheet(
         context: context,
         shape: const RoundedRectangleBorder(
@@ -131,15 +144,25 @@ class AccountScreen extends StatelessWidget {
                                 .getAccount(accountViewModel.account?.id)
                           },
                           child: ListView.builder(
-                            itemCount: accountViewModel.account!.items.length,
+                            itemCount: accountViewModel
+                                    .account!.accountCategories.length +
+                                1,
                             itemBuilder: (context, index) {
+                              _controllers.add(ExpansionTileController());
+
                               return Padding(
                                 padding: const EdgeInsets.only(
                                     left: 16, right: 16, top: 8, bottom: 8),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5.0),
-                                    color: Colors.white,
+                                    color: index != 0
+                                        ? Color(accountViewModel
+                                                .account!
+                                                .accountCategories[index - 1]
+                                                .color ??
+                                            0)
+                                        : Colors.white,
                                     boxShadow: const [
                                       BoxShadow(
                                         color: Colors.black,
@@ -149,24 +172,62 @@ class AccountScreen extends StatelessWidget {
                                     ],
                                   ),
                                   child: ListTile(
-                                    title: ListItem(
-                                      item: accountViewModel
-                                          .account!.items[index],
-                                      accountId: accountViewModel.account!.id,
-                                      callbackFunc: showModal,
-                                      canManage:
-                                          profileViewModel.user!.hasPermission(
-                                        ressource: accountViewModel
-                                            .account!.items[index],
-                                        account: accountViewModel.account,
-                                        permissionsNeeded: [
-                                          "change_item",
-                                          "delete_item"
-                                        ],
-                                        permissions: accountViewModel
-                                            .account!.permissions,
-                                        strict: false,
-                                      ),
+                                    title: ExpansionTile(
+                                      controller: _controllers[index],
+                                      onExpansionChanged: (isExpanded) {
+                                        if (isExpanded) {
+                                          for (var (key, controller)
+                                              in _controllers.indexed) {
+                                            if (key != index) {
+                                              controller.collapse();
+                                            }
+                                          }
+                                        }
+                                      },
+                                      title: index == 0
+                                          ? Text(locale.without_category
+                                              .capitalize())
+                                          : Row(
+                                              children: [
+                                                Icon(
+                                                  IconData(
+                                                      accountViewModel
+                                                              .account!
+                                                              .accountCategories[
+                                                                  index - 1]
+                                                              .icon ??
+                                                          0,
+                                                      fontFamily:
+                                                          "MaterialIcons"),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 8.0),
+                                                  child: Text(
+                                                    accountViewModel
+                                                        .account!
+                                                        .accountCategories[
+                                                            index - 1]
+                                                        .title
+                                                        .capitalize(),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                      children: [
+                                        Builder(builder: (context) {
+                                          if (index == 0) {
+                                            return const ItemCategoryList();
+                                          } else {
+                                            return ItemCategoryList(
+                                              category: accountViewModel
+                                                  .account!
+                                                  .accountCategories[index - 1],
+                                            );
+                                          }
+                                        })
+                                      ],
                                     ),
                                   ),
                                 ),

@@ -1,0 +1,29 @@
+[
+    {
+        "model": "back_account_managment.category",
+        "pk": 1,
+        "fields": {
+            "title": "food",
+            "color": 4294951175,
+            "icon": 57946
+        }
+    },
+    {
+        "model": "back_account_managment.category",
+        "pk": 2,
+        "fields": {
+            "title": "invoice",
+            "color": 4280391411,
+            "icon": 58636
+        }
+    },
+    {
+        "model": "back_account_managment.category",
+        "pk": 3,
+        "fields": {
+            "title": "transport",
+            "color": 4291681337,
+            "icon": 57815
+        }
+    }
+]

@@ -1,6 +1,9 @@
+import 'package:account_managment/components/category_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
+import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +16,35 @@ class SettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AccountUserViewModel accountUserViewModel =
         Provider.of<AccountUserViewModel>(context);
+    final CategoryViewModel categoryViewModel =
+        Provider.of<CategoryViewModel>(context);
     final AppLocalizations locale = AppLocalizations.of(context)!;
+
+    showModal(String action, [CategoryApp? category]) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled: true,
+        builder: (BuildContext drawerContext) {
+          return MultiProvider(
+            providers: [
+              InheritedProvider<CategoryViewModel>(
+                update: (context, value) {
+                  return categoryViewModel;
+                },
+              ),
+            ],
+            child: CategoryDrawer(
+              action: action,
+              category: category,
+              categoryType: "profile",
+            ),
+          );
+        },
+      );
+    }
 
     return Scaffold(
       body: Padding(
@@ -97,6 +128,96 @@ class SettingScreen extends StatelessWidget {
                   }
                 }
                 return const Center(child: CircularProgressIndicator());
+              },
+            ),
+            Consumer<ProfileViewModel>(
+              builder: (context, profileViewModel, child) {
+                return Expanded(
+                  child: Column(
+                    children: [
+                      Text(locale.categories.capitalize()),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount:
+                              profileViewModel.profile!.categories.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 16, right: 16, top: 8, bottom: 8),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  color: Colors.white,
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      offset: Offset(0.0, 1.0),
+                                      blurRadius: 4.0,
+                                    ),
+                                  ],
+                                ),
+                                child: ListTile(
+                                  title: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Icon(
+                                            IconData(
+                                                profileViewModel
+                                                        .profile!
+                                                        .categories[index]
+                                                        .icon ??
+                                                    0,
+                                                fontFamily: "MaterialIcons"),
+                                          ),
+                                          Text(
+                                            profileViewModel.profile!
+                                                .categories[index].title
+                                                .capitalize(),
+                                          ),
+                                          Icon(
+                                            Icons.circle,
+                                            size: 16,
+                                            color: Color(profileViewModel
+                                                    .profile!
+                                                    .categories[index]
+                                                    .color ??
+                                                0),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () => showModal(
+                                              "update",
+                                              profileViewModel
+                                                  .profile!.categories[index],
+                                            ),
+                                            child: const Icon(
+                                              Icons.mode,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => showModal("create"),
+                            child: Text(locale.create_category(1).capitalize()),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                );
               },
             ),
             ElevatedButton(

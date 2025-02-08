@@ -1,9 +1,11 @@
-import json
+from itertools import chain
 
 from back_account_managment.models import (
     Account,
+    AccountCategory,
     AccountUser,
     AccountUserPermission,
+    Category,
     Item,
     Profile,
     Transfert,
@@ -16,6 +18,9 @@ from back_account_managment.permissions import (
     ManageRessourcePermission,
     TransfertToAccountPermission,
 )
+from back_account_managment.serializers.account_category_serializer import (
+    AccountCategorySerializer,
+)
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
@@ -24,6 +29,10 @@ from back_account_managment.serializers.account_serializer import (
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountUserSerializer,
+)
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
+    CategoryWriteSerializer,
 )
 from back_account_managment.serializers.item_serializer import (
     ItemWriteSerializer,
@@ -36,10 +45,12 @@ from back_account_managment.serializers.user_serializer import (
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
-from django.db.models import Exists, OuterRef
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Exists, OuterRef, Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -134,7 +145,10 @@ class RegisterView(APIView):
 
 
 class AccountView(ModelViewSet):
-    queryset = Account.objects.all()
+    queryset = Account.objects.prefetch_related(
+        "items",
+        "account_categories",
+    ).all()
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
@@ -147,22 +161,26 @@ class AccountView(ModelViewSet):
         return context
 
     def list(self, request):
+        queryset = self.get_queryset()
+
+        own_accounts = queryset.filter(user=request.user)
+
         contributor_account_user = AccountUser.objects.filter(
             account=OuterRef("pk"), user=request.user, state="APPROVED"
         )
-        own_accounts = Account.objects.filter(user=request.user)
-
-        contributor_accounts = Account.objects.filter(
+        contributor_accounts = queryset.filter(
             Exists(contributor_account_user)
         )
 
-        own_account_serialized = AccountListSerializer(own_accounts, many=True)
-        own_account_serialized.context.update({"request": self.request})
-        contributor_account_serialized = AccountListSerializer(
-            contributor_accounts, many=True
+        own_account_serialized = AccountListSerializer(
+            own_accounts,
+            many=True,
+            context={"request": request},
         )
-        contributor_account_serialized.context.update(
-            {"request": self.request}
+        contributor_account_serialized = AccountListSerializer(
+            contributor_accounts,
+            many=True,
+            context={"request": request},
         )
 
         return Response(
@@ -189,14 +207,10 @@ class AccountView(ModelViewSet):
         if serializer.is_valid():
             account = serializer.save()
 
-            for contributor in json.loads(request.data["contributors"]):
-                if contributor != request.user.username:
-                    AccountUser.objects.create(
-                        account=account,
-                        user=User.objects.get(username=contributor),
-                    )
-
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(
+                data=self.get_serializer(account).data,
+                status=status.HTTP_201_CREATED,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -210,32 +224,7 @@ class AccountView(ModelViewSet):
         if serializer.is_valid():
             serializer.save()
 
-        user_contributors = User.objects.filter(
-            username__in=json.loads(request.data["contributors"])
-        ).exclude(username=account.user.username)
-
-        account_users = AccountUser.objects.filter(account=account)
-        account_user_set = set(
-            account_user.user.username for account_user in account_users
-        )
-        user_contributors_set = set(
-            user_contributor.username for user_contributor in user_contributors
-        )
-
-        contributor_to_remove = account_user_set - user_contributors_set
-        contributor_to_add = user_contributors_set - account_user_set
-
-        for contributor in contributor_to_add:
-            AccountUser.objects.create(
-                user=User.objects.get(username=contributor), account=account
-            )
-
-        for contributor in contributor_to_remove:
-            AccountUser.objects.filter(
-                user=User.objects.get(username=contributor), account=account
-            ).delete()
-
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk):
         account = self.get_object()
@@ -287,11 +276,76 @@ class AccountView(ModelViewSet):
             account.salary_based_split = split
             account.save()
 
-            return Response(status=status.HTTP_200_OK)
+            return Response(
+                data=self.get_serializer(account).data,
+                status=status.HTTP_200_OK,
+            )
 
         return Response(
             {"error": "You must include 'split' field"},
             status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    @action(detail=True, methods=["post"], url_path="contributors/add")
+    def update_contributors(self, request, pk=None):
+        account = self.get_object()
+
+        contributor_to_add = request.data.get("user_username", None)
+
+        if contributor_to_add == account.user.username:
+            return Response(
+                {"error": "You can't add yourself as a contributor"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if AccountUser.objects.filter(
+            account=account, user__username=contributor_to_add
+        ).exists():
+            return Response(
+                {"error": f"{contributor_to_add} is already a contributor"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(username=contributor_to_add)
+
+        if not user.exists():
+            return Response(
+                {"error": f"{contributor_to_add} doesn't exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        AccountUser.objects.create(user=user.first(), account=account)
+
+        return Response(
+            data=self.get_serializer(account).data, status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["post"], url_path="contributors/remove")
+    def remove_contributors(self, request, pk=None):
+        account = self.get_object()
+
+        contributor_to_remove = request.data.get("user_username", None)
+
+        if not AccountUser.objects.filter(
+            account=account, user__username=contributor_to_remove
+        ).exists():
+            return Response(
+                {"error": f"{contributor_to_remove} is not a contributor"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(username=contributor_to_remove)
+
+        if not user.exists():
+            return Response(
+                {"error": f"{contributor_to_remove} doesn't exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        AccountUser.objects.get(user=user.first(), account=account).delete()
+
+        return Response(
+            data=self.get_serializer(account).data, status=status.HTTP_200_OK
         )
 
 
@@ -334,8 +388,10 @@ class ItemView(ModelViewSet):
         to_account = self.request.data.get("to_account", None)
 
         user = get_object_or_404(User, username=username) if username else None
+        category_id = self.request.data.get("category_id", None)
 
         item = serializer.save(
+            category_id=category_id,
             user=user,
         )
 
@@ -352,7 +408,9 @@ class ItemView(ModelViewSet):
 
 
 class AccountUserView(ModelViewSet):
-    queryset = AccountUser.objects.all()
+    queryset = AccountUser.objects.select_related(
+        "account", "account__user"
+    ).all()
     serializer_class = AccountUserSerializer
     permission_classes = [
         permissions.IsAuthenticated,
@@ -400,20 +458,175 @@ class AccountUserPermissionView(ModelViewSet):
 
         account_user = self.get_queryset()
 
-        permissions_to_remove = AccountUserPermission.objects.exclude(
-            account_user=account_user,
-            permissions__codename__in=request.data["permissions"],
-        ).filter(account_user=account_user)
-
-        for account_user_permission in permissions_to_remove:
-            account_user_permission.delete()
-
-        for permission_codename in json.loads(request.data["permissions"]):
-            permission = Permission.objects.get(codename=permission_codename)
-
+        account_user_permissions, created = (
             AccountUserPermission.objects.get_or_create(
                 account_user=account_user,
-                permissions=permission,
+                permissions=Permission.objects.get(
+                    codename=self.request.data["permission"]
+                ),
+            )
+        )
+
+        if not created:
+            account_user_permissions.delete()
+
+        return Response(
+            data={"enabled": created},
+            status=status.HTTP_200_OK,
+        )
+
+
+class CategoryView(ModelViewSet):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+    def get_queryset(self):
+        if self.request.method not in SAFE_METHODS:
+            return super().get_queryset()
+
+        account_id = self.request.query_params.get("account", None)
+        category = self.request.query_params.get("category", None)
+
+        queryset = self.queryset
+
+        match category:
+            case "default":
+                return queryset.filter(content_type=None)
+
+            case "user":
+                return queryset.filter(
+                    content_type=ContentType.objects.get_for_model(User),
+                    object_id=self.request.user.pk,
+                )
+
+            case "account":
+                return queryset.filter(
+                    content_type=ContentType.objects.get_for_model(Account),
+                    object_id=account_id,
+                )
+
+            case "account_categories":
+                account = Account.objects.get(pk=account_id)
+
+                return queryset.filter(
+                    Exists(
+                        AccountCategory.objects.filter(
+                            account=account, category=OuterRef("pk")
+                        )
+                    )
+                )
+
+            case _:
+                return None
+
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return CategoryWriteSerializer
+
+        return super().get_serializer_class()
+
+    @action(methods=["get"], detail=False, url_path="default")
+    def get_defaut_categories(self, *args, **kwargs):
+        default_category = Category.objects.filter(content_type=None)
+
+        return Response(
+            data=self.get_serializer(default_category, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
+    def create(self, request, *args, **kwargs):
+        account_id = request.data.get("account_id", None)
+
+        if account_id is not None:
+            request.data["object_id"] = account_id
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                Account
+            ).pk
+        else:
+            request.data["object_id"] = str(request.user.pk)
+            request.data["content_type"] = ContentType.objects.get_for_model(
+                User
+            ).pk
+
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        category = serializer.save()
+
+        if category.content_type.model_class() is Account:
+            AccountCategory.objects.create(
+                category=category, account_id=category.object_id
             )
 
-        return Response(status=status.HTTP_200_OK)
+
+class AccountCategoryView(ModelViewSet):
+    queryset = AccountCategory.objects.all()
+    serializer_class = AccountCategorySerializer
+
+    def create(self, request):
+        try:
+            category = Category.objects.get(
+                pk=request.data.get("category", None)
+            )
+
+            account = Account.objects.get(pk=request.data.get("account", None))
+
+            if category.content_type == ContentType.objects.get_for_model(
+                Account
+            ):
+                account_category = AccountCategory.objects.filter(
+                    category=category
+                )
+
+                if (
+                    account_category.exists()
+                    and account_category.first().account != account
+                ):
+                    return Response(
+                        {"detail": "The category is link to another account"},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+
+            AccountCategory.objects.get_or_create(
+                account=account, category=category
+            )
+
+            return Response(
+                data=CategoryWriteSerializer(category).data,
+                status=status.HTTP_201_CREATED,
+            )
+        except Category.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Account.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(methods=["post"], detail=False, url_path="unlink")
+    def unlink(self, request):
+        try:
+            category = Category.objects.get(
+                pk=request.data.get("category", None)
+            )
+
+            account = Account.objects.get(pk=request.data.get("account", None))
+
+            AccountCategory.objects.filter(
+                account=account, category=category
+            ).delete()
+
+            return Response(
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        except Category.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Account.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )

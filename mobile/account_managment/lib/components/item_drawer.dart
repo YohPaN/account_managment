@@ -4,6 +4,7 @@ import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
+import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +15,11 @@ class ItemDrawer extends StatefulWidget {
   final Item? item;
 
   @override
-  const ItemDrawer({super.key, required this.action, this.item});
+  const ItemDrawer({
+    super.key,
+    required this.action,
+    this.item,
+  });
 
   @override
   _ItemDrawerState createState() => _ItemDrawerState();
@@ -28,6 +33,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
   final List<bool> _selectButton = [true, false];
   String _username = "";
   String _toAccount = "";
+  String _category = "";
 
   final List<Map<String, Color?>> buttonStyleChoices = [
     {
@@ -62,6 +68,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
         valuationController.text = widget.item!.valuation.abs().toString();
         _username = widget.item!.username ?? "";
         _toAccount = widget.item!.toAccount?["id"] ?? "";
+        _category = widget.item!.category?.id.toString() ?? "";
       }
     }
   }
@@ -72,6 +79,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
         Provider.of<AccountViewModel>(context, listen: false);
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
+    final CategoryViewModel categoryViewModel =
+        Provider.of<CategoryViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
     switchButton(index) {
@@ -83,6 +92,13 @@ class _ItemDrawerState extends State<ItemDrawer> {
         _buttonStyle = buttonStyleChoices[index];
       });
     }
+
+    final List<DropdownMenuEntry<String>> categoryList = [
+      const DropdownMenuEntry<String>(
+        value: "",
+        label: "",
+      ),
+    ];
 
     final List<DropdownMenuEntry<String>> menuEntries = [
       DropdownMenuEntry<String>(
@@ -98,13 +114,21 @@ class _ItemDrawerState extends State<ItemDrawer> {
       )
     ];
 
-    for (var account in accountViewModel.accounts!) {
+    for (var account in accountViewModel.accounts) {
       accountList.add(DropdownMenuEntry<String>(
         value: account.id.toString(),
         label: account.name,
       ));
     }
-    for (var account in accountViewModel.contributorAccounts!) {
+
+    for (var category in categoryViewModel.categories) {
+      categoryList.add(DropdownMenuEntry<String>(
+        value: category.id.toString(),
+        label: category.title,
+      ));
+    }
+
+    for (var account in accountViewModel.contributorAccounts ?? []) {
       if (profileViewModel.user!.hasPermission(
           account: account,
           permissionsNeeded: ["transfert_item"],
@@ -158,6 +182,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
+          categoryId: _category != "" ? int.parse(_category) : null,
           username: _username != "" ? _username : null,
           toAccount: _toAccount != "" ? _toAccount : null,
         );
@@ -166,6 +191,7 @@ class _ItemDrawerState extends State<ItemDrawer> {
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
+          categoryId: _category != "" ? int.parse(_category) : null,
           username: _username != "" ? _username : null,
           toAccount: _toAccount != "" ? _toAccount : null,
           itemId: widget.item!.id,
@@ -216,6 +242,16 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   "twoDigitMax",
                   "validPositifDouble"
                 ]),
+              ),
+              const SizedBox(height: 16),
+              DropdownMenu(
+                expandedInsets: const EdgeInsets.all(50),
+                label: Text(locale.category(1).capitalize()),
+                initialSelection: _category,
+                onSelected: (value) => setState(() {
+                  _category = value!;
+                }),
+                dropdownMenuEntries: categoryList,
               ),
               const SizedBox(height: 16),
               DropdownMenu(

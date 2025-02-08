@@ -1,3 +1,6 @@
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
+)
 from back_account_managment.serializers.profile_serializer import (
     ProfileSerializer,
 )
@@ -7,11 +10,18 @@ from rest_framework import serializers
 
 class UserMeta:
     model = get_user_model()
-    fields = ["username", "email", "password", "profile"]
+    fields = [
+        "username",
+        "email",
+        "password",
+        "profile",
+        "categories",
+    ]
 
 
 class _UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
+    categories = CategorySerializer(many=True)
 
     class Meta:
         pass
@@ -31,9 +41,14 @@ class UserSerializer(_UserSerializer):
         fields = [
             field
             for field in UserMeta.fields
-            if field in ["username", "email", "profile"]
+            if field
+            in [
+                "username",
+                "email",
+                "profile",
+                "categories",
+            ]
         ]
-        fields = ["username", "email", "profile"]
 
 
 class UsernameUserSerilizer(_UserSerializer):

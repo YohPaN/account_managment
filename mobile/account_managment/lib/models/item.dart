@@ -1,8 +1,11 @@
+import 'package:account_managment/models/category.dart';
+
 class Item {
   int id;
   String title;
   String? description;
   String? username;
+  CategoryApp? category;
   double valuation;
   Map<String, String?>? toAccount;
   bool transfertItem;
@@ -12,6 +15,7 @@ class Item {
     required this.title,
     required this.description,
     this.username,
+    this.category,
     this.toAccount,
     required this.valuation,
     required this.transfertItem,

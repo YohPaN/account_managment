@@ -1,21 +1,22 @@
 import 'package:account_managment/models/account.dart';
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/account_repository.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AccountViewModel extends ChangeNotifier {
   final AccountRepository accountRepository = AccountRepository();
 
-  List<Account>? _accounts;
-  List<Account>? get accounts => _accounts;
+  List<Account> _accounts = [];
+  List<Account> get accounts => _accounts;
 
   List<Account>? _contributorAccounts;
   List<Account>? get contributorAccounts => _contributorAccounts;
 
-  Account? _account;
-  Account? get account => _account;
+  Account? account;
 
   int? accountIdToRetrieve;
 
@@ -32,6 +33,22 @@ class AccountViewModel extends ChangeNotifier {
           items.add(Item.deserialize(item));
         }
 
+        final List<CategoryApp> categories = [];
+
+        for (var category in account["categories"]) {
+          categories.add(
+            CategoryApp.deserialize(category),
+          );
+        }
+
+        final List<CategoryApp> accountCategories = [];
+
+        for (var category in account["account_categories"]) {
+          accountCategories.add(
+            CategoryApp.deserialize(category),
+          );
+        }
+
         final List<Contributor> contributors = [];
 
         for (var contributor in account["contributors"]) {
@@ -42,7 +59,9 @@ class AccountViewModel extends ChangeNotifier {
 
         final accountToAdd = Account.deserialize(account);
         accountToAdd.items = items;
+        accountToAdd.categories = categories;
         accountToAdd.contributor = contributors;
+        accountToAdd.accountCategories = accountCategories;
         accounts.add(
           accountToAdd,
         );
@@ -85,11 +104,32 @@ class AccountViewModel extends ChangeNotifier {
     if (repoResponse.success && repoResponse.data != null) {
       final List<Item> items = [];
       for (var item in repoResponse.data!["items"]) {
-        items.add(Item.deserialize(item));
+        Item deserializedItem = Item.deserialize(item);
+        if (item["category"] != null) {
+          CategoryApp categoryItem = CategoryApp.deserialize(item["category"]);
+          deserializedItem.category = categoryItem;
+        }
+        items.add(deserializedItem);
+      }
+
+      final List<CategoryApp> categories = [];
+
+      for (var category in repoResponse.data!["categories"]) {
+        categories.add(
+          CategoryApp.deserialize(category),
+        );
       }
 
       for (var transfertItem in repoResponse.data!["transfert_items"]) {
         items.add(Item.deserialize(transfertItem, true));
+      }
+
+      final List<CategoryApp> accountCategories = [];
+
+      for (var category in repoResponse.data!["account_categories"]) {
+        accountCategories.add(
+          CategoryApp.deserialize(category),
+        );
       }
 
       final List<Contributor> contributors = [];
@@ -102,44 +142,52 @@ class AccountViewModel extends ChangeNotifier {
 
       final accountToAdd = Account.deserialize(repoResponse.data);
       accountToAdd.items = items;
+      accountToAdd.categories = categories;
+      accountToAdd.accountCategories = accountCategories;
       accountToAdd.contributor = contributors;
 
-      _account = accountToAdd;
+      account = accountToAdd;
     }
 
     accountIdToRetrieve = null;
 
-    if (_accounts == null) {
-      listAccount();
-    }
-
     return repoResponse;
   }
 
-  Future<RepoResponse> createAccount(
-      String accountName, List<Contributor> contributors) async {
-    final List<String> contributorSerializable = [];
-
-    for (var contributor in contributors) {
-      contributorSerializable.add(contributor.username);
-    }
+  Future<RepoResponse> createAccount({
+    required String accountName,
+  }) async {
     final RepoResponse repoResponse =
-        await accountRepository.create(accountName, contributorSerializable);
+        await accountRepository.create(accountName);
+
+    if (repoResponse.success) {
+      Account newAccount = Account.deserialize(repoResponse.data);
+      _accounts.add(newAccount);
+      account = newAccount;
+    }
 
     notifyListeners();
 
     return repoResponse;
   }
 
-  Future<RepoResponse> updateAccount(
-      int accountId, String accountName, List<Contributor> contributors) async {
-    final List<String> contributorSerializable = [];
-
-    for (var contributor in contributors) {
-      contributorSerializable.add(contributor.username);
-    }
+  Future<RepoResponse> updateAccount({
+    required String accountName,
+  }) async {
     final RepoResponse repoResponse = await accountRepository.update(
-        accountId, accountName, contributorSerializable);
+      id: account!.id,
+      name: accountName,
+    );
+
+    if (repoResponse.success) {
+      for (var i = 0; i < accounts.length; i++) {
+        if (accounts[i].id == account!.id) {
+          await _accounts[i].update(repoResponse.data);
+          await account!.update(repoResponse.data);
+          break;
+        }
+      }
+    }
 
     notifyListeners();
 
@@ -154,10 +202,45 @@ class AccountViewModel extends ChangeNotifier {
     return repoResponse;
   }
 
+  Future<RepoResponse> addContributor({
+    required String userUsername,
+  }) async {
+    final RepoResponse repoResponse = await accountRepository.addContributor(
+      id: account!.id,
+      username: userUsername,
+    );
+
+    if (repoResponse.success) {
+      await account!.update(repoResponse.data);
+    }
+
+    notifyListeners();
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> removeContributor({
+    required String userUsername,
+  }) async {
+    final RepoResponse repoResponse = await accountRepository.removeContributor(
+      id: account!.id,
+      username: userUsername,
+    );
+
+    if (repoResponse.success) {
+      await account!.update(repoResponse.data);
+    }
+
+    notifyListeners();
+
+    return repoResponse;
+  }
+
   Future<RepoResponse> createItem({
     required String title,
     required String description,
     required String valuation,
+    required int? categoryId,
     required String? username,
     required String? toAccount,
   }) async {
@@ -165,6 +248,7 @@ class AccountViewModel extends ChangeNotifier {
       title: title,
       description: description,
       valuation: valuation,
+      categoryId: categoryId,
       accountId: account!.id,
       username: username,
       toAccount: toAccount,
@@ -179,6 +263,7 @@ class AccountViewModel extends ChangeNotifier {
     required String title,
     required String description,
     required String valuation,
+    required int? categoryId,
     required String? username,
     required String? toAccount,
     required int itemId,
@@ -187,6 +272,7 @@ class AccountViewModel extends ChangeNotifier {
         title: title,
         description: description,
         valuation: valuation,
+        categoryId: categoryId,
         accountId: account!.id,
         username: username,
         toAccount: toAccount,
@@ -206,33 +292,39 @@ class AccountViewModel extends ChangeNotifier {
   }
 
   Future<RepoResponse> listItemPermissions({
-    required int accountId,
     required String username,
   }) async {
     final RepoResponse repoResponse = await accountRepository
-        .listItemPermissions(accountId: accountId, username: username);
+        .listItemPermissions(accountId: account!.id, username: username);
 
     return repoResponse;
   }
 
   Future<RepoResponse> manageItemPermissions({
-    int? accountId,
     required String username,
-    required List<String> permissions,
+    required String permission,
   }) async {
     final RepoResponse repoResponse =
         await accountRepository.manageItemPermissions(
-            accountId: accountId, username: username, permissions: permissions);
+      id: account!.id,
+      username: username,
+      permission: permission,
+    );
+
+    notifyListeners();
 
     return repoResponse;
   }
 
   Future<RepoResponse> setSalaryBasedSplit({
-    int? accountId,
     required bool isSplit,
   }) async {
     final RepoResponse repoResponse = await accountRepository
-        .setSalaryBasedSplit(accountId: accountId, isSplit: isSplit);
+        .setSalaryBasedSplit(accountId: account!.id, isSplit: isSplit);
+
+    if (repoResponse.success) {
+      account!.update(repoResponse.data);
+    }
 
     notifyListeners();
 

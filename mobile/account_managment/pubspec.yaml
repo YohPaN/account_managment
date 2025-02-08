@@ -44,6 +44,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
+  flutter_colorpicker: ^1.1.0
+  flutter_iconpicker: ^4.0.1
 
 dev_dependencies:
   flutter_test:

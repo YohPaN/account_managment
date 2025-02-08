@@ -1,6 +1,11 @@
 import uuid
 
 from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.contenttypes.fields import (
+    GenericForeignKey,
+    GenericRelation,
+)
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import (
     Case,
@@ -15,10 +20,33 @@ from django.db.models import (
 )
 
 
+class Category(models.Model):
+    title = models.CharField(max_length=25)
+    color = models.CharField(max_length=50, blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, null=True, blank=True
+    )
+    object_id = models.CharField(max_length=50, blank=True)
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    def save(self, **kwargs):
+        # We are testing that both are not None
+        assert self.content_type != self.object_id
+
+        return super().save(**kwargs)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=15, unique=True)
     email = models.EmailField(max_length=50, unique=True)
+    categories = GenericRelation(Category)
 
     first_name = None
     last_name = None
@@ -42,6 +70,9 @@ class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
     salary_based_split = models.BooleanField(default=False)
+    account_categories = models.ManyToManyField(
+        Category, through="AccountCategory"
+    )
 
     class Meta:
         permissions = [
@@ -65,7 +96,12 @@ class Account(models.Model):
             Q(account_id=self.pk) | Exists(transfert_item),
         )
 
-        return total.aggregate(total_sum=(Sum("calc_valuation")))
+        return total.aggregate(total_sum=(Sum("calc_valuation", default=0)))
+
+
+class AccountCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
 
 class Item(models.Model):
@@ -79,6 +115,19 @@ class Item(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True
     )
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    def save(self, **kwargs):
+        if self.category:
+            account_category = AccountCategory.objects.filter(
+                account=self.account, category=self.category
+            )
+
+            assert account_category.exists()
+
+        return super().save(**kwargs)
 
 
 class AccountUserState(models.TextChoices):

@@ -4,6 +4,7 @@ from back_account_managment.models import (
     Account,
     AccountUser,
     AccountUserPermission,
+    Category,
     Item,
     Profile,
     Transfert,
@@ -13,6 +14,9 @@ from back_account_managment.serializers.account_user_permission_serializer impor
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountAccountUserSerializer,
+)
+from back_account_managment.serializers.category_serializer import (
+    CategorySerializer,
 )
 from back_account_managment.serializers.item_serializer import (
     ItemReadSerializer,
@@ -41,6 +45,8 @@ class AccountMeta:
         "user",
         "salary_based_split",
         "transfert_items",
+        "categories",
+        "account_categories",
     ]
 
 
@@ -54,8 +60,16 @@ class _AccountSerializer(serializers.ModelSerializer):
     own_contribution = serializers.SerializerMethodField()
     need_to_add = serializers.SerializerMethodField()
 
+    categories = serializers.SerializerMethodField()
+    account_categories = CategorySerializer(many=True)
+
     class Meta:
         pass
+
+    def get_categories(self, account):
+        return CategorySerializer(
+            Category.objects.filter(object_id=account.id), many=True
+        ).data
 
     def get_transfert_items(self, account):
         transferts = Transfert.objects.filter(
@@ -196,6 +210,8 @@ class AccountListSerializer(_AccountSerializer):
                 "total",
                 "user",
                 "salary_based_split",
+                "categories",
+                "account_categories",
             ]
         ]
 
@@ -217,9 +233,12 @@ class AccountSerializer(_AccountSerializer):
                 "need_to_add",
                 "own_contribution",
                 "permissions",
+                "salary_based_split",
                 "total",
                 "transfert_items",
                 "user",
+                "categories",
+                "account_categories",
             ]
         ]
 

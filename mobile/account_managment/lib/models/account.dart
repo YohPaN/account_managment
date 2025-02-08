@@ -1,3 +1,4 @@
+import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/contributor.dart';
 import 'package:account_managment/models/item.dart';
 
@@ -8,17 +9,21 @@ class Account {
   List<Item> items;
   double? ownContribution;
   double? needToAdd;
+  List<CategoryApp> categories;
+  List<CategoryApp> accountCategories;
   List<Contributor> contributor;
-  List<dynamic> permissions;
+  List<String> permissions;
   String username;
   double total;
-  bool? salaryBasedSplit;
+  bool salaryBasedSplit;
 
   Account({
     required this.id,
     required this.name,
     required this.isMain,
     required this.items,
+    required this.categories,
+    required this.accountCategories,
     this.ownContribution,
     this.needToAdd,
     required this.contributor,
@@ -41,10 +46,26 @@ class Account {
           ? jsonAccount["need_to_add"]["total"]
           : null,
       contributor: [],
-      permissions: jsonAccount["permissions"],
+      categories: [],
+      accountCategories: [],
+      permissions: List<String>.from(jsonAccount["permissions"]),
       username: jsonAccount["user"]["username"],
       total: jsonAccount["total"]["total_sum"],
       salaryBasedSplit: jsonAccount["salary_based_split"],
     );
+  }
+
+  Future<void> update(data) async {
+    if (data["name"] != null) name = data["name"];
+    if (data["salary_based_split"] != null) {
+      salaryBasedSplit = data["salary_based_split"];
+    }
+    if (data["contributors"] != null) {
+      contributor = [];
+
+      for (var contributor in data["contributors"]) {
+        this.contributor.add(Contributor.deserialize(contributor));
+      }
+    }
   }
 }

@@ -8,13 +8,13 @@ class AccountUserPermissionsMeta:
 
 
 class _AccountUserPermissionsSerializer(serializers.Serializer):
-    permissions_codename = serializers.SerializerMethodField()
+    permissions_codename = serializers.CharField(
+        source="permissions.codename",
+        read_only=True,
+    )
 
     class Meta:
         pass
-
-    def get_permissions_codename(self, obj):
-        return obj.permissions.codename
 
 
 class AccountUserPermissionsSerializer(_AccountUserPermissionsSerializer):

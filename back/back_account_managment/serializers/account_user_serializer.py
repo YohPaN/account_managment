@@ -1,4 +1,4 @@
-from back_account_managment.models import Account, AccountUser
+from back_account_managment.models import AccountUser
 from back_account_managment.serializers.user_serializer import (
     UsernameUserSerilizer,
 )
@@ -7,23 +7,24 @@ from rest_framework import serializers
 
 class AccountUserMeta:
     model = AccountUser
-    fields = ["id", "user", "state", "account"]
-    read_only_fields = ["account"]
+    fields = [
+        "id",
+        "user",
+        "state",
+        "account_owner_username",
+        "account_name",
+    ]
 
 
 class _AccountAccountUserSerializer(serializers.ModelSerializer):
     user = UsernameUserSerilizer()
-    account = serializers.SerializerMethodField()
+    account_owner_username = serializers.CharField(
+        source="account.user.username", read_only=True
+    )
+    account_name = serializers.CharField(source="account.name", read_only=True)
 
     class Meta:
         pass
-
-    def get_account(self, account_user):
-        accounts = Account.objects.get(pk=(account_user.pk))
-        return {
-            "name": accounts.name if accounts else None,
-            "username": accounts.user.username if accounts else None,
-        }
 
 
 class AccountAccountUserSerializer(_AccountAccountUserSerializer):
@@ -40,5 +41,11 @@ class AccountUserSerializer(_AccountAccountUserSerializer):
         fields = [
             field
             for field in AccountUserMeta.fields
-            if field in ["id", "state", "account"]
+            if field
+            in [
+                "id",
+                "state",
+                "account_owner_username",
+                "account_name",
+            ]
         ]

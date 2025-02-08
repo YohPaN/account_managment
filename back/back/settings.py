@@ -63,8 +63,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "back_account_managment.middlewares.HMACMiddleware",
 ]
+
+if DEBUG is False:
+    MIDDLEWARE.append(
+        "back_account_managment.middlewares.HMACMiddleware",
+    )
 
 
 REST_FRAMEWORK = {

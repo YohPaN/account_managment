@@ -7,22 +7,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('back_account_managment', '0006_accountuserpermission'),
+        ("back_account_managment", "0006_accountuserpermission"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='accountuser',
-            name='account',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='contributors', to='back_account_managment.account'),
+            model_name="accountuser",
+            name="account",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="contributors",
+                to="back_account_managment.account",
+            ),
         ),
         migrations.AlterField(
-            model_name='item',
-            name='account',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='back_account_managment.account'),
+            model_name="item",
+            name="account",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="items",
+                to="back_account_managment.account",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='accountuser',
-            constraint=models.CheckConstraint(condition=models.Q(('state__in', ['PENDING', 'APPROVED', 'DISAPPROVED'])), name='valid_state_constraint'),
+            model_name="accountuser",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    ("state__in", ["PENDING", "APPROVED", "DISAPPROVED"])
+                ),
+                name="valid_state_constraint",
+            ),
         ),
     ]

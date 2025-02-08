@@ -7,13 +7,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountListItem extends StatelessWidget {
   final Account account;
-  final Function callbackFunc;
   final bool canManage;
 
   const AccountListItem({
     super.key,
     required this.account,
-    required this.callbackFunc,
     required this.canManage,
   });
 
@@ -53,7 +51,13 @@ class AccountListItem extends StatelessWidget {
             if (canManage)
               IconButton(
                 onPressed: () {
-                  callbackFunc("update", account);
+                  Provider.of<AccountViewModel>(context, listen: false)
+                      .account = account;
+                  Navigator.pushNamed(
+                    context,
+                    "account_managment",
+                    arguments: "update",
+                  );
                 },
                 icon: const Icon(Icons.mode),
               ),

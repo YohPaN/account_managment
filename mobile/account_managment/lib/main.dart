@@ -2,7 +2,9 @@ import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/common/router.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
+import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,8 +28,19 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthViewModel>(
           create: (context) => AuthViewModel(),
         ),
-        ChangeNotifierProvider(
+        ChangeNotifierProvider<ProfileViewModel>(
           create: (context) => ProfileViewModel(),
+        ),
+        ChangeNotifierProvider<AccountViewModel>(
+          create: (context) => AccountViewModel(),
+        ),
+        ChangeNotifierProvider<CategoryViewModel>(
+          create: (context) => CategoryViewModel(
+            profileViewModel:
+                Provider.of<ProfileViewModel>(context, listen: false),
+            accountViewModel:
+                Provider.of<AccountViewModel>(context, listen: false),
+          ),
         )
       ],
       child: ToastificationWrapper(

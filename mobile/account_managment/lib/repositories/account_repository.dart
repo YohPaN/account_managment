@@ -27,24 +27,26 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> create(String name, List<String> contributors) async {
+  Future<RepoResponse> create(String name) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/",
       contentType: 'application/json',
-      body: {'name': name, 'contributors': contributors},
+      body: {'name': name},
     );
 
     return repoResponse;
   }
 
-  Future<RepoResponse> update(
-      int accountId, String name, List<String> contributors) async {
+  Future<RepoResponse> update({
+    required int id,
+    required String name,
+  }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
-      uri: "$modelUrl/$accountId/",
+      uri: "$modelUrl/$id/",
       contentType: 'application/json',
-      body: {'name': name, 'contributors': contributors},
+      body: {'name': name},
     );
 
     return repoResponse;
@@ -60,11 +62,40 @@ class AccountRepository {
     return repoResponse;
   }
 
+  Future<RepoResponse> addContributor({
+    required int id,
+    required String username,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$modelUrl/$id/contributors/add/",
+      contentType: 'application/json',
+      body: {'user_username': username},
+    );
+
+    return repoResponse;
+  }
+
+  Future<RepoResponse> removeContributor({
+    required int id,
+    required String username,
+  }) async {
+    final RepoResponse repoResponse = await RequestHandler.handleRequest(
+      method: "POST",
+      uri: "$modelUrl/$id/contributors/remove/",
+      contentType: 'application/json',
+      body: {'user_username': username},
+    );
+
+    return repoResponse;
+  }
+
   Future<RepoResponse> createItem({
     required String title,
     required String description,
     required String valuation,
     required int accountId,
+    int? categoryId,
     String? username,
     String? toAccount,
   }) async {
@@ -79,6 +110,7 @@ class AccountRepository {
         'title': title,
         'description': description,
         'valuation': valuation,
+        if (categoryId != null) 'category_id': categoryId.toString(),
       },
     );
 
@@ -90,8 +122,9 @@ class AccountRepository {
     required String description,
     required String valuation,
     required int accountId,
-    required String? username,
-    required String? toAccount,
+    int? categoryId,
+    String? username,
+    String? toAccount,
     required int itemId,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
@@ -102,6 +135,7 @@ class AccountRepository {
         'account': accountId.toString(),
         if (username != null) 'username': username,
         if (toAccount != null) 'to_account': toAccount,
+        if (categoryId != null) 'category_id': categoryId.toString(),
         'title': title,
         'description': description,
         'valuation': valuation,
@@ -132,16 +166,17 @@ class AccountRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> manageItemPermissions(
-      {int? accountId,
-      required String username,
-      required List<String> permissions}) async {
+  Future<RepoResponse> manageItemPermissions({
+    required int id,
+    required String username,
+    required String permission,
+  }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
-      uri: "$modelUrl/$accountId/$username/permissions/",
+      uri: "$modelUrl/$id/$username/permissions/",
       contentType: 'application/json',
       body: {
-        'permissions': permissions,
+        'permission': permission,
       },
     );
 
