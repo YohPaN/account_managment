@@ -22,8 +22,8 @@ class CategoryRepository {
 
   Future<RepoResponse> create({
     required String title,
-    required String icon,
-    required String color,
+    required int icon,
+    required int color,
     int? accountId,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
@@ -44,8 +44,8 @@ class CategoryRepository {
   Future<RepoResponse> update({
     required int categoryId,
     required String title,
-    required String icon,
-    required String color,
+    required int icon,
+    required int color,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PUT",

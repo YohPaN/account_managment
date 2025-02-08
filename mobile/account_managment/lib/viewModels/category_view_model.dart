@@ -42,8 +42,8 @@ class CategoryViewModel extends ChangeNotifier {
 
   Future<RepoResponse> createCategory({
     required String title,
-    required String icon,
-    required String color,
+    required int icon,
+    required int color,
     int? accountId,
   }) async {
     final RepoResponse repoResponse = await accountCategoryRepository.create(
@@ -73,8 +73,8 @@ class CategoryViewModel extends ChangeNotifier {
   Future<RepoResponse> updateCategory({
     required int categoryId,
     required String title,
-    required String icon,
-    required String color,
+    required int icon,
+    required int color,
     required String categoryType,
   }) async {
     final RepoResponse repoResponse = await accountCategoryRepository.update(

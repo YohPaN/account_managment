@@ -5,9 +5,12 @@ import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
+import 'package:flutter_iconpicker/Models/configuration.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
 class CategoryDrawer extends StatefulWidget {
   final String action;
@@ -31,6 +34,9 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
   final TextEditingController iconController = TextEditingController();
   final TextEditingController colorController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  Color pickerColor = const Color(0xff443a49);
+  Color currentColor = const Color(0xff443a49);
+  Icon? _selectedIcon = const Icon(Icons.category);
 
   @override
   void initState() {
@@ -42,12 +48,55 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
     }
   }
 
+  void changeColor(Color color) {
+    setState(() => pickerColor = color);
+  }
+
   @override
   Widget build(BuildContext context) {
     final CategoryViewModel categoryViewModel =
         Provider.of<CategoryViewModel>(context);
 
     final AppLocalizations locale = AppLocalizations.of(context)!;
+
+    Future<void> colorDialogBuilder(BuildContext context) {
+      return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Pick a color!'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor: currentColor,
+              onColorChanged: changeColor,
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Got it'),
+              onPressed: () {
+                setState(() => currentColor = pickerColor);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    }
+
+    Future<void> pickIcon() async {
+      IconPickerIcon? icon = await showIconPicker(
+        context,
+        configuration: const SinglePickerConfiguration(
+          iconPackModes: [IconPack.material],
+        ),
+      );
+
+      if (icon != null) {
+        setState(() {
+          _selectedIcon = Icon(icon.data);
+        });
+      }
+    }
 
     Future<RepoResponse> submit({
       required String title,
@@ -57,8 +106,8 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
       if (widget.action == "create") {
         return await categoryViewModel.createCategory(
           title: title,
-          icon: icon,
-          color: color,
+          icon: _selectedIcon!.icon!.codePoint,
+          color: currentColor.value,
           accountId: widget.categoryType == "account"
               ? Provider.of<AccountViewModel>(context, listen: false)
                   .account!
@@ -69,8 +118,8 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
         return await categoryViewModel.updateCategory(
           categoryId: widget.category!.id,
           title: title,
-          icon: icon,
-          color: color,
+          icon: _selectedIcon!.icon!.codePoint,
+          color: currentColor.value,
           categoryType: widget.categoryType,
         );
       }
@@ -98,24 +147,23 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                     value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                textCapitalization: TextCapitalization.sentences,
-                controller: iconController,
-                decoration:
-                    InputDecoration(labelText: locale.icon.capitalize()),
-                maxLength: 30,
-                validator: (value) => ValidationHelper.validateInput(
-                    value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                textCapitalization: TextCapitalization.sentences,
-                controller: colorController,
-                decoration:
-                    InputDecoration(labelText: locale.color.capitalize()),
-                maxLength: 30,
-                validator: (value) => ValidationHelper.validateInput(
-                    value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: currentColor),
+                    onPressed: () async {
+                      await colorDialogBuilder(context);
+                    },
+                    child: const Icon(Icons.brush,
+                        color: Colors.white, size: 24.0),
+                  ),
+                  ElevatedButton(
+                    onPressed: pickIcon,
+                    child: _selectedIcon,
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Row(

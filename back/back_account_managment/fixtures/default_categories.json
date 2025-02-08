@@ -4,8 +4,8 @@
         "pk": 1,
         "fields": {
             "title": "food",
-            "color": "",
-            "icon": ""
+            "color": 4294951175,
+            "icon": 57946
         }
     },
     {
@@ -13,8 +13,8 @@
         "pk": 2,
         "fields": {
             "title": "invoice",
-            "color": "",
-            "icon": ""
+            "color": 4280391411,
+            "icon": 58636
         }
     },
     {
@@ -22,8 +22,8 @@
         "pk": 3,
         "fields": {
             "title": "transport",
-            "color": "",
-            "icon": ""
+            "color": 4291681337,
+            "icon": 57815
         }
     }
 ]

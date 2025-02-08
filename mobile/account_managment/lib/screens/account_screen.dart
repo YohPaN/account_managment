@@ -156,7 +156,13 @@ class _AccountScreenState extends State<AccountScreen> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5.0),
-                                    color: Colors.white,
+                                    color: index != 0
+                                        ? Color(accountViewModel
+                                                .account!
+                                                .accountCategories[index - 1]
+                                                .color ??
+                                            0)
+                                        : Colors.white,
                                     boxShadow: const [
                                       BoxShadow(
                                         color: Colors.black,
@@ -178,16 +184,37 @@ class _AccountScreenState extends State<AccountScreen> {
                                           }
                                         }
                                       },
-                                      title: Text(
-                                        index == 0
-                                            ? locale.without_category
-                                                .capitalize()
-                                            : accountViewModel
-                                                .account!
-                                                .accountCategories[index - 1]
-                                                .title
-                                                .capitalize(),
-                                      ),
+                                      title: index == 0
+                                          ? Text(locale.without_category
+                                              .capitalize())
+                                          : Row(
+                                              children: [
+                                                Icon(
+                                                  IconData(
+                                                      accountViewModel
+                                                              .account!
+                                                              .accountCategories[
+                                                                  index - 1]
+                                                              .icon ??
+                                                          0,
+                                                      fontFamily:
+                                                          "MaterialIcons"),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 8.0),
+                                                  child: Text(
+                                                    accountViewModel
+                                                        .account!
+                                                        .accountCategories[
+                                                            index - 1]
+                                                        .title
+                                                        .capitalize(),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                       children: [
                                         Builder(builder: (context) {
                                           if (index == 0) {

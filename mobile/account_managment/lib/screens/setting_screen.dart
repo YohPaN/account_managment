@@ -164,9 +164,13 @@ class SettingScreen extends StatelessWidget {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Icon(
-                                            IconData(profileViewModel.profile!
-                                                    .categories[index].icon ??
-                                                0),
+                                            IconData(
+                                                profileViewModel
+                                                        .profile!
+                                                        .categories[index]
+                                                        .icon ??
+                                                    0,
+                                                fontFamily: "MaterialIcons"),
                                           ),
                                           Text(
                                             profileViewModel.profile!

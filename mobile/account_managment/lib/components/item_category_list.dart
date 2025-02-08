@@ -61,36 +61,33 @@ class ItemCategoryList extends StatelessWidget {
             shrinkWrap: true,
             itemCount: items.length,
             itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(
-                    left: 16, right: 16, top: 8, bottom: 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5.0),
-                    color: Colors.white,
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black,
-                        offset: Offset(0.0, 1.0),
-                        blurRadius: 4.0,
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    title: ListItem(
-                      item: items[index],
-                      accountId: accountViewModel.account!.id,
-                      callbackFunc: showModal,
-                      canManage: profileViewModel.user!.hasPermission(
-                        ressource: items[index],
-                        account: accountViewModel.account,
-                        permissionsNeeded: ["change_item", "delete_item"],
-                        permissions: accountViewModel.account!.permissions,
-                        strict: false,
+              return Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      color: const Color.fromARGB(0, 0, 0, 0),
+                    ),
+                    child: ListTile(
+                      title: ListItem(
+                        item: items[index],
+                        accountId: accountViewModel.account!.id,
+                        callbackFunc: showModal,
+                        canManage: profileViewModel.user!.hasPermission(
+                          ressource: items[index],
+                          account: accountViewModel.account,
+                          permissionsNeeded: ["change_item", "delete_item"],
+                          permissions: accountViewModel.account!.permissions,
+                          strict: false,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  if (items.length != index + 1)
+                    const Divider(
+                      color: Colors.black,
+                    ),
+                ],
               );
             },
           ),
