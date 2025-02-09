@@ -22,6 +22,12 @@ class _AccountScreenState extends State<AccountScreen> {
   final List<ExpansionTileController> _controllers = [];
 
   @override
+  void initState() {
+    super.initState();
+    _controllers.clear();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final accountViewModel =
         Provider.of<AccountViewModel>(context, listen: false);
@@ -174,6 +180,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ),
                                   child: ListTile(
                                     title: ExpansionTile(
+                                      key: ValueKey(index),
                                       controller: _controllers[index],
                                       onExpansionChanged: (isExpanded) {
                                         if (isExpanded) {
