@@ -5,6 +5,7 @@ import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
 class CategoryViewModel extends ChangeNotifier {
   final CategoryRepository accountCategoryRepository = CategoryRepository();
@@ -42,7 +43,7 @@ class CategoryViewModel extends ChangeNotifier {
 
   Future<RepoResponse> createCategory({
     required String title,
-    required int icon,
+    required IconPickerIcon icon,
     required int color,
     int? accountId,
   }) async {
@@ -73,7 +74,7 @@ class CategoryViewModel extends ChangeNotifier {
   Future<RepoResponse> updateCategory({
     required int categoryId,
     required String title,
-    required int icon,
+    required IconPickerIcon icon,
     required int color,
     required String categoryType,
   }) async {

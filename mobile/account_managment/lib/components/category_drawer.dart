@@ -1,4 +1,5 @@
 import 'package:account_managment/common/internal_notification.dart';
+import 'package:account_managment/custom_icon_pack.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:flutter_iconpicker/Models/configuration.dart';
+import 'package:flutter_iconpicker/Models/icon_picker_icon.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
@@ -36,15 +38,18 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
   final _formKey = GlobalKey<FormState>();
   Color pickerColor = const Color(0xff443a49);
   Color currentColor = const Color(0xff443a49);
-  Icon? _selectedIcon = const Icon(Icons.category);
+  IconPickerIcon? _selectedIcon = const IconPickerIcon(
+      name: "category",
+      pack: IconPack.material,
+      data: IconData(0xe148, fontFamily: 'MaterialIcons'));
 
   @override
   void initState() {
     super.initState();
     if (widget.action == "update") {
       titleController.text = widget.category!.title;
-      iconController.text = widget.category!.icon.toString();
-      colorController.text = widget.category!.color.toString();
+      _selectedIcon = widget.category!.icon;
+      currentColor = Color(widget.category!.color ?? 0xff443a49);
     }
   }
 
@@ -90,13 +95,14 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
           title: Text(locale.pick_icon.capitalize()),
           closeChild: Text(locale.close.capitalize()),
           searchHintText: locale.search.capitalize(),
-          iconPackModes: [IconPack.material],
+          customIconPack: customIcons,
+          iconPackModes: [IconPack.material, IconPack.custom],
         ),
       );
 
       if (icon != null) {
         setState(() {
-          _selectedIcon = Icon(icon.data);
+          _selectedIcon = icon;
         });
       }
     }
@@ -109,7 +115,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
       if (widget.action == "create") {
         return await categoryViewModel.createCategory(
           title: title,
-          icon: _selectedIcon!.icon!.codePoint,
+          icon: _selectedIcon!,
           color: currentColor.value,
           accountId: widget.categoryType == "account"
               ? Provider.of<AccountViewModel>(context, listen: false)
@@ -121,7 +127,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
         return await categoryViewModel.updateCategory(
           categoryId: widget.category!.id,
           title: title,
-          icon: _selectedIcon!.icon!.codePoint,
+          icon: _selectedIcon!,
           color: currentColor.value,
           categoryType: widget.categoryType,
         );
@@ -164,7 +170,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                   ),
                   ElevatedButton(
                     onPressed: pickIcon,
-                    child: _selectedIcon,
+                    child: Icon(_selectedIcon?.data),
                   ),
                 ],
               ),

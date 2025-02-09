@@ -1,4 +1,4 @@
-from itertools import chain
+import json
 
 from back_account_managment.models import (
     Account,
@@ -46,7 +46,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Exists, OuterRef, Prefetch
+from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -537,6 +537,8 @@ class CategoryView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         account_id = request.data.get("account_id", None)
 
+        request.data["icon"] = json.loads(request.data["icon"])
+
         if account_id is not None:
             request.data["object_id"] = account_id
             request.data["content_type"] = ContentType.objects.get_for_model(
@@ -547,7 +549,6 @@ class CategoryView(ModelViewSet):
             request.data["content_type"] = ContentType.objects.get_for_model(
                 User
             ).pk
-
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
@@ -557,6 +558,11 @@ class CategoryView(ModelViewSet):
             AccountCategory.objects.create(
                 category=category, account_id=category.object_id
             )
+
+    def update(self, request, *args, **kwargs):
+        request.data["icon"] = json.loads(request.data["icon"])
+
+        return super().update(request, *args, **kwargs)
 
 
 class AccountCategoryView(ModelViewSet):

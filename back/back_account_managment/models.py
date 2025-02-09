@@ -23,7 +23,7 @@ from django.db.models import (
 class Category(models.Model):
     title = models.CharField(max_length=25)
     color = models.CharField(max_length=50, blank=True)
-    icon = models.CharField(max_length=50, blank=True)
+    icon = models.JSONField()
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, null=True, blank=True
     )

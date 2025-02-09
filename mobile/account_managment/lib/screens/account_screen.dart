@@ -192,26 +192,45 @@ class _AccountScreenState extends State<AccountScreen> {
                                                 Icon(
                                                   IconData(
                                                       accountViewModel
+                                                          .account!
+                                                          .accountCategories[
+                                                              index - 1]
+                                                          .icon!
+                                                          .data
+                                                          .codePoint,
+                                                      fontFamily:
+                                                          accountViewModel
                                                               .account!
                                                               .accountCategories[
                                                                   index - 1]
-                                                              .icon ??
-                                                          0,
-                                                      fontFamily:
-                                                          "MaterialIcons"),
+                                                              .icon!
+                                                              .data
+                                                              .fontFamily),
                                                 ),
                                                 Padding(
                                                   padding:
                                                       const EdgeInsets.only(
                                                           left: 8.0),
-                                                  child: Text(
-                                                    accountViewModel
-                                                        .account!
-                                                        .accountCategories[
-                                                            index - 1]
-                                                        .title
-                                                        .capitalize(),
-                                                  ),
+                                                  child: Text((locale.default_category_title(
+                                                                  accountViewModel
+                                                                      .account!
+                                                                      .accountCategories[
+                                                                          index -
+                                                                              1]
+                                                                      .title) !=
+                                                              ""
+                                                          ? locale.default_category_title(
+                                                              accountViewModel
+                                                                  .account!
+                                                                  .accountCategories[
+                                                                      index - 1]
+                                                                  .title)
+                                                          : accountViewModel
+                                                              .account!
+                                                              .accountCategories[
+                                                                  index - 1]
+                                                              .title)
+                                                      .capitalize()),
                                                 ),
                                               ],
                                             ),

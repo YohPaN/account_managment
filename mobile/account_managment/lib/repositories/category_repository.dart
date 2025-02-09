@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:account_managment/helpers/request_handler.dart';
 
 import 'package:account_managment/models/repo_reponse.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CategoryRepository {
@@ -22,7 +25,7 @@ class CategoryRepository {
 
   Future<RepoResponse> create({
     required String title,
-    required int icon,
+    required IconPickerIcon icon,
     required int color,
     int? accountId,
   }) async {
@@ -32,7 +35,7 @@ class CategoryRepository {
       contentType: 'application/json',
       body: {
         'title': title,
-        'icon': icon,
+        'icon': jsonEncode(serializeIcon(icon)),
         'color': color,
         if (accountId != null) 'account_id': accountId,
       },
@@ -44,7 +47,7 @@ class CategoryRepository {
   Future<RepoResponse> update({
     required int categoryId,
     required String title,
-    required int icon,
+    required IconPickerIcon icon,
     required int color,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
@@ -53,7 +56,7 @@ class CategoryRepository {
       contentType: 'application/json',
       body: {
         'title': title,
-        'icon': icon,
+        'icon': jsonEncode(serializeIcon(icon)),
         'color': color,
       },
     );

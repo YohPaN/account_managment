@@ -121,6 +121,14 @@
             }
         }
     },
+    "default_category_title": "{title, select, food{food} invoice{invoice} transport{transport} animal{animal} subscription{subscription} other{}}",
+    "@default_category_title": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
     "no_category": "no categories",
     "icon": "icon",
     "color": "color",

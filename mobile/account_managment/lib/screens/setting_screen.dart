@@ -166,11 +166,17 @@ class SettingScreen extends StatelessWidget {
                                           Icon(
                                             IconData(
                                                 profileViewModel
-                                                        .profile!
-                                                        .categories[index]
-                                                        .icon ??
-                                                    0,
-                                                fontFamily: "MaterialIcons"),
+                                                    .profile!
+                                                    .categories[index]
+                                                    .icon!
+                                                    .data
+                                                    .codePoint,
+                                                fontFamily: profileViewModel
+                                                    .profile!
+                                                    .categories[index]
+                                                    .icon!
+                                                    .data
+                                                    .fontFamily),
                                           ),
                                           Text(
                                             profileViewModel.profile!
