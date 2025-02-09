@@ -28,6 +28,7 @@ class CategoryList extends StatelessWidget {
       builder: (context, accountViewModel, child) {
         if (categories.isNotEmpty) {
           return ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: categories.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {

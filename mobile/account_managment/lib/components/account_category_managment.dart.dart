@@ -57,6 +57,7 @@ class _AccountCategoryManagmentState extends State<AccountCategoryManagment> {
     return Consumer<AccountViewModel>(
       builder: (context, accountViewModel, child) {
         return ListView(
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           children: [
             ListTile(
