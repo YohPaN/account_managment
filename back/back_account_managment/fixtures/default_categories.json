@@ -5,7 +5,10 @@
         "fields": {
             "title": "food",
             "color": 4294951175,
-            "icon": 57946
+            "icon": {
+                "key": "local_restaurant",
+                "pack": "material"
+            }
         }
     },
     {
@@ -14,7 +17,10 @@
         "fields": {
             "title": "invoice",
             "color": 4280391411,
-            "icon": 58636
+            "icon": {
+                "key": "receipt",
+                "pack": "material"
+            }
         }
     },
     {
@@ -23,7 +29,40 @@
         "fields": {
             "title": "transport",
             "color": 4291681337,
-            "icon": 57815
+            "icon": {
+                "key": "directions_car",
+                "pack": "material"
+            }
+        }
+    },
+    {
+        "model": "back_account_managment.category",
+        "pk": 4,
+        "fields": {
+            "title": "animal",
+            "color": 4288423856,
+            "icon": {
+                "key": "animal",
+                "pack": "custom",
+                "iconData": {
+                    "codePoint": 59648,
+                    "fontFamily": "AnimalIcon",
+                    "fontPackage": "",
+                    "matchTextDirection": false
+                }
+            }
+        }
+    },
+    {
+        "model": "back_account_managment.category",
+        "pk": 5,
+        "fields": {
+            "title": "subscription",
+            "color": 4294198070,
+            "icon": {
+                "key": "loop",
+                "pack": "material"
+            }
         }
     }
 ]

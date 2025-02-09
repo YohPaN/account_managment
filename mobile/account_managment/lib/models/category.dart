@@ -1,8 +1,11 @@
+import 'package:flutter_iconpicker/Models/icon_picker_icon.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
+
 class CategoryApp {
   int id;
   String title;
   int? color;
-  int? icon;
+  IconPickerIcon? icon;
 
   CategoryApp({
     required this.id,
@@ -13,17 +16,17 @@ class CategoryApp {
 
   static CategoryApp deserialize(jsonCategory) {
     return CategoryApp(
-      id: jsonCategory["id"],
-      title: jsonCategory["title"],
-      color:
-          jsonCategory["color"] != "" ? int.parse(jsonCategory["color"]) : null,
-      icon: jsonCategory["icon"] != "" ? int.parse(jsonCategory["icon"]) : null,
-    );
+        id: jsonCategory["id"],
+        title: jsonCategory["title"],
+        color: jsonCategory["color"] != ""
+            ? int.parse(jsonCategory["color"])
+            : null,
+        icon: deserializeIcon(jsonCategory["icon"]));
   }
 
   void update(data) {
     title = data["title"];
     color = int.parse(data["color"]);
-    icon = int.parse(data["icon"]);
+    icon = deserializeIcon(data["icon"]);
   }
 }

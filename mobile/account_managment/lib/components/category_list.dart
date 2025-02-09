@@ -39,7 +39,13 @@ class CategoryList extends StatelessWidget {
                         builder: (context) {
                           if (!accountCategory) {
                             return CheckboxListTile(
-                              title: Text(categories[index].title),
+                              title: Text((locale.default_category_title(
+                                              categories[index].title) !=
+                                          ""
+                                      ? locale.default_category_title(
+                                          categories[index].title)
+                                      : categories[index].title)
+                                  .capitalize()),
                               value: accountViewModel.account!.accountCategories
                                   .any((category) =>
                                       category.id == categories[index].id),
