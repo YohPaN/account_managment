@@ -186,8 +186,13 @@ class _AccountScreenState extends State<AccountScreen> {
                                         }
                                       },
                                       title: index == 0
-                                          ? Text(locale.without_category
-                                              .capitalize())
+                                          ? Text(
+                                              locale.without_category
+                                                  .capitalize(),
+                                              style: const TextStyle(
+                                                  fontSize: 18.0,
+                                                  fontWeight: FontWeight.bold),
+                                            )
                                           : Row(
                                               children: [
                                                 Icon(
