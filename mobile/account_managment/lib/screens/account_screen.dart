@@ -196,7 +196,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                                           .account!
                                                           .accountCategories[
                                                               index - 1]
-                                                          .color!),
+                                                          .color),
                                                   IconData(
                                                       accountViewModel
                                                           .account!
@@ -240,6 +240,9 @@ class _AccountScreenState extends State<AccountScreen> {
                                                                 .title)
                                                         .capitalize(),
                                                     style: TextStyle(
+                                                      fontSize: 18.0,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       color: textColor(
                                                           accountViewModel
                                                               .account!
