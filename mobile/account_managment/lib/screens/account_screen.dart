@@ -1,6 +1,7 @@
 import 'package:account_managment/components/item_category_list.dart';
 import 'package:account_managment/components/item_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/helpers/text_w_or_dark.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
@@ -190,6 +191,12 @@ class _AccountScreenState extends State<AccountScreen> {
                                           : Row(
                                               children: [
                                                 Icon(
+                                                  color: textColor(
+                                                      accountViewModel
+                                                          .account!
+                                                          .accountCategories[
+                                                              index - 1]
+                                                          .color!),
                                                   IconData(
                                                       accountViewModel
                                                           .account!
@@ -211,26 +218,36 @@ class _AccountScreenState extends State<AccountScreen> {
                                                   padding:
                                                       const EdgeInsets.only(
                                                           left: 8.0),
-                                                  child: Text((locale.default_category_title(
-                                                                  accountViewModel
-                                                                      .account!
-                                                                      .accountCategories[
-                                                                          index -
-                                                                              1]
-                                                                      .title) !=
-                                                              ""
-                                                          ? locale.default_category_title(
-                                                              accountViewModel
-                                                                  .account!
-                                                                  .accountCategories[
-                                                                      index - 1]
-                                                                  .title)
-                                                          : accountViewModel
+                                                  child: Text(
+                                                    (locale.default_category_title(accountViewModel
+                                                                    .account!
+                                                                    .accountCategories[
+                                                                        index -
+                                                                            1]
+                                                                    .title) !=
+                                                                ""
+                                                            ? locale.default_category_title(
+                                                                accountViewModel
+                                                                    .account!
+                                                                    .accountCategories[
+                                                                        index -
+                                                                            1]
+                                                                    .title)
+                                                            : accountViewModel
+                                                                .account!
+                                                                .accountCategories[
+                                                                    index - 1]
+                                                                .title)
+                                                        .capitalize(),
+                                                    style: TextStyle(
+                                                      color: textColor(
+                                                          accountViewModel
                                                               .account!
                                                               .accountCategories[
                                                                   index - 1]
-                                                              .title)
-                                                      .capitalize()),
+                                                              .color!),
+                                                    ),
+                                                  ),
                                                 ),
                                               ],
                                             ),
