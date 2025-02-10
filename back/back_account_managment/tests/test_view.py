@@ -41,12 +41,14 @@ class UserViewTest(TestCase):
 
         self.category_under_user = Category.objects.create(
             title="test_category",
+            icon={},
             content_type=ContentType.objects.get_for_model(User),
             object_id=self.user.pk,
         )
 
         self.other_category = Category.objects.create(
             title="test",
+            icon={},
         )
 
         self.c = APIClient()
@@ -291,22 +293,26 @@ class AccountViewTest(TestCase):
 
         self.default_category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
         self.category_for_account = Category.objects.create(
             title="category_for_account",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account,
         )
 
         self.category_for_account2 = Category.objects.create(
             title="category_for_account2",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account2,
         )
 
         self.category_for_user = Category.objects.create(
             title="category_for_user",
+            icon={},
             content_type=ContentType.objects.get_for_model(User),
             object_id=self.user.pk,
         )
@@ -336,6 +342,7 @@ class AccountViewTest(TestCase):
         )
         category_for_account = Category.objects.create(
             title="locale_category",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=account_approved,
         )
@@ -672,10 +679,12 @@ class ItemViewTest(TestCase):
 
         self.category = Category.objects.create(
             title="category",
+            icon={},
         )
 
         self.category_not_under_account = Category.objects.create(
             title="other category",
+            icon={},
         )
 
         self.account_category = AccountCategory.objects.create(
@@ -1242,22 +1251,26 @@ class CategoryViewTest(TestCase):
 
         self.default_category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
         self.category_for_account = Category.objects.create(
             title="category_for_account",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account.pk,
         )
 
         self.category_for_account2 = Category.objects.create(
             title="category_for_account2",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account2.pk,
         )
 
         self.category_for_user = Category.objects.create(
             title="category_for_user",
+            icon={},
             content_type=ContentType.objects.get_for_model(User),
             object_id=self.user.pk,
         )
@@ -1339,6 +1352,7 @@ class CategoryViewTest(TestCase):
             "/api/categories/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
                 "account_id": self.account.pk,
             },
             format="json",
@@ -1359,6 +1373,7 @@ class CategoryViewTest(TestCase):
             f"/api/categories/{self.category_for_account.pk}/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
             },
             format="json",
         )
@@ -1371,6 +1386,7 @@ class CategoryViewTest(TestCase):
         self.c.put(
             f"/api/categories/{self.category_for_account.pk}/",
             {
+                "icon": json.dumps({}),
                 "content_type": ContentType.objects.get_for_model(User).pk,
             },
             format="json",
@@ -1392,6 +1408,7 @@ class CategoryViewTest(TestCase):
             "/api/categories/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
             },
             format="json",
         )
@@ -1406,6 +1423,7 @@ class CategoryViewTest(TestCase):
             f"/api/categories/{self.category_for_user.pk}/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
             },
             format="json",
         )
@@ -1438,6 +1456,7 @@ class AccountCategoryViewTest(TestCase):
 
         self.category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
         self.account_with_category = Account.objects.create(
@@ -1446,12 +1465,14 @@ class AccountCategoryViewTest(TestCase):
 
         self.category_link_to_account = Category.objects.create(
             title="default_category",
+            icon={},
             object_id=self.account_with_category.pk,
             content_type=ContentType.objects.get_for_model(Account),
         )
 
         self.category_link_to_user = Category.objects.create(
             title="default_category",
+            icon={},
             object_id=self.user.pk,
             content_type=ContentType.objects.get_for_model(User),
         )
@@ -1469,6 +1490,7 @@ class AccountCategoryViewTest(TestCase):
 
         self.category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
     def test_associate_category_to_account(self):
