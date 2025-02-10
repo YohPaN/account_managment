@@ -26,6 +26,7 @@ class _ContributorsListState extends State<ContributorsList> {
         _controllers.clear();
 
         return ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: accountViewModel.account!.contributor.length,
           itemBuilder: (context, index) {
