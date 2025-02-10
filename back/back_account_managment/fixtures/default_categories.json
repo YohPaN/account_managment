@@ -64,5 +64,29 @@
                 "pack": "material"
             }
         }
+    },
+    {
+        "model": "back_account_managment.category",
+        "pk": 6,
+        "fields": {
+            "title": "home",
+            "color": 4294961979,
+            "icon": {
+                "key": "home",
+                "pack": "material"
+            }
+        }
+    },
+    {
+        "model": "back_account_managment.category",
+        "pk": 7,
+        "fields": {
+            "title": "bank",
+            "color": 4282661449,
+            "icon": {
+                "key": "account_balance",
+                "pack": "material"
+            }
+        }
     }
 ]

@@ -121,7 +121,7 @@
             }
         }
     },
-    "default_category_title": "{title, select, food{food} invoice{invoice} transport{transport} animal{animal} subscription{subscription} other{}}",
+    "default_category_title": "{title, select, food{food} invoice{invoice} transport{transport} animal{animal} home{home} bank{bank} subscription{subscription} other{}}",
     "@default_category_title": {
         "placeholders": {
             "title": {

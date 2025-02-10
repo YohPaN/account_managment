@@ -123,9 +123,11 @@ class _ItemDrawerState extends State<ItemDrawer> {
 
     for (var category in categoryViewModel.categories) {
       categoryList.add(DropdownMenuEntry<String>(
-        value: category.id.toString(),
-        label: category.title,
-      ));
+          value: category.id.toString(),
+          label: (locale.default_category_title(category.title) != ""
+                  ? locale.default_category_title(category.title)
+                  : category.title)
+              .capitalize()));
     }
 
     for (var account in accountViewModel.contributorAccounts ?? []) {
