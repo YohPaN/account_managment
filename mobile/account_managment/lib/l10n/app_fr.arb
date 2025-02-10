@@ -52,7 +52,7 @@
     "category": "{isSingular, plural, =0{categorie} other{categories}}",
     "create_category": "créer {isSingular, plural, =1{une categorie} other{des categories}}",
     "category_type": "categorie {type, select, account{du compte} profile{du profile} other{par défault}}",
-    "default_category_title": "{title, select, food{alimentation} invoice{facture} transport{transport} animal{animal} subscription{abonnement} other{}}",
+    "default_category_title": "{title, select, food{alimentation} invoice{facture} transport{transport} animal{animal} subscription{abonnement} home{maison} bank{banque} other{}}",
     "no_category": "aucune categorie",
     "icon": "icone",
     "color": "couleur",
