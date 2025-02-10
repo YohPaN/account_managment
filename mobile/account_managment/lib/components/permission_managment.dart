@@ -21,33 +21,42 @@ class PermissionManagment extends StatelessWidget {
       future: Provider.of<AccountViewModel>(context, listen: false)
           .listItemPermissions(username: username),
       builder: (context, snapshot) => snapshot.hasData
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ? ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
               children: [
                 Text(locale.permissions.capitalize()),
-                PermissionCheckbox(
-                  permission:
-                      snapshot.data!.data["permissions"].contains("add_item"),
-                  permissionsCodename: "add_item",
-                  username: username,
+                ListTile(
+                  title: PermissionCheckbox(
+                    permission:
+                        snapshot.data!.data["permissions"].contains("add_item"),
+                    permissionsCodename: "add_item",
+                    username: username,
+                  ),
                 ),
-                PermissionCheckbox(
-                  permission: snapshot.data!.data["permissions"]
-                      .contains("change_item"),
-                  permissionsCodename: "change_item",
-                  username: username,
+                ListTile(
+                  title: PermissionCheckbox(
+                    permission: snapshot.data!.data["permissions"]
+                        .contains("change_item"),
+                    permissionsCodename: "change_item",
+                    username: username,
+                  ),
                 ),
-                PermissionCheckbox(
-                  permission: snapshot.data!.data["permissions"]
-                      .contains("delete_item"),
-                  permissionsCodename: "delete_item",
-                  username: username,
+                ListTile(
+                  title: PermissionCheckbox(
+                    permission: snapshot.data!.data["permissions"]
+                        .contains("delete_item"),
+                    permissionsCodename: "delete_item",
+                    username: username,
+                  ),
                 ),
-                PermissionCheckbox(
-                  permission: snapshot.data!.data["permissions"]
-                      .contains("transfert_item"),
-                  permissionsCodename: "transfert_item",
-                  username: username,
+                ListTile(
+                  title: PermissionCheckbox(
+                    permission: snapshot.data!.data["permissions"]
+                        .contains("transfert_item"),
+                    permissionsCodename: "transfert_item",
+                    username: username,
+                  ),
                 ),
               ],
             )
