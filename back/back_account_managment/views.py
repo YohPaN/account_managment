@@ -2,7 +2,6 @@ import json
 
 from back_account_managment.models import (
     Account,
-    AccountCategory,
     AccountUser,
     AccountUserPermission,
     Category,
@@ -17,9 +16,6 @@ from back_account_managment.permissions import (
     LinkItemUserPermission,
     ManageRessourcePermission,
     TransfertToAccountPermission,
-)
-from back_account_managment.serializers.account_category_serializer import (
-    AccountCategorySerializer,
 )
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
@@ -147,7 +143,7 @@ class RegisterView(APIView):
 class AccountView(ModelViewSet):
     queryset = Account.objects.prefetch_related(
         "items",
-        "account_categories",
+        "categories",
     ).all()
     serializer_class = AccountSerializer
     permission_classes = [
@@ -508,13 +504,7 @@ class CategoryView(ModelViewSet):
             case "account_categories":
                 account = Account.objects.get(pk=account_id)
 
-                return queryset.filter(
-                    Exists(
-                        AccountCategory.objects.filter(
-                            account=account, category=OuterRef("pk")
-                        )
-                    )
-                )
+                return account.categories.all()
 
             case _:
                 return None
@@ -554,10 +544,9 @@ class CategoryView(ModelViewSet):
     def perform_create(self, serializer):
         category = serializer.save()
 
-        if category.content_type.model_class() is Account:
-            AccountCategory.objects.create(
-                category=category, account_id=category.object_id
-            )
+        instance = category.content_object
+        if isinstance(instance, Account):
+            category.accounts.add(instance)
 
     def update(self, request, *args, **kwargs):
         request.data["icon"] = json.loads(request.data["icon"])
@@ -565,74 +554,74 @@ class CategoryView(ModelViewSet):
         return super().update(request, *args, **kwargs)
 
 
-class AccountCategoryView(ModelViewSet):
-    queryset = AccountCategory.objects.all()
-    serializer_class = AccountCategorySerializer
+# class AccountCategoryView(ModelViewSet):
+#     queryset = AccountCategory.objects.all()
+#     serializer_class = AccountCategorySerializer
 
-    def create(self, request):
-        try:
-            category = Category.objects.get(
-                pk=request.data.get("category", None)
-            )
+#     def create(self, request):
+#         try:
+#             category = Category.objects.get(
+#                 pk=request.data.get("category", None)
+#             )
 
-            account = Account.objects.get(pk=request.data.get("account", None))
+#             account = Account.objects.get(pk=request.data.get("account", None))
 
-            if category.content_type == ContentType.objects.get_for_model(
-                Account
-            ):
-                account_category = AccountCategory.objects.filter(
-                    category=category
-                )
+#             if category.content_type == ContentType.objects.get_for_model(
+#                 Account
+#             ):
+#                 account_category = AccountCategory.objects.filter(
+#                     category=category
+#                 )
 
-                if (
-                    account_category.exists()
-                    and account_category.first().account != account
-                ):
-                    return Response(
-                        {"detail": "The category is link to another account"},
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
+#                 if (
+#                     account_category.exists()
+#                     and account_category.first().account != account
+#                 ):
+#                     return Response(
+#                         {"detail": "The category is link to another account"},
+#                         status=status.HTTP_401_UNAUTHORIZED,
+#                     )
 
-            AccountCategory.objects.get_or_create(
-                account=account, category=category
-            )
+#             AccountCategory.objects.get_or_create(
+#                 account=account, category=category
+#             )
 
-            return Response(
-                data=CategoryWriteSerializer(category).data,
-                status=status.HTTP_201_CREATED,
-            )
-        except Category.DoesNotExist as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-            )
+#             return Response(
+#                 data=CategoryWriteSerializer(category).data,
+#                 status=status.HTTP_201_CREATED,
+#             )
+#         except Category.DoesNotExist as e:
+#             return Response(
+#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+#             )
 
-        except Account.DoesNotExist as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-            )
+#         except Account.DoesNotExist as e:
+#             return Response(
+#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+#             )
 
-    @action(methods=["post"], detail=False, url_path="unlink")
-    def unlink(self, request):
-        try:
-            category = Category.objects.get(
-                pk=request.data.get("category", None)
-            )
+#     @action(methods=["post"], detail=False, url_path="unlink")
+#     def unlink(self, request):
+#         try:
+#             category = Category.objects.get(
+#                 pk=request.data.get("category", None)
+#             )
 
-            account = Account.objects.get(pk=request.data.get("account", None))
+#             account = Account.objects.get(pk=request.data.get("account", None))
 
-            AccountCategory.objects.filter(
-                account=account, category=category
-            ).delete()
+#             AccountCategory.objects.filter(
+#                 account=account, category=category
+#             ).delete()
 
-            return Response(
-                status=status.HTTP_204_NO_CONTENT,
-            )
-        except Category.DoesNotExist as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-            )
+#             return Response(
+#                 status=status.HTTP_204_NO_CONTENT,
+#             )
+#         except Category.DoesNotExist as e:
+#             return Response(
+#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+#             )
 
-        except Account.DoesNotExist as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-            )
+#         except Account.DoesNotExist as e:
+#             return Response(
+#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+#             )

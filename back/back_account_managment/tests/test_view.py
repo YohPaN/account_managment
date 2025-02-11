@@ -2,7 +2,6 @@ import json
 from decimal import Decimal
 
 from back_account_managment.models import (
-    AccountCategory,
     AccountUserPermission,
     Category,
     Profile,
@@ -317,14 +316,12 @@ class AccountViewTest(TestCase):
             object_id=self.user.pk,
         )
 
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category_for_account,
+        self.category_for_account.accounts.add(
+            self.account,
         )
 
-        self.account2_category = AccountCategory.objects.create(
-            account=self.account2,
-            category=self.category_for_account2,
+        self.category_for_account2.accounts.add(
+            self.account2,
         )
 
         self.c = APIClient()
@@ -346,10 +343,7 @@ class AccountViewTest(TestCase):
             content_type=ContentType.objects.get_for_model(Account),
             object_id=account_approved,
         )
-        AccountCategory.objects.create(
-            account=account_approved,
-            category=category_for_account,
-        )
+        category_for_account.accounts.add(account_approved)
 
         response = self.c.get("/api/accounts/")
 
@@ -357,6 +351,7 @@ class AccountViewTest(TestCase):
         self.assertIn("own", response.data)
         self.assertIn("contributor_account", response.data)
         self.assertIn("categories", response.data["own"][0])
+        self.assertIn("account_categories", response.data["own"][0])
         self.assertIn("categories", response.data["contributor_account"][0])
 
         self_account = [
@@ -368,7 +363,7 @@ class AccountViewTest(TestCase):
         self.assertTrue(
             any(
                 category["title"] == self.category_for_account.title
-                for category in self_account[0]["account_categories"]
+                for category in self_account[0]["categories"]
             )
         )
 
@@ -376,15 +371,15 @@ class AccountViewTest(TestCase):
             any(
                 category["title"] == category_for_account.title
                 for category in response.data["contributor_account"][0][
-                    "account_categories"
+                    "categories"
                 ]
             )
         )
         self.assertEqual(len(response.data["own"]), 2)
         self.assertEqual(len(response.data["contributor_account"]), 1)
-        self.assertEqual(len(self_account[0]["account_categories"]), 1)
+        self.assertEqual(len(self_account[0]["categories"]), 1)
         self.assertEqual(
-            len(response.data["contributor_account"][0]["account_categories"]),
+            len(response.data["contributor_account"][0]["categories"]),
             1,
         )
 
@@ -687,10 +682,7 @@ class ItemViewTest(TestCase):
             icon={},
         )
 
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category,
-        )
+        self.account_category = self.category.accounts.add(self.account)
 
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
@@ -813,10 +805,7 @@ class ItemViewTest(TestCase):
         self.assertEqual(self.item.title, "mon")
         self.assertEqual(self.item.category, self.category)
 
-        AccountCategory.objects.create(
-            account=self.account,
-            category=self.category_not_under_account,
-        )
+        self.category_not_under_account.accounts.add(self.account)
 
         self.c.put(
             f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
@@ -1275,14 +1264,12 @@ class CategoryViewTest(TestCase):
             object_id=self.user.pk,
         )
 
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category_for_account,
+        self.category_for_account.accounts.add(
+            self.account,
         )
 
-        self.account2_category = AccountCategory.objects.create(
-            account=self.account2,
-            category=self.category_for_account2,
+        self.category_for_account2.accounts.add(
+            self.account2,
         )
 
         self.c = APIClient()
@@ -1344,9 +1331,7 @@ class CategoryViewTest(TestCase):
             object_id=self.account.pk
         ).count()
 
-        account_category_count = AccountCategory.objects.filter(
-            account=self.account
-        ).count()
+        account_category_count = self.account.categories.all().count()
 
         self.c.post(
             "/api/categories/",
@@ -1364,7 +1349,7 @@ class CategoryViewTest(TestCase):
         )
 
         self.assertEqual(
-            AccountCategory.objects.filter(account=self.account).count(),
+            self.account.categories.all().count(),
             account_category_count + 1,
         )
 
@@ -1440,173 +1425,4 @@ class CategoryViewTest(TestCase):
         self.assertEqual(
             Category.objects.all().count(),
             user_category_count - 1,
-        )
-
-
-class AccountCategoryViewTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(
-            username="jonDoe",
-            email="jon@doe.test",
-        )
-
-        self.account = Account.objects.create(
-            user=self.user, name="first name", is_main=True
-        )
-
-        self.category = Category.objects.create(
-            title="default_category",
-            icon={},
-        )
-
-        self.account_with_category = Account.objects.create(
-            user=self.user, name="first name"
-        )
-
-        self.category_link_to_account = Category.objects.create(
-            title="default_category",
-            icon={},
-            object_id=self.account_with_category.pk,
-            content_type=ContentType.objects.get_for_model(Account),
-        )
-
-        self.category_link_to_user = Category.objects.create(
-            title="default_category",
-            icon={},
-            object_id=self.user.pk,
-            content_type=ContentType.objects.get_for_model(User),
-        )
-
-        self.account_category = AccountCategory.objects.create(
-            account=self.account_with_category,
-            category=self.category_link_to_account,
-        )
-
-        self.c = APIClient()
-        self.c.force_authenticate(user=self.user)
-        self.account = Account.objects.create(
-            user=self.user, name="first name", is_main=True
-        )
-
-        self.category = Category.objects.create(
-            title="default_category",
-            icon={},
-        )
-
-    def test_associate_category_to_account(self):
-        response = self.c.post(
-            "/api/account-categories/",
-            {
-                "category": self.category.pk,
-                "account": self.account.pk,
-            },
-        )
-
-        self.assertTrue(status.is_success(response.status_code))
-
-        self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
-            1,
-        )
-
-    def test_associate_category_to_account_that_are_already_linked(self):
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category,
-        )
-
-        response = self.c.post(
-            "/api/account-categories/",
-            {
-                "category": self.category.pk,
-                "account": self.account.pk,
-            },
-        )
-
-        self.assertTrue(status.is_success(response.status_code))
-
-        self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
-            1,
-        )
-
-    def test_associate_category_of_user_to_account(self):
-        response = self.c.post(
-            "/api/account-categories/",
-            {
-                "category": self.category_link_to_user.pk,
-                "account": self.account.pk,
-            },
-        )
-
-        self.assertTrue(status.is_success(response.status_code))
-
-        self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category_link_to_user
-            ).count(),
-            1,
-        )
-
-    def test_cannot_link_category_from_another_account(self):
-        """Can't link category define on another account"""
-        response = self.c.post(
-            "/api/account-categories/",
-            {
-                "category": self.category_link_to_account.pk,
-                "account": self.account.pk,
-            },
-        )
-
-        self.assertFalse(status.is_success(response.status_code))
-
-        self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
-            0,
-        )
-
-    def test_with_non_existing_category(self):
-        self.assertEqual(len(Category.objects.filter(pk=1000)), 0)
-
-        response = self.c.post(
-            "/api/account-categories/",
-            {
-                "category": 1000,
-                "account": self.account.pk,
-            },
-        )
-
-        self.assertFalse(status.is_success(response.status_code))
-
-        self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
-            0,
-        )
-
-    def test_with_non_existing_account(self):
-        self.assertEqual(len(Account.objects.filter(pk=1000)), 0)
-
-        response = self.c.post(
-            "/api/account-categories/",
-            {
-                "category": self.category.pk,
-                "account": 1000,
-            },
-        )
-
-        self.assertFalse(status.is_success(response.status_code))
-
-        self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
-            0,
         )

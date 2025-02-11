@@ -46,7 +46,6 @@ class AccountMeta:
         "salary_based_split",
         "transfert_items",
         "categories",
-        "account_categories",
     ]
 
 
@@ -60,13 +59,13 @@ class _AccountSerializer(serializers.ModelSerializer):
     own_contribution = serializers.SerializerMethodField()
     need_to_add = serializers.SerializerMethodField()
 
-    categories = serializers.SerializerMethodField()
-    account_categories = CategorySerializer(many=True)
+    account_categories = serializers.SerializerMethodField()
+    categories = CategorySerializer(many=True)
 
     class Meta:
         pass
 
-    def get_categories(self, account):
+    def get_account_categories(self, account):
         return CategorySerializer(
             Category.objects.filter(object_id=account.id), many=True
         ).data
@@ -197,22 +196,24 @@ class AccountListSerializer(_AccountSerializer):
 
     class Meta(AccountMeta):
         fields = [
-            field
-            for field in AccountMeta.fields
-            if field
-            in [
-                "contributors",
-                "id",
-                "is_main",
-                "items",
-                "name",
-                "permissions",
-                "total",
-                "user",
-                "salary_based_split",
-                "categories",
-                "account_categories",
-            ]
+            *[
+                field
+                for field in AccountMeta.fields
+                if field
+                in [
+                    "contributors",
+                    "id",
+                    "is_main",
+                    "items",
+                    "name",
+                    "permissions",
+                    "total",
+                    "user",
+                    "salary_based_split",
+                    "categories",
+                ]
+            ],
+            "account_categories",
         ]
 
 
@@ -221,25 +222,27 @@ class AccountSerializer(_AccountSerializer):
 
     class Meta(AccountMeta):
         fields = [
-            field
-            for field in AccountMeta.fields
-            if field
-            in [
-                "contributors",
-                "id",
-                "is_main",
-                "items",
-                "name",
-                "need_to_add",
-                "own_contribution",
-                "permissions",
-                "salary_based_split",
-                "total",
-                "transfert_items",
-                "user",
-                "categories",
-                "account_categories",
-            ]
+            *[
+                field
+                for field in AccountMeta.fields
+                if field
+                in [
+                    "contributors",
+                    "id",
+                    "is_main",
+                    "items",
+                    "name",
+                    "need_to_add",
+                    "own_contribution",
+                    "permissions",
+                    "salary_based_split",
+                    "total",
+                    "transfert_items",
+                    "user",
+                    "categories",
+                ]
+            ],
+            "account_categories",
         ]
 
 
