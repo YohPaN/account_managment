@@ -70,9 +70,7 @@ class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
     salary_based_split = models.BooleanField(default=False)
-    account_categories = models.ManyToManyField(
-        Category, through="AccountCategory"
-    )
+    categories = models.ManyToManyField(Category, related_name="accounts")
 
     class Meta:
         permissions = [
@@ -99,11 +97,6 @@ class Account(models.Model):
         return total.aggregate(total_sum=(Sum("calc_valuation", default=0)))
 
 
-class AccountCategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-
-
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=15)
@@ -121,11 +114,7 @@ class Item(models.Model):
 
     def save(self, **kwargs):
         if self.category:
-            account_category = AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            )
-
-            assert account_category.exists()
+            assert self.category.accounts.filter(pk=self.account.pk).exists()
 
         return super().save(**kwargs)
 
