@@ -269,7 +269,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                       children: [
                                         Builder(builder: (context) {
                                           if (index == 0) {
-                                            return ItemCategoryList();
+                                            return ItemCategoryList(); //MUST BE NOT CONST
                                           } else {
                                             return ItemCategoryList(
                                               category: accountViewModel
