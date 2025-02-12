@@ -1,11 +1,5 @@
-from back_account_managment.models import (
-    Account,
-    AccountUser,
-    AccountUserPermission,
-    Item,
-)
+from back_account_managment.models import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
-from django.db.models import Exists
 from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS
 
@@ -56,15 +50,14 @@ class ManageRessourcePermission(permissions.BasePermission):
             case _:
                 return False
 
-        account_user = AccountUser.objects.filter(
-            user=request.user, account=account
-        )
-        account_user_permissions = AccountUserPermission.objects.filter(
-            Exists(account_user),
-            permissions__codename=codename,
-        ).count()
+        try:
+            account_user = AccountUser.objects.get(
+                user=request.user, account=account
+            )
+        except AccountUser.DoesNotExist:
+            return False
 
-        if account_user_permissions > 0:
+        if account_user.permissions.filter(codename=codename).count() > 0:
             return True
 
         return False
@@ -89,14 +82,17 @@ class LinkItemUserPermission(permissions.BasePermission):
         if request.method in [*SAFE_METHODS, "DELETE"]:
             return True
 
-        account_user = AccountUser.objects.filter(
-            user=request.user,
-            account_id=view.kwargs.get("account_id"),
-        )
+        try:
+            account_user = AccountUser.objects.get(
+                user=request.user,
+                account_id=view.kwargs.get("account_id"),
+            )
+        except AccountUser.DoesNotExist:
+            return False
 
-        permissions = AccountUserPermission.objects.filter(
-            Exists(account_user)
-        ).values_list("permissions__codename", flat=True)
+        permissions = account_user.permissions.values_list(
+            "codename", flat=True
+        )
 
         if "change_item" in permissions:
             return True
@@ -122,13 +118,13 @@ class TransfertToAccountPermission(permissions.BasePermission):
         ):
             return True
 
-        account_user = AccountUser.objects.filter(
+        account_user = AccountUser.objects.get(
             user=request.user,
             account_id=request.data.get("to_account"),
         )
 
-        permissions = AccountUserPermission.objects.filter(
-            Exists(account_user)
-        ).values_list("permissions__codename", flat=True)
+        permissions = account_user.permissions.values_list(
+            "permissions__codename", flat=True
+        )
 
         return "transfert_item" in permissions
