@@ -19,6 +19,7 @@ from back_account_managment.permissions import (
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
+    AccountUserPermissionsSerializer,
     MinimalAccountSerilizer,
 )
 from back_account_managment.serializers.account_user_serializer import (
@@ -38,6 +39,7 @@ from back_account_managment.serializers.user_serializer import (
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
@@ -419,6 +421,52 @@ class AccountUserView(ModelViewSet):
 
         return Response(
             {"pending_account_request": ask}, status=status.HTTP_200_OK
+        )
+
+
+class AccountUserPermissionView(ModelViewSet):
+    serializer_class = AccountUserPermissionsSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
+
+    def get_queryset(self):
+        return AccountUser.objects.get(
+            user=User.objects.get(username=self.kwargs.get("user_username")),
+            account=self.kwargs.get("account_id"),
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        queryset = queryset.permissions.all()
+
+        codenames = [entry.codename for entry in queryset]
+        return Response({"permissions": codenames})
+
+    def create(self, request, *args, **kwargs):
+        account = Account.objects.get(pk=kwargs["account_id"])
+
+        self.check_object_permissions(request, account)
+
+        account_user = self.get_queryset()
+
+        permission = Permission.objects.get(
+            codename=self.request.data["permission"],
+        )
+
+        account_user_permissions = account_user.permissions.filter(
+            codename=self.request.data["permission"],
+        )
+
+        if account_user_permissions.exists():
+            account_user.permissions.remove(permission)
+            created = False
+        else:
+            account_user.permissions.add(permission)
+            created = True
+
+        return Response(
+            data={"enabled": created},
+            status=status.HTTP_200_OK,
         )
 
 
