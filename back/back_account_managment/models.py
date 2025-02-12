@@ -137,6 +137,7 @@ class AccountUser(models.Model):
         Account, on_delete=models.CASCADE, related_name="contributors"
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    permissions = models.ManyToManyField(Permission, blank=True)
 
     class Meta:
         constraints = [
@@ -147,11 +148,6 @@ class AccountUser(models.Model):
                 name="valid_state_constraint",
             )
         ]
-
-
-class AccountUserPermission(models.Model):
-    account_user = models.ForeignKey(AccountUser, on_delete=models.CASCADE)
-    permissions = models.ForeignKey(Permission, on_delete=models.CASCADE)
 
 
 class Transfert(models.Model):

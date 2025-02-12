@@ -3,14 +3,10 @@ from decimal import Decimal
 from back_account_managment.models import (
     Account,
     AccountUser,
-    AccountUserPermission,
     Category,
     Item,
     Profile,
     Transfert,
-)
-from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
-    AccountUserPermissionsSerializer,
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountAccountUserSerializer,
@@ -25,7 +21,6 @@ from back_account_managment.serializers.user_serializer import (
     UsernameUserSerilizer,
 )
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
 from django.db.models import Case, Exists, F, OuterRef, Q, Sum, Value, When
 from rest_framework import serializers
 
@@ -84,20 +79,12 @@ class _AccountSerializer(serializers.ModelSerializer):
         if user == account.user:
             return []
 
-        account_user_qs = AccountUser.objects.filter(
+        account_user = AccountUser.objects.get(
             user=user,
             account=account,
-            id=OuterRef("account_user"),
         )
 
-        permissions = Permission.objects.filter(
-            Exists(
-                AccountUserPermission.objects.filter(
-                    permissions=OuterRef("pk"),
-                    account_user__in=account_user_qs,
-                )
-            )
-        )
+        permissions = account_user.permissions.all()
 
         return [
             permission["codename"]

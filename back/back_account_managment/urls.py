@@ -1,5 +1,4 @@
 from back_account_managment.views import (
-    AccountUserPermissionView,
     AccountUserView,
     AccountView,
     CategoryView,
@@ -18,11 +17,7 @@ router.register(r"account_user", AccountUserView)
 router.register(
     r"accounts/(?P<account_id>[^/.]+)/items", ItemView, basename="items"
 )
-router.register(
-    r"accounts/(?P<account_id>[^/.]+)/(?P<user_username>[^/.]+)/permissions",
-    AccountUserPermissionView,
-    basename="permissions",
-)
+
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),

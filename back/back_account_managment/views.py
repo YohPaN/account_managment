@@ -3,7 +3,6 @@ import json
 from back_account_managment.models import (
     Account,
     AccountUser,
-    AccountUserPermission,
     Category,
     Item,
     Profile,
@@ -20,7 +19,6 @@ from back_account_managment.permissions import (
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
-    AccountUserPermissionsSerializer,
     MinimalAccountSerilizer,
 )
 from back_account_managment.serializers.account_user_serializer import (
@@ -40,7 +38,6 @@ from back_account_managment.serializers.user_serializer import (
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
-from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
@@ -425,51 +422,51 @@ class AccountUserView(ModelViewSet):
         )
 
 
-class AccountUserPermissionView(ModelViewSet):
-    serializer_class = AccountUserPermissionsSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
+# class AccountUserPermissionView(ModelViewSet):
+#     serializer_class = AccountUserPermissionsSerializer
+#     permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
 
-    def get_queryset(self):
-        return AccountUser.objects.get(
-            user=User.objects.get(username=self.kwargs.get("user_username")),
-            account=self.kwargs.get("account_id"),
-        )
+#     def get_queryset(self):
+#         return AccountUser.objects.get(
+#             user=User.objects.get(username=self.kwargs.get("user_username")),
+#             account=self.kwargs.get("account_id"),
+#         )
 
-    def list(self, request, *args, **kwargs):
-        queryset = Permission.objects.filter(
-            Exists(
-                AccountUserPermission.objects.filter(
-                    account_user=self.get_queryset(),
-                    permissions=OuterRef("pk"),
-                )
-            )
-        )
-        codenames = [entry.codename for entry in queryset]
-        return Response({"permissions": codenames})
+#     def list(self, request, *args, **kwargs):
+#         queryset = Permission.objects.filter(
+#             Exists(
+#                 AccountUserPermission.objects.filter(
+#                     account_user=self.get_queryset(),
+#                     permissions=OuterRef("pk"),
+#                 )
+#             )
+#         )
+#         codenames = [entry.codename for entry in queryset]
+#         return Response({"permissions": codenames})
 
-    def create(self, request, *args, **kwargs):
-        account = Account.objects.get(pk=kwargs["account_id"])
+#     def create(self, request, *args, **kwargs):
+#         account = Account.objects.get(pk=kwargs["account_id"])
 
-        self.check_object_permissions(request, account)
+#         self.check_object_permissions(request, account)
 
-        account_user = self.get_queryset()
+#         account_user = self.get_queryset()
 
-        account_user_permissions, created = (
-            AccountUserPermission.objects.get_or_create(
-                account_user=account_user,
-                permissions=Permission.objects.get(
-                    codename=self.request.data["permission"]
-                ),
-            )
-        )
+#         account_user_permissions, created = (
+#             AccountUserPermission.objects.get_or_create(
+#                 account_user=account_user,
+#                 permissions=Permission.objects.get(
+#                     codename=self.request.data["permission"]
+#                 ),
+#             )
+#         )
 
-        if not created:
-            account_user_permissions.delete()
+#         if not created:
+#             account_user_permissions.delete()
 
-        return Response(
-            data={"enabled": created},
-            status=status.HTTP_200_OK,
-        )
+#         return Response(
+#             data={"enabled": created},
+#             status=status.HTTP_200_OK,
+#         )
 
 
 class CategoryView(ModelViewSet):
@@ -552,76 +549,3 @@ class CategoryView(ModelViewSet):
         request.data["icon"] = json.loads(request.data["icon"])
 
         return super().update(request, *args, **kwargs)
-
-
-# class AccountCategoryView(ModelViewSet):
-#     queryset = AccountCategory.objects.all()
-#     serializer_class = AccountCategorySerializer
-
-#     def create(self, request):
-#         try:
-#             category = Category.objects.get(
-#                 pk=request.data.get("category", None)
-#             )
-
-#             account = Account.objects.get(pk=request.data.get("account", None))
-
-#             if category.content_type == ContentType.objects.get_for_model(
-#                 Account
-#             ):
-#                 account_category = AccountCategory.objects.filter(
-#                     category=category
-#                 )
-
-#                 if (
-#                     account_category.exists()
-#                     and account_category.first().account != account
-#                 ):
-#                     return Response(
-#                         {"detail": "The category is link to another account"},
-#                         status=status.HTTP_401_UNAUTHORIZED,
-#                     )
-
-#             AccountCategory.objects.get_or_create(
-#                 account=account, category=category
-#             )
-
-#             return Response(
-#                 data=CategoryWriteSerializer(category).data,
-#                 status=status.HTTP_201_CREATED,
-#             )
-#         except Category.DoesNotExist as e:
-#             return Response(
-#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-#             )
-
-#         except Account.DoesNotExist as e:
-#             return Response(
-#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-#             )
-
-#     @action(methods=["post"], detail=False, url_path="unlink")
-#     def unlink(self, request):
-#         try:
-#             category = Category.objects.get(
-#                 pk=request.data.get("category", None)
-#             )
-
-#             account = Account.objects.get(pk=request.data.get("account", None))
-
-#             AccountCategory.objects.filter(
-#                 account=account, category=category
-#             ).delete()
-
-#             return Response(
-#                 status=status.HTTP_204_NO_CONTENT,
-#             )
-#         except Category.DoesNotExist as e:
-#             return Response(
-#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-#             )
-
-#         except Account.DoesNotExist as e:
-#             return Response(
-#                 {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
-#             )
