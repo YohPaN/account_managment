@@ -422,53 +422,6 @@ class AccountUserView(ModelViewSet):
         )
 
 
-# class AccountUserPermissionView(ModelViewSet):
-#     serializer_class = AccountUserPermissionsSerializer
-#     permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
-
-#     def get_queryset(self):
-#         return AccountUser.objects.get(
-#             user=User.objects.get(username=self.kwargs.get("user_username")),
-#             account=self.kwargs.get("account_id"),
-#         )
-
-#     def list(self, request, *args, **kwargs):
-#         queryset = Permission.objects.filter(
-#             Exists(
-#                 AccountUserPermission.objects.filter(
-#                     account_user=self.get_queryset(),
-#                     permissions=OuterRef("pk"),
-#                 )
-#             )
-#         )
-#         codenames = [entry.codename for entry in queryset]
-#         return Response({"permissions": codenames})
-
-#     def create(self, request, *args, **kwargs):
-#         account = Account.objects.get(pk=kwargs["account_id"])
-
-#         self.check_object_permissions(request, account)
-
-#         account_user = self.get_queryset()
-
-#         account_user_permissions, created = (
-#             AccountUserPermission.objects.get_or_create(
-#                 account_user=account_user,
-#                 permissions=Permission.objects.get(
-#                     codename=self.request.data["permission"]
-#                 ),
-#             )
-#         )
-
-#         if not created:
-#             account_user_permissions.delete()
-
-#         return Response(
-#             data={"enabled": created},
-#             status=status.HTTP_200_OK,
-#         )
-
-
 class CategoryView(ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
