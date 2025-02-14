@@ -16,11 +16,16 @@ from back_account_managment.permissions import (
     ManageRessourcePermission,
     TransfertToAccountPermission,
 )
+from back_account_managment.serializers.account_category_serializer import (
+    AccountCategorySerializer,
+)
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
-    AccountUserPermissionsSerializer,
     MinimalAccountSerilizer,
+)
+from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
+    AccountUserPermissionsSerializer,
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountUserSerializer,
@@ -550,3 +555,70 @@ class CategoryView(ModelViewSet):
         request.data["icon"] = json.loads(request.data["icon"])
 
         return super().update(request, *args, **kwargs)
+
+
+class AccountCategoryView(ModelViewSet):
+    queryset = Account.objects.all()
+    serializer_class = AccountCategorySerializer
+
+    def create(self, request):
+        try:
+            category = Category.objects.get(
+                pk=request.data.get("category", None)
+            )
+
+            account = Account.objects.get(pk=request.data.get("account", None))
+
+            if category.content_type == ContentType.objects.get_for_model(
+                Account
+            ):
+                account_category = category.accounts.all()
+
+                if (
+                    account_category.exists()
+                    and account_category.first() != account
+                ):
+                    return Response(
+                        {"detail": "The category is link to another account"},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+
+            account.categories.add(category)
+
+            return Response(
+                data=CategoryWriteSerializer(category).data,
+                status=status.HTTP_201_CREATED,
+            )
+        except Category.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Account.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(methods=["post"], detail=False, url_path="unlink")
+    def unlink(self, request):
+        try:
+            category = Category.objects.get(
+                pk=request.data.get("category", None)
+            )
+
+            account = Account.objects.get(pk=request.data.get("account", None))
+
+            account.categories.remove(category)
+
+            return Response(
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        except Category.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Account.DoesNotExist as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_404_NOT_FOUND
+            )
