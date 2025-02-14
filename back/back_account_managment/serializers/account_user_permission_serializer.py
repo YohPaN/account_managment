@@ -1,9 +1,9 @@
-from back_account_managment.models import AccountUserPermission
+from back_account_managment.models import AccountUser
 from rest_framework import serializers
 
 
 class AccountUserPermissionsMeta:
-    model = AccountUserPermission
+    model = AccountUser
     fields = ["permissions"]
 
 

@@ -3,7 +3,6 @@ from decimal import Decimal
 from back_account_managment.models import (
     Account,
     AccountUser,
-    AccountUserPermission,
     Item,
     Profile,
     Transfert,
@@ -68,9 +67,7 @@ class AccountSerializerTest(TestCase):
 
         self.permission = Permission.objects.get(codename="view_account")
 
-        self.account_user_permission = AccountUserPermission.objects.create(
-            account_user=self.account_user, permissions=self.permission
-        )
+        self.account_user.permissions.add(self.permission)
 
         # Plus / user / account / 57.46
         Item.objects.create(

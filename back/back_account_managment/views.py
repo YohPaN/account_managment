@@ -2,9 +2,7 @@ import json
 
 from back_account_managment.models import (
     Account,
-    AccountCategory,
     AccountUser,
-    AccountUserPermission,
     Category,
     Item,
     Profile,
@@ -24,8 +22,10 @@ from back_account_managment.serializers.account_category_serializer import (
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
-    AccountUserPermissionsSerializer,
     MinimalAccountSerilizer,
+)
+from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
+    AccountUserPermissionsSerializer,
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountUserSerializer,
@@ -147,7 +147,7 @@ class RegisterView(APIView):
 class AccountView(ModelViewSet):
     queryset = Account.objects.prefetch_related(
         "items",
-        "account_categories",
+        "categories",
     ).all()
     serializer_class = AccountSerializer
     permission_classes = [
@@ -440,14 +440,10 @@ class AccountUserPermissionView(ModelViewSet):
         )
 
     def list(self, request, *args, **kwargs):
-        queryset = Permission.objects.filter(
-            Exists(
-                AccountUserPermission.objects.filter(
-                    account_user=self.get_queryset(),
-                    permissions=OuterRef("pk"),
-                )
-            )
-        )
+        queryset = self.get_queryset()
+
+        queryset = queryset.permissions.all()
+
         codenames = [entry.codename for entry in queryset]
         return Response({"permissions": codenames})
 
@@ -458,17 +454,20 @@ class AccountUserPermissionView(ModelViewSet):
 
         account_user = self.get_queryset()
 
-        account_user_permissions, created = (
-            AccountUserPermission.objects.get_or_create(
-                account_user=account_user,
-                permissions=Permission.objects.get(
-                    codename=self.request.data["permission"]
-                ),
-            )
+        permission = Permission.objects.get(
+            codename=self.request.data["permission"],
         )
 
-        if not created:
-            account_user_permissions.delete()
+        account_user_permissions = account_user.permissions.filter(
+            codename=self.request.data["permission"],
+        )
+
+        if account_user_permissions.exists():
+            account_user.permissions.remove(permission)
+            created = False
+        else:
+            account_user.permissions.add(permission)
+            created = True
 
         return Response(
             data={"enabled": created},
@@ -508,13 +507,7 @@ class CategoryView(ModelViewSet):
             case "account_categories":
                 account = Account.objects.get(pk=account_id)
 
-                return queryset.filter(
-                    Exists(
-                        AccountCategory.objects.filter(
-                            account=account, category=OuterRef("pk")
-                        )
-                    )
-                )
+                return account.categories.all()
 
             case _:
                 return None
@@ -554,10 +547,9 @@ class CategoryView(ModelViewSet):
     def perform_create(self, serializer):
         category = serializer.save()
 
-        if category.content_type.model_class() is Account:
-            AccountCategory.objects.create(
-                category=category, account_id=category.object_id
-            )
+        instance = category.content_object
+        if isinstance(instance, Account):
+            category.accounts.add(instance)
 
     def update(self, request, *args, **kwargs):
         request.data["icon"] = json.loads(request.data["icon"])
@@ -566,7 +558,7 @@ class CategoryView(ModelViewSet):
 
 
 class AccountCategoryView(ModelViewSet):
-    queryset = AccountCategory.objects.all()
+    queryset = Account.objects.all()
     serializer_class = AccountCategorySerializer
 
     def create(self, request):
@@ -580,22 +572,18 @@ class AccountCategoryView(ModelViewSet):
             if category.content_type == ContentType.objects.get_for_model(
                 Account
             ):
-                account_category = AccountCategory.objects.filter(
-                    category=category
-                )
+                account_category = category.accounts.all()
 
                 if (
                     account_category.exists()
-                    and account_category.first().account != account
+                    and account_category.first() != account
                 ):
                     return Response(
                         {"detail": "The category is link to another account"},
                         status=status.HTTP_401_UNAUTHORIZED,
                     )
 
-            AccountCategory.objects.get_or_create(
-                account=account, category=category
-            )
+            account.categories.add(category)
 
             return Response(
                 data=CategoryWriteSerializer(category).data,
@@ -620,9 +608,7 @@ class AccountCategoryView(ModelViewSet):
 
             account = Account.objects.get(pk=request.data.get("account", None))
 
-            AccountCategory.objects.filter(
-                account=account, category=category
-            ).delete()
+            account.categories.remove(category)
 
             return Response(
                 status=status.HTTP_204_NO_CONTENT,

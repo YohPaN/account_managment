@@ -1,9 +1,9 @@
-from back_account_managment.models import AccountCategory
+from back_account_managment.models import Account
 from rest_framework import serializers
 
 
 class AccountCategoryMeta:
-    model = AccountCategory
+    model = Account
     fields = ["category", "account"]
 
 

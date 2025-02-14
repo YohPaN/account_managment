@@ -1,13 +1,7 @@
 import json
 from decimal import Decimal
 
-from back_account_managment.models import (
-    AccountCategory,
-    AccountUserPermission,
-    Category,
-    Profile,
-    Transfert,
-)
+from back_account_managment.models import Category, Profile, Transfert
 from back_account_managment.views import Account, AccountUser, Item
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
@@ -41,12 +35,14 @@ class UserViewTest(TestCase):
 
         self.category_under_user = Category.objects.create(
             title="test_category",
+            icon={},
             content_type=ContentType.objects.get_for_model(User),
             object_id=self.user.pk,
         )
 
         self.other_category = Category.objects.create(
             title="test",
+            icon={},
         )
 
         self.c = APIClient()
@@ -291,34 +287,36 @@ class AccountViewTest(TestCase):
 
         self.default_category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
         self.category_for_account = Category.objects.create(
             title="category_for_account",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account,
         )
 
         self.category_for_account2 = Category.objects.create(
             title="category_for_account2",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account2,
         )
 
         self.category_for_user = Category.objects.create(
             title="category_for_user",
+            icon={},
             content_type=ContentType.objects.get_for_model(User),
             object_id=self.user.pk,
         )
 
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category_for_account,
+        self.category_for_account.accounts.add(
+            self.account,
         )
 
-        self.account2_category = AccountCategory.objects.create(
-            account=self.account2,
-            category=self.category_for_account2,
+        self.category_for_account2.accounts.add(
+            self.account2,
         )
 
         self.c = APIClient()
@@ -336,13 +334,11 @@ class AccountViewTest(TestCase):
         )
         category_for_account = Category.objects.create(
             title="locale_category",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=account_approved,
         )
-        AccountCategory.objects.create(
-            account=account_approved,
-            category=category_for_account,
-        )
+        category_for_account.accounts.add(account_approved)
 
         response = self.c.get("/api/accounts/")
 
@@ -350,6 +346,7 @@ class AccountViewTest(TestCase):
         self.assertIn("own", response.data)
         self.assertIn("contributor_account", response.data)
         self.assertIn("categories", response.data["own"][0])
+        self.assertIn("account_categories", response.data["own"][0])
         self.assertIn("categories", response.data["contributor_account"][0])
 
         self_account = [
@@ -361,7 +358,7 @@ class AccountViewTest(TestCase):
         self.assertTrue(
             any(
                 category["title"] == self.category_for_account.title
-                for category in self_account[0]["account_categories"]
+                for category in self_account[0]["categories"]
             )
         )
 
@@ -369,15 +366,15 @@ class AccountViewTest(TestCase):
             any(
                 category["title"] == category_for_account.title
                 for category in response.data["contributor_account"][0][
-                    "account_categories"
+                    "categories"
                 ]
             )
         )
         self.assertEqual(len(response.data["own"]), 2)
         self.assertEqual(len(response.data["contributor_account"]), 1)
-        self.assertEqual(len(self_account[0]["account_categories"]), 1)
+        self.assertEqual(len(self_account[0]["categories"]), 1)
         self.assertEqual(
-            len(response.data["contributor_account"][0]["account_categories"]),
+            len(response.data["contributor_account"][0]["categories"]),
             1,
         )
 
@@ -480,9 +477,8 @@ class AccountViewTest(TestCase):
             account=self.account, user=self.user
         )
 
-        AccountUserPermission.objects.create(
-            account_user=account_user,
-            permissions=Permission.objects.get(codename="delete_account"),
+        account_user.permissions.add(
+            Permission.objects.get(codename="delete_account"),
         )
 
         response = self.c.delete(
@@ -497,9 +493,8 @@ class AccountViewTest(TestCase):
             account=self.account, user=self.user
         )
 
-        AccountUserPermission.objects.create(
-            account_user=account_user,
-            permissions=Permission.objects.get(codename="delete_account"),
+        account_user.permissions.add(
+            Permission.objects.get(codename="delete_account"),
         )
 
         AccountUser.objects.create(account=self.account, user=self.user2)
@@ -649,18 +644,16 @@ class ItemViewTest(TestCase):
             "delete_item",
             "transfert_item",
         ]:
-            AccountUserPermission.objects.create(
-                account_user=self.account_user,
-                permissions=Permission.objects.get(codename=perm),
+            self.account_user.permissions.add(
+                Permission.objects.get(codename=perm)
             )
 
-        AccountUserPermission.objects.create(
-            account_user=self.account_user2,
-            permissions=Permission.objects.get(codename="transfert_item"),
+        self.account_user2.permissions.add(
+            Permission.objects.get(codename="transfert_item")
         )
-        AccountUserPermission.objects.create(
-            account_user=self.account_user3,
-            permissions=Permission.objects.get(codename="transfert_item"),
+
+        self.account_user3.permissions.add(
+            Permission.objects.get(codename="transfert_item")
         )
 
         self.item = Item.objects.create(
@@ -672,16 +665,15 @@ class ItemViewTest(TestCase):
 
         self.category = Category.objects.create(
             title="category",
+            icon={},
         )
 
         self.category_not_under_account = Category.objects.create(
             title="other category",
+            icon={},
         )
 
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category,
-        )
+        self.account_category = self.category.accounts.add(self.account)
 
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
@@ -804,10 +796,7 @@ class ItemViewTest(TestCase):
         self.assertEqual(self.item.title, "mon")
         self.assertEqual(self.item.category, self.category)
 
-        AccountCategory.objects.create(
-            account=self.account,
-            category=self.category_not_under_account,
-        )
+        self.category_not_under_account.accounts.add(self.account)
 
         self.c.put(
             f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
@@ -1034,30 +1023,18 @@ class AccountUserPermissionTest(TestCase):
             codename="delete_item"
         )
 
-        self.account_user_permission_add_item = (
-            AccountUserPermission.objects.create(
-                account_user=self.account_user,
-                permissions=self.add_item_permission,
-            )
-        )
-        self.account_user_permission_change_item = (
-            AccountUserPermission.objects.create(
-                account_user=self.account_user,
-                permissions=self.change_item_permission,
-            )
-        )
+        self.account_user.permissions.add(self.add_item_permission)
+
+        self.account_user.permissions.add(self.change_item_permission)
 
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
     def test_add_permission_to_user_on_account(self):
         self.assertEqual(
-            len(
-                AccountUserPermission.objects.filter(
-                    account_user=self.account_user,
-                    permissions=self.delete_item_permission,
-                )
-            ),
+            self.account_user.permissions.filter(
+                codename=self.delete_item_permission.codename
+            ).count(),
             0,
         )
 
@@ -1072,37 +1049,24 @@ class AccountUserPermissionTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
 
         self.assertIsNotNone(
-            AccountUserPermission.objects.get(
-                account_user=self.account_user,
-                permissions=self.delete_item_permission,
+            self.account_user.permissions.get(
+                codename=self.delete_item_permission.codename
             ),
         )
 
         self.assertEqual(
-            len(
-                AccountUserPermission.objects.filter(
-                    account_user=self.account_user2,
-                )
-            ),
+            len(self.account_user2.permissions.all()),
             0,
         )
 
     def test_remove_permission_to_user_on_account(self):
-        AccountUserPermission.objects.create(
-            account_user=self.account_user,
-            permissions=self.delete_item_permission,
-        )
-
-        AccountUserPermission.objects.create(
-            account_user=self.account_user2,
-            permissions=self.delete_item_permission,
-        )
+        self.account_user.permissions.add(self.delete_item_permission)
+        self.account_user2.permissions.add(self.delete_item_permission)
 
         self.assertEqual(
             len(
-                AccountUserPermission.objects.filter(
-                    account_user=self.account_user,
-                    permissions=self.delete_item_permission,
+                self.account_user.permissions.filter(
+                    codename=self.delete_item_permission.codename
                 )
             ),
             1,
@@ -1119,20 +1083,16 @@ class AccountUserPermissionTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
 
         self.assertEqual(
-            len(
-                AccountUserPermission.objects.filter(
-                    account_user=self.account_user,
-                    permissions=self.delete_item_permission,
-                )
-            ),
+            self.account_user.permissions.filter(
+                codename=self.delete_item_permission.codename
+            ).count(),
             0,
         )
 
         self.assertIsNotNone(
-            AccountUserPermission.objects.get(
-                account_user=self.account_user2,
-                permissions=self.delete_item_permission,
-            ),
+            self.account_user2.permissions.get(
+                codename=self.delete_item_permission.codename
+            )
         )
 
     def test_list_account_user_permission(self):
@@ -1158,11 +1118,7 @@ class AccountUserPermissionTest(TestCase):
 
     def test_add_and_remove_permission_to_user_on_account(self):
         self.assertEqual(
-            len(
-                AccountUserPermission.objects.filter(
-                    account_user=self.account_user
-                )
-            ),
+            len(self.account_user.permissions.all()),
             2,
         )
 
@@ -1187,34 +1143,27 @@ class AccountUserPermissionTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
 
         self.assertEqual(
-            len(
-                AccountUserPermission.objects.filter(
-                    account_user=self.account_user
-                )
-            ),
+            self.account_user.permissions.all().count(),
             2,
         )
 
         self.assertEqual(
-            AccountUserPermission.objects.filter(
-                account_user=self.account_user,
-                permissions=self.add_item_permission,
+            self.account_user.permissions.filter(
+                codename=self.add_item_permission.codename
             ).count(),
             0,
         )
 
         self.assertEqual(
-            AccountUserPermission.objects.filter(
-                account_user=self.account_user,
-                permissions=self.delete_item_permission,
+            self.account_user.permissions.filter(
+                codename=self.delete_item_permission.codename
             ).count(),
             1,
         )
 
         self.assertEqual(
-            AccountUserPermission.objects.filter(
-                account_user=self.account_user,
-                permissions=self.change_item_permission,
+            self.account_user.permissions.filter(
+                codename=self.change_item_permission.codename
             ).count(),
             1,
         )
@@ -1242,34 +1191,36 @@ class CategoryViewTest(TestCase):
 
         self.default_category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
         self.category_for_account = Category.objects.create(
             title="category_for_account",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account.pk,
         )
 
         self.category_for_account2 = Category.objects.create(
             title="category_for_account2",
+            icon={},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account2.pk,
         )
 
         self.category_for_user = Category.objects.create(
             title="category_for_user",
+            icon={},
             content_type=ContentType.objects.get_for_model(User),
             object_id=self.user.pk,
         )
 
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category_for_account,
+        self.category_for_account.accounts.add(
+            self.account,
         )
 
-        self.account2_category = AccountCategory.objects.create(
-            account=self.account2,
-            category=self.category_for_account2,
+        self.category_for_account2.accounts.add(
+            self.account2,
         )
 
         self.c = APIClient()
@@ -1331,14 +1282,13 @@ class CategoryViewTest(TestCase):
             object_id=self.account.pk
         ).count()
 
-        account_category_count = AccountCategory.objects.filter(
-            account=self.account
-        ).count()
+        account_category_count = self.account.categories.all().count()
 
         self.c.post(
             "/api/categories/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
                 "account_id": self.account.pk,
             },
             format="json",
@@ -1350,7 +1300,7 @@ class CategoryViewTest(TestCase):
         )
 
         self.assertEqual(
-            AccountCategory.objects.filter(account=self.account).count(),
+            self.account.categories.all().count(),
             account_category_count + 1,
         )
 
@@ -1359,6 +1309,7 @@ class CategoryViewTest(TestCase):
             f"/api/categories/{self.category_for_account.pk}/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
             },
             format="json",
         )
@@ -1371,6 +1322,7 @@ class CategoryViewTest(TestCase):
         self.c.put(
             f"/api/categories/{self.category_for_account.pk}/",
             {
+                "icon": json.dumps({}),
                 "content_type": ContentType.objects.get_for_model(User).pk,
             },
             format="json",
@@ -1392,6 +1344,7 @@ class CategoryViewTest(TestCase):
             "/api/categories/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
             },
             format="json",
         )
@@ -1406,6 +1359,7 @@ class CategoryViewTest(TestCase):
             f"/api/categories/{self.category_for_user.pk}/",
             {
                 "title": "new title",
+                "icon": json.dumps({}),
             },
             format="json",
         )
@@ -1438,6 +1392,7 @@ class AccountCategoryViewTest(TestCase):
 
         self.category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
         self.account_with_category = Account.objects.create(
@@ -1446,19 +1401,20 @@ class AccountCategoryViewTest(TestCase):
 
         self.category_link_to_account = Category.objects.create(
             title="default_category",
+            icon={},
             object_id=self.account_with_category.pk,
             content_type=ContentType.objects.get_for_model(Account),
         )
 
         self.category_link_to_user = Category.objects.create(
             title="default_category",
+            icon={},
             object_id=self.user.pk,
             content_type=ContentType.objects.get_for_model(User),
         )
 
-        self.account_category = AccountCategory.objects.create(
-            account=self.account_with_category,
-            category=self.category_link_to_account,
+        self.account_with_category.categories.add(
+            self.category_link_to_account
         )
 
         self.c = APIClient()
@@ -1469,6 +1425,7 @@ class AccountCategoryViewTest(TestCase):
 
         self.category = Category.objects.create(
             title="default_category",
+            icon={},
         )
 
     def test_associate_category_to_account(self):
@@ -1483,17 +1440,12 @@ class AccountCategoryViewTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
 
         self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
+            self.account.categories.filter(pk=self.category.pk).count(),
             1,
         )
 
     def test_associate_category_to_account_that_are_already_linked(self):
-        self.account_category = AccountCategory.objects.create(
-            account=self.account,
-            category=self.category,
-        )
+        self.account.categories.add(self.category)
 
         response = self.c.post(
             "/api/account-categories/",
@@ -1506,9 +1458,7 @@ class AccountCategoryViewTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
 
         self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
+            self.account.categories.filter(pk=self.category.pk).count(),
             1,
         )
 
@@ -1524,8 +1474,8 @@ class AccountCategoryViewTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
 
         self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category_link_to_user
+            self.account.categories.filter(
+                pk=self.category_link_to_user.pk
             ).count(),
             1,
         )
@@ -1543,9 +1493,7 @@ class AccountCategoryViewTest(TestCase):
         self.assertFalse(status.is_success(response.status_code))
 
         self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
+            self.account.categories.filter(pk=self.category.pk).count(),
             0,
         )
 
@@ -1563,9 +1511,7 @@ class AccountCategoryViewTest(TestCase):
         self.assertFalse(status.is_success(response.status_code))
 
         self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
+            self.account.categories.filter(pk=self.category.pk).count(),
             0,
         )
 
@@ -1583,8 +1529,6 @@ class AccountCategoryViewTest(TestCase):
         self.assertFalse(status.is_success(response.status_code))
 
         self.assertEqual(
-            AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            ).count(),
+            self.account.categories.filter(pk=self.category.pk).count(),
             0,
         )
