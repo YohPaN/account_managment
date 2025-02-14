@@ -7,7 +7,6 @@ from back_account_managment.models import (
     Category,
     Item,
     Profile,
-    Transfert,
 )
 from back_account_managment.permissions import (
     IsAccountContributor,
@@ -41,6 +40,7 @@ from back_account_managment.serializers.item_serializer import (
     ItemWriteSerializer,
 )
 from back_account_managment.serializers.user_serializer import (
+    PasswordUserSerializer,
     ProfileSerializer,
     RegisterUserSerializer,
     UserSerializer,
@@ -63,7 +63,9 @@ User = get_user_model()
 
 
 class UserView(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.select_related("profile").prefetch_related(
+        "categories"
+    )
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
@@ -100,10 +102,14 @@ class UserView(ModelViewSet):
     @action(detail=False, methods=["patch"], url_path="password")
     def update_password(self, request):
         user = request.user
-        new_password = request.data["new_password"]
+        serializer = PasswordUserSerializer(data=request.data)
 
-        if check_password(request.data["old_password"], user.password):
-            user.password = make_password(new_password)
+        if serializer.is_valid() and check_password(
+            serializer.validated_data["old_password"], user.password
+        ):
+            user.password = make_password(
+                serializer.validated_data["new_password"]
+            )
             user.save()
 
             return Response(status=status.HTTP_200_OK)
@@ -112,20 +118,19 @@ class UserView(ModelViewSet):
 
 
 class RegisterView(APIView):
+    serializer_class = RegisterUserSerializer
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        user_serializer = RegisterUserSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
 
-        if user_serializer.is_valid():
-            user_validated_data = user_serializer.validated_data
-            user = User(**user_validated_data)
-
-            password = user_serializer.validated_data.get("password", None)
+        if serializer.is_valid():
+            password = serializer.validated_data.get("password", None)
 
             if password is None:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
+            user = serializer.save()
             user.set_password(password)
             user.save()
 
@@ -153,6 +158,7 @@ class AccountView(ModelViewSet):
         "items",
         "categories",
         "transfer_items",
+        "contributors",
     ).annotate(
         total=Coalesce(
             Sum(
@@ -387,8 +393,6 @@ class ItemView(ModelViewSet):
         )
 
         username = self.request.data.get("username", None)
-        to_account = self.request.data.get("to_account", None)
-
         user = get_object_or_404(User, username=username) if username else None
 
         item = serializer.save(
@@ -396,14 +400,12 @@ class ItemView(ModelViewSet):
             user=user,
         )
 
-        if to_account:
-            Transfert.objects.create(item=item, to_account_id=to_account)
+        item.manage_transfert(self.request.data.get("to_account", None))
 
     def perform_update(self, serializer):
         username = self.request.data.get("username", None)
-        to_account = self.request.data.get("to_account", None)
-
         user = get_object_or_404(User, username=username) if username else None
+
         category_id = self.request.data.get("category_id", None)
 
         item = serializer.save(
@@ -411,22 +413,11 @@ class ItemView(ModelViewSet):
             user=user,
         )
 
-        if to_account:
-            Transfert.objects.update_or_create(
-                item=item, defaults={"to_account_id": to_account}
-            )
-
-        else:
-            transfert = Transfert.objects.filter(item=item).first()
-
-            if transfert:
-                transfert.delete()
+        item.manage_transfert(self.request.data.get("to_account", None))
 
 
 class AccountUserView(ModelViewSet):
-    queryset = AccountUser.objects.select_related(
-        "account", "account__user"
-    ).all()
+    queryset = AccountUser.objects.select_related("account", "account__user")
     serializer_class = AccountUserSerializer
     permission_classes = [
         permissions.IsAuthenticated,
@@ -435,22 +426,13 @@ class AccountUserView(ModelViewSet):
     def get_queryset(self):
         return self.queryset.filter(state="PENDING", user=self.request.user)
 
-    @action(methods=["get"], detail=False, url_path="count")
-    def count(self, request):
-        queryset = self.get_queryset()
-        ask = queryset.count()
-
-        return Response(
-            {"pending_account_request": ask}, status=status.HTTP_200_OK
-        )
-
 
 class AccountUserPermissionView(ModelViewSet):
     serializer_class = AccountUserPermissionsSerializer
     permission_classes = [permissions.IsAuthenticated, IsAccountOwner]
 
     def get_queryset(self):
-        return AccountUser.objects.get(
+        return AccountUser.objects.prefetch_related("permissions").get(
             user=User.objects.get(username=self.kwargs.get("user_username")),
             account=self.kwargs.get("account_id"),
         )
@@ -458,9 +440,9 @@ class AccountUserPermissionView(ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
 
-        queryset = queryset.permissions.all()
+        permissions = queryset.permissions.all()
 
-        codenames = [entry.codename for entry in queryset]
+        codenames = [permission.codename for permission in permissions]
         return Response({"permissions": codenames})
 
     def create(self, request, *args, **kwargs):
@@ -470,19 +452,20 @@ class AccountUserPermissionView(ModelViewSet):
 
         account_user = self.get_queryset()
 
-        permission = Permission.objects.get(
-            codename=self.request.data["permission"],
-        )
+        codename = self.request.data["permission"]
 
-        account_user_permissions = account_user.permissions.filter(
-            codename=self.request.data["permission"],
-        )
+        try:
+            account_user_permission = account_user.permissions.get(
+                codename=codename,
+            )
 
-        if account_user_permissions.exists():
-            account_user.permissions.remove(permission)
+            account_user.permissions.remove(account_user_permission)
             created = False
-        else:
-            account_user.permissions.add(permission)
+
+        except Permission.DoesNotExist:
+            account_user.permissions.add(
+                Permission.objects.get(codename=codename)
+            )
             created = True
 
         return Response(

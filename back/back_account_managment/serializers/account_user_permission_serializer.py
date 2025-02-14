@@ -8,10 +8,6 @@ class AccountUserPermissionsMeta:
 
 
 class _AccountUserPermissionsSerializer(serializers.Serializer):
-    permissions_codename = serializers.CharField(
-        source="permissions.codename",
-        read_only=True,
-    )
 
     class Meta:
         pass

@@ -38,14 +38,14 @@ class AccountMeta:
         "permissions",
         "user",
         "salary_based_split",
-        "transfert_items",
+        "transfer_items",
         "categories",
     ]
 
 
 class _AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
-    transfert_items = serializers.SerializerMethodField()
+    transfer_items = ItemReadSerializer(many=True)
     contributors = AccountAccountUserSerializer(many=True)
     total = serializers.DecimalField(max_digits=15, decimal_places=2)
 
@@ -64,14 +64,6 @@ class _AccountSerializer(serializers.ModelSerializer):
         return CategorySerializer(
             Category.objects.filter(object_id=account.id), many=True
         ).data
-
-    def get_transfert_items(self, account):
-        transferts = Transfert.objects.filter(
-            to_account=account, item=OuterRef("pk")
-        )
-        items = Item.objects.filter(Exists(transferts))
-
-        return ItemReadSerializer(items, many=True).data
 
     def get_permissions(self, account):
         user = self.context["request"].user
@@ -223,7 +215,7 @@ class AccountSerializer(_AccountSerializer):
                     "own_contribution",
                     "permissions",
                     "salary_based_split",
-                    "transfert_items",
+                    "transfer_items",
                     "user",
                     "categories",
                 ]
