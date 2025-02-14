@@ -36,7 +36,6 @@ class AccountMeta:
         "need_to_add",
         "own_contribution",
         "permissions",
-        "total",
         "user",
         "salary_based_split",
         "transfert_items",
@@ -48,6 +47,7 @@ class _AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
     transfert_items = serializers.SerializerMethodField()
     contributors = AccountAccountUserSerializer(many=True)
+    total = serializers.DecimalField(max_digits=15, decimal_places=2)
 
     permissions = serializers.SerializerMethodField()
 
@@ -194,12 +194,12 @@ class AccountListSerializer(_AccountSerializer):
                     "items",
                     "name",
                     "permissions",
-                    "total",
                     "user",
                     "salary_based_split",
                     "categories",
                 ]
             ],
+            "total",
             "account_categories",
         ]
 
@@ -223,12 +223,12 @@ class AccountSerializer(_AccountSerializer):
                     "own_contribution",
                     "permissions",
                     "salary_based_split",
-                    "total",
                     "transfert_items",
                     "user",
                     "categories",
                 ]
             ],
+            "total",
             "account_categories",
         ]
 
@@ -237,4 +237,20 @@ class MinimalAccountSerilizer(_AccountSerializer):
     class Meta(AccountMeta):
         fields = [
             field for field in AccountMeta.fields if field in ["name", "user"]
+        ]
+
+
+class SalaryBasedSplitAccountSerilizer(_AccountSerializer):
+    class Meta(AccountMeta):
+        fields = [
+            field
+            for field in AccountMeta.fields
+            if field in ["salary_based_split"]
+        ]
+
+
+class ContributorAccountSerilizer(_AccountSerializer):
+    class Meta(AccountMeta):
+        fields = [
+            field for field in AccountMeta.fields if field in ["contributors"]
         ]

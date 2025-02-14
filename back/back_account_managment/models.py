@@ -7,17 +7,7 @@ from django.contrib.contenttypes.fields import (
 )
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import (
-    Case,
-    CheckConstraint,
-    Exists,
-    F,
-    OuterRef,
-    Q,
-    Sum,
-    Value,
-    When,
-)
+from django.db.models import CheckConstraint, Q
 
 
 class Category(models.Model):
@@ -31,9 +21,8 @@ class Category(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
 
     def save(self, **kwargs):
-        # We are testing that both are not None
+        # verify that both are not None
         assert self.content_type != self.object_id
-
         return super().save(**kwargs)
 
     class Meta:
@@ -79,23 +68,6 @@ class Account(models.Model):
             ("transfert_item", "Can transfert item into account"),
         ]
 
-    @property
-    def total(self):
-        transfert_item = Transfert.objects.filter(
-            to_account_id=self.pk, item=OuterRef("pk")
-        )
-
-        total = Item.objects.annotate(
-            calc_valuation=Case(
-                When(Exists(transfert_item), then=F("valuation") * Value(-1)),
-                default=F("valuation"),
-            )
-        ).filter(
-            Q(account_id=self.pk) | Exists(transfert_item),
-        )
-
-        return total.aggregate(total_sum=(Sum("calc_valuation", default=0)))
-
 
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -126,7 +98,6 @@ class AccountUserState(models.TextChoices):
 
 
 class AccountUser(models.Model):
-
     id = models.BigAutoField(primary_key=True)
     state = models.CharField(
         choices=AccountUserState,
@@ -151,8 +122,12 @@ class AccountUser(models.Model):
 
 
 class Transfert(models.Model):
-    to_account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    item = models.OneToOneField(Item, on_delete=models.CASCADE)
+    to_account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="transfer_items"
+    )
+    item = models.OneToOneField(
+        Item, on_delete=models.CASCADE, related_name="to_account"
+    )
 
 
 class LogCode(models.TextChoices):

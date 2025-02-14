@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 
 from back_account_managment.models import (
     Account,
@@ -22,7 +23,9 @@ from back_account_managment.serializers.account_category_serializer import (
 from back_account_managment.serializers.account_serializer import (
     AccountListSerializer,
     AccountSerializer,
+    ContributorAccountSerilizer,
     MinimalAccountSerilizer,
+    SalaryBasedSplitAccountSerilizer,
 )
 from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
     AccountUserPermissionsSerializer,
@@ -46,7 +49,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Exists, OuterRef
+from django.db.models import DecimalField, Exists, F, OuterRef, Sum, Value
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -148,7 +152,16 @@ class AccountView(ModelViewSet):
     queryset = Account.objects.prefetch_related(
         "items",
         "categories",
-    ).all()
+        "transfer_items",
+    ).annotate(
+        total=Coalesce(
+            Sum(
+                F("items__valuation") + F("transfer_items__item__valuation"),
+            ),
+            Value(0),
+            output_field=DecimalField(),
+        )
+    )
     serializer_class = AccountSerializer
     permission_classes = [
         permissions.IsAuthenticated,
@@ -177,6 +190,7 @@ class AccountView(ModelViewSet):
             many=True,
             context={"request": request},
         )
+
         contributor_account_serialized = AccountListSerializer(
             contributor_accounts,
             many=True,
@@ -193,8 +207,7 @@ class AccountView(ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="me")
     def get_current_user_account(self, request, pk=None):
-        account = get_object_or_404(Account, user=request.user, is_main=True)
-
+        account = self.get_queryset().get(user=request.user, is_main=True)
         serializer = self.get_serializer(account)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -206,6 +219,7 @@ class AccountView(ModelViewSet):
 
         if serializer.is_valid():
             account = serializer.save()
+            account.total = Decimal(0)
 
             return Response(
                 data=self.get_serializer(account).data,
@@ -277,7 +291,7 @@ class AccountView(ModelViewSet):
             account.save()
 
             return Response(
-                data=self.get_serializer(account).data,
+                data=SalaryBasedSplitAccountSerilizer(account).data,
                 status=status.HTTP_200_OK,
             )
 
@@ -317,7 +331,8 @@ class AccountView(ModelViewSet):
         AccountUser.objects.create(user=user.first(), account=account)
 
         return Response(
-            data=self.get_serializer(account).data, status=status.HTTP_200_OK
+            data=ContributorAccountSerilizer(account).data,
+            status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["post"], url_path="contributors/remove")
@@ -345,7 +360,8 @@ class AccountView(ModelViewSet):
         AccountUser.objects.get(user=user.first(), account=account).delete()
 
         return Response(
-            data=self.get_serializer(account).data, status=status.HTTP_200_OK
+            data=ContributorAccountSerilizer(account).data,
+            status=status.HTTP_200_OK,
         )
 
 
