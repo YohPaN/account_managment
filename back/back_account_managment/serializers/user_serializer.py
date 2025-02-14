@@ -54,3 +54,11 @@ class UserSerializer(_UserSerializer):
 class UsernameUserSerilizer(_UserSerializer):
     class Meta(UserMeta):
         fields = [field for field in UserMeta.fields if field in ["username"]]
+
+
+class PasswordUserSerializer(serializers.Serializer):
+    new_password = serializers.CharField()
+    old_password = serializers.CharField()
+
+    class Meta:
+        fields = ["new_password", "old_password"]

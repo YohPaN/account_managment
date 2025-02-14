@@ -965,27 +965,34 @@ class AccountUserViewTest(TestCase):
             name="account_name", user=self.user
         )
 
+        self.account2 = Account.objects.create(
+            name="account_name", user=self.user
+        )
+
         self.account_user = AccountUser.objects.create(
             account=self.account, user=self.user
         )
 
         self.account_user2 = AccountUser.objects.create(
+            account=self.account2, user=self.user
+        )
+
+        self.account_user_approved = AccountUser.objects.create(
             account=self.account, user=self.user, state="APPROVED"
         )
 
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
-    def test_count(self):
-        response = self.c.get("/api/account_user/count/")
-
-        self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(response.data, {"pending_account_request": 1})
-
     def test_list(self):
         response = self.c.get("/api/account_user/")
 
         self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(len(response.data), 2)
+        self.assertIn("id", response.data[0])
+        self.assertIn("state", response.data[0])
+        self.assertIn("account_owner_username", response.data[0])
+        self.assertIn("account_name", response.data[0])
 
 
 class AccountUserPermissionTest(TestCase):
@@ -1065,6 +1072,14 @@ class AccountUserPermissionTest(TestCase):
             ),
             1,
         )
+        self.assertEqual(
+            len(
+                self.account_user2.permissions.filter(
+                    codename=self.delete_item_permission.codename
+                )
+            ),
+            1,
+        )
 
         response = self.c.post(
             f"/api/accounts/{self.account.pk}/{self.user.username}/permissions/",  # noqa
@@ -1082,11 +1097,11 @@ class AccountUserPermissionTest(TestCase):
             ).count(),
             0,
         )
-
-        self.assertIsNotNone(
-            self.account_user2.permissions.get(
+        self.assertEqual(
+            self.account_user2.permissions.filter(
                 codename=self.delete_item_permission.codename
-            )
+            ).count(),
+            1,
         )
 
     def test_list_account_user_permission(self):

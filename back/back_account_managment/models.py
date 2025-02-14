@@ -90,6 +90,17 @@ class Item(models.Model):
 
         return super().save(**kwargs)
 
+    def manage_transfert(self, to_account):
+        if to_account:
+            Transfert.objects.update_or_create(
+                item=self, defaults={"to_account_id": to_account}
+            )
+
+        else:
+            trasfert = getattr(self, "to_account", None)
+            if trasfert:
+                trasfert.delete()
+
 
 class AccountUserState(models.TextChoices):
     PENDING = "PENDING"
