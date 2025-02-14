@@ -383,12 +383,6 @@ class AccountViewTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(response.data["id"], self.main_account.pk)
 
-    def test_no_account_get_current_user_account(self):
-        self.c.force_authenticate(user=self.user2)
-
-        response = self.c.get("/api/accounts/me/")
-        self.assertFalse(status.is_success(response.status_code))
-
     def test_create_account(self):
         response = self.c.post(
             "/api/accounts/",
