@@ -1200,7 +1200,7 @@ class CategoryViewTest(TestCase):
 
         self.default_category = Category.objects.create(
             title="default_category",
-            icon={},
+            icon={"key": "default", "pack": "default"},
         )
 
         self.category_for_account = Category.objects.create(
@@ -1293,12 +1293,13 @@ class CategoryViewTest(TestCase):
 
         account_category_count = self.account.categories.all().count()
 
-        self.c.post(
+        response = self.c.post(
             "/api/categories/",
             {
                 "title": "new title",
-                "icon": json.dumps({}),
-                "account_id": self.account.pk,
+                "icon": {},
+                "object_id": self.account.pk,
+                "content_type": "account",
             },
             format="json",
         )
@@ -1313,12 +1314,23 @@ class CategoryViewTest(TestCase):
             account_category_count + 1,
         )
 
+        created_category = Category.objects.get(pk=response.data["id"])
+
+        self.assertEqual(
+            created_category.object_id,
+            str(self.account.pk),
+        )
+        self.assertEqual(
+            created_category.content_type,
+            ContentType.objects.get_for_model(Account),
+        )
+
     def test_update_account_category(self):
         self.c.put(
             f"/api/categories/{self.category_for_account.pk}/",
             {
                 "title": "new title",
-                "icon": json.dumps({}),
+                "icon": {},
             },
             format="json",
         )
@@ -1331,7 +1343,7 @@ class CategoryViewTest(TestCase):
         self.c.put(
             f"/api/categories/{self.category_for_account.pk}/",
             {
-                "icon": json.dumps({}),
+                "icon": {},
                 "content_type": ContentType.objects.get_for_model(User).pk,
             },
             format="json",
@@ -1353,7 +1365,8 @@ class CategoryViewTest(TestCase):
             "/api/categories/",
             {
                 "title": "new title",
-                "icon": json.dumps({}),
+                "icon": {},
+                "content_type": "user",
             },
             format="json",
         )
@@ -1368,7 +1381,7 @@ class CategoryViewTest(TestCase):
             f"/api/categories/{self.category_for_user.pk}/",
             {
                 "title": "new title",
-                "icon": json.dumps({}),
+                "icon": {},
             },
             format="json",
         )
@@ -1386,6 +1399,44 @@ class CategoryViewTest(TestCase):
             Category.objects.all().count(),
             user_category_count - 1,
         )
+
+    def test_create_category_with_icon(self):
+        icon = {"key": "directions_car", "pack": "material"}
+
+        response = self.c.post(
+            "/api/categories/",
+            {
+                "title": "new title",
+                "icon": icon,
+                "object_id": self.account.pk,
+                "content_type": "account",
+            },
+            format="json",
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(
+            Category.objects.get(pk=response.data["id"]).icon, icon
+        )
+
+    def test_update_category_with_icon(self):
+        self.assertEqual(
+            self.default_category.icon, {"key": "default", "pack": "default"}
+        )
+        icon = {"key": "directions_car", "pack": "material"}
+
+        response = self.c.put(
+            f"/api/categories/{self.default_category.pk}/",
+            {
+                "title": "new title",
+                "icon": icon,
+            },
+            format="json",
+        )
+
+        self.default_category.refresh_from_db()
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(self.default_category.icon, icon)
 
 
 class AccountCategoryViewTest(TestCase):

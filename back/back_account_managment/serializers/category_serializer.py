@@ -19,12 +19,12 @@ class _CategorySerializer(serializers.ModelSerializer):
         pass
 
 
-class CategorySerializer(_CategorySerializer):
+class CategoryWriteSerializer(_CategorySerializer):
     class Meta(CategoryMeta):
         pass
 
 
-class CategoryWriteSerializer(_CategorySerializer):
+class CategorySerializer(_CategorySerializer):
     class Meta(CategoryMeta):
         fields = [
             field

@@ -1,4 +1,3 @@
-import json
 from decimal import Decimal
 
 from back_account_managment.models import (
@@ -54,7 +53,6 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -478,27 +476,24 @@ class CategoryView(ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
-    def get_queryset(self):
-        if self.request.method not in SAFE_METHODS:
-            return super().get_queryset()
-
+    def list(self, request, *args, **kwargs):
         account_id = self.request.query_params.get("account", None)
         category = self.request.query_params.get("category", None)
 
-        queryset = self.queryset
+        queryset = self.get_queryset()
 
         match category:
             case "default":
-                return queryset.filter(content_type=None)
+                queryset = queryset.filter(content_type=None)
 
             case "user":
-                return queryset.filter(
+                queryset = queryset.filter(
                     content_type=ContentType.objects.get_for_model(User),
                     object_id=self.request.user.pk,
                 )
 
             case "account":
-                return queryset.filter(
+                queryset = queryset.filter(
                     content_type=ContentType.objects.get_for_model(Account),
                     object_id=account_id,
                 )
@@ -506,41 +501,30 @@ class CategoryView(ModelViewSet):
             case "account_categories":
                 account = Account.objects.get(pk=account_id)
 
-                return account.categories.all()
+                queryset = account.categories.all()
 
             case _:
-                return None
-
-    def get_serializer_class(self):
-        if self.request.method == "PUT":
-            return CategoryWriteSerializer
-
-        return super().get_serializer_class()
-
-    @action(methods=["get"], detail=False, url_path="default")
-    def get_defaut_categories(self, *args, **kwargs):
-        default_category = Category.objects.filter(content_type=None)
+                return Response(
+                    {"detail": f"Type of category {category} does not exist"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
 
         return Response(
-            data=self.get_serializer(default_category, many=True).data,
+            self.get_serializer(queryset, many=True).data,
             status=status.HTTP_200_OK,
         )
 
     def create(self, request, *args, **kwargs):
-        account_id = request.data.get("account_id", None)
+        self.serializer_class = CategoryWriteSerializer
+        model_name = request.data.get("content_type", None)
 
-        request.data["icon"] = json.loads(request.data["icon"])
+        content_type = ContentType.objects.get(model=model_name)
 
-        if account_id is not None:
-            request.data["object_id"] = account_id
-            request.data["content_type"] = ContentType.objects.get_for_model(
-                Account
-            ).pk
-        else:
+        if content_type.model_class() == User:
             request.data["object_id"] = str(request.user.pk)
-            request.data["content_type"] = ContentType.objects.get_for_model(
-                User
-            ).pk
+
+        request.data["content_type"] = content_type.pk
+
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
@@ -549,11 +533,6 @@ class CategoryView(ModelViewSet):
         instance = category.content_object
         if isinstance(instance, Account):
             category.accounts.add(instance)
-
-    def update(self, request, *args, **kwargs):
-        request.data["icon"] = json.loads(request.data["icon"])
-
-        return super().update(request, *args, **kwargs)
 
 
 class AccountCategoryView(ModelViewSet):
