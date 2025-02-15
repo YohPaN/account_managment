@@ -1,4 +1,4 @@
-from back_account_managment.models import Item, Transfert
+from back_account_managment.models import Item
 from back_account_managment.serializers.category_serializer import (
     CategorySerializer,
 )
