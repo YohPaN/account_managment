@@ -53,6 +53,17 @@ class Profile(models.Model):
     )
 
 
+class AccountManager(models.Manager):
+    def get_own_accounts_and_contributions(self, queryset, user):
+        contributor_account_user = AccountUser.objects.filter(
+            account=models.OuterRef("pk"), user=user, state="APPROVED"
+        )
+
+        return queryset.filter(
+            models.Q(user=user) | models.Exists(contributor_account_user)
+        )
+
+
 class Account(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -60,6 +71,8 @@ class Account(models.Model):
     is_main = models.BooleanField(default=False)
     salary_based_split = models.BooleanField(default=False)
     categories = models.ManyToManyField(Category, related_name="accounts")
+
+    objects = AccountManager()
 
     class Meta:
         permissions = [
