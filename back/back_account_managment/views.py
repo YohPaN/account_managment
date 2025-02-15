@@ -212,7 +212,7 @@ class AccountView(ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk):
-        account = Account.objects.get(pk=pk)
+        account = self.get_object()
 
         serializer = MinimalAccountSerilizer(
             account, data=request.data, partial=True
