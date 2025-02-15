@@ -68,6 +68,27 @@ class Account(models.Model):
             ("transfert_item", "Can transfert item into account"),
         ]
 
+    def manage_category(self, category_id, link=True):
+        try:
+            category = Category.objects.get(pk=category_id)
+            category_accounts = category.accounts.all()
+
+            if link:
+                if category_accounts.filter(~Q(pk=self.pk)).exists():
+                    return {"error": "The category is link to another account"}
+
+                elif category_accounts.filter(pk=self.pk).exists():
+                    return True
+
+                self.categories.add(category)
+            else:
+                self.categories.remove(category)
+
+            return True
+
+        except Category.DoesNotExist as e:
+            return {"error": str(e)}
+
 
 class Item(models.Model):
     id = models.BigAutoField(primary_key=True)
