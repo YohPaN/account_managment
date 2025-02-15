@@ -373,7 +373,7 @@ class ItemView(ModelViewSet):
             user=user,
         )
 
-        item.manage_transfert(self.request.data.get("to_account", None))
+        item.manage_transfer(self.request.data.get("to_account", None))
 
     def perform_update(self, serializer):
         username = self.request.data.get("username", None)
@@ -386,7 +386,7 @@ class ItemView(ModelViewSet):
             user=user,
         )
 
-        item.manage_transfert(self.request.data.get("to_account", None))
+        item.manage_transfer(self.request.data.get("to_account", None))
 
 
 class AccountUserView(ModelViewSet):
