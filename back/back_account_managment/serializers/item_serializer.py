@@ -34,11 +34,11 @@ class _ItemSerializer(serializers.ModelSerializer):
         pass
 
     def get_to_account(self, item):
-        transfert = Transfert.objects.filter(item=item).first()
+        transfert = item.to_account.to_account
 
         return {
-            "id": transfert.to_account.pk if transfert else None,
-            "name": transfert.to_account.name if transfert else None,
+            "id": transfert.pk if transfert else None,
+            "name": transfert.name if transfert else None,
         }
 
 
