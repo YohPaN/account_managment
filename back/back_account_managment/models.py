@@ -133,7 +133,7 @@ class Item(models.Model):
 
         return super().save(**kwargs)
 
-    def manage_transfert(self, to_account):
+    def manage_transfer(self, to_account=None):
         if to_account:
             Transfert.objects.update_or_create(
                 item=self, defaults={"to_account_id": to_account}
