@@ -45,7 +45,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import DecimalField, F, Sum, Value
+from django.db.models import DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
@@ -253,22 +253,18 @@ class AccountView(ModelViewSet):
 
             if split is True:
                 account_users = AccountUser.objects.filter(
+                    ~Q(user__profile__salary=None),
                     account=account,
                     state="APPROVED",
                 )
 
-                for account_user in account_users:
-                    profile = Profile.objects.get(
-                        user=User.objects.get(pk=account_user.user.pk)
+                if not account_users.exists():
+                    return Response(
+                        {
+                            "error": "All user in account must have set their salary"  # noqa
+                        },
+                        status=status.HTTP_401_UNAUTHORIZED,
                     )
-
-                    if profile.salary is None:
-                        return Response(
-                            {
-                                "error": "All user in account must have set their salary"  # noqa
-                            },
-                            status=status.HTTP_401_UNAUTHORIZED,
-                        )
 
             account.salary_based_split = split
             account.save()
@@ -311,7 +307,7 @@ class AccountView(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        AccountUser.objects.create(user=user.first(), account=account)
+        account.account_user.add(user.first())
 
         return Response(
             data=ContributorAccountSerilizer(account).data,
@@ -340,7 +336,7 @@ class AccountView(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        AccountUser.objects.get(user=user.first(), account=account).delete()
+        account.account_user.remove(user.first())
 
         return Response(
             data=ContributorAccountSerilizer(account).data,

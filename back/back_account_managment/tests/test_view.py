@@ -425,7 +425,7 @@ class AccountViewTest(TestCase):
         self.assertEqual(
             len(
                 AccountUser.objects.filter(
-                    account=self.account, user=self.user2
+                    account=self.account, user=self.user2, state="PENDING"
                 )
             ),
             1,

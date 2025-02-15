@@ -71,6 +71,15 @@ class Account(models.Model):
     is_main = models.BooleanField(default=False)
     salary_based_split = models.BooleanField(default=False)
     categories = models.ManyToManyField(Category, related_name="accounts")
+    account_user = models.ManyToManyField(
+        User,
+        through="AccountUser",
+        related_name="accounts",
+        through_fields=[
+            "account",
+            "user",
+        ],
+    )
 
     objects = AccountManager()
 
