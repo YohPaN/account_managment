@@ -180,6 +180,7 @@ class AccountListSerializer(_AccountSerializer):
                 for field in AccountMeta.fields
                 if field
                 in [
+                    "categories",
                     "contributors",
                     "id",
                     "is_main",
@@ -188,7 +189,6 @@ class AccountListSerializer(_AccountSerializer):
                     "permissions",
                     "user",
                     "salary_based_split",
-                    "categories",
                 ]
             ],
             "total",
@@ -206,6 +206,7 @@ class AccountSerializer(_AccountSerializer):
                 for field in AccountMeta.fields
                 if field
                 in [
+                    "categories",
                     "contributors",
                     "id",
                     "is_main",
@@ -217,7 +218,6 @@ class AccountSerializer(_AccountSerializer):
                     "salary_based_split",
                     "transfer_items",
                     "user",
-                    "categories",
                 ]
             ],
             "total",

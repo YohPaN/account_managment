@@ -45,7 +45,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import DecimalField, Exists, F, OuterRef, Sum, Value
+from django.db.models import DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
@@ -175,34 +175,16 @@ class AccountView(ModelViewSet):
         return context
 
     def list(self, request):
-        queryset = self.get_queryset()
-
-        own_accounts = queryset.filter(user=request.user)
-
-        contributor_account_user = AccountUser.objects.filter(
-            account=OuterRef("pk"), user=request.user, state="APPROVED"
-        )
-        contributor_accounts = queryset.filter(
-            Exists(contributor_account_user)
-        )
-
-        own_account_serialized = AccountListSerializer(
-            own_accounts,
-            many=True,
-            context={"request": request},
-        )
-
-        contributor_account_serialized = AccountListSerializer(
-            contributor_accounts,
-            many=True,
-            context={"request": request},
+        queryset = Account.objects.get_own_accounts_and_contributions(
+            queryset=self.get_queryset(), user=request.user
         )
 
         return Response(
-            data={
-                "own": own_account_serialized.data,
-                "contributor_account": contributor_account_serialized.data,
-            },
+            AccountListSerializer(
+                queryset,
+                many=True,
+                context=self.get_serializer_context(),
+            ).data,
             status=status.HTTP_200_OK,
         )
 

@@ -343,40 +343,28 @@ class AccountViewTest(TestCase):
         response = self.c.get("/api/accounts/")
 
         self.assertTrue(status.is_success(response.status_code))
-        self.assertIn("own", response.data)
-        self.assertIn("contributor_account", response.data)
-        self.assertIn("categories", response.data["own"][0])
-        self.assertIn("account_categories", response.data["own"][0])
-        self.assertIn("categories", response.data["contributor_account"][0])
-
-        self_account = [
-            account
-            for account in response.data["own"]
-            if account["id"] == self.account.pk
-        ]
-
-        self.assertTrue(
-            any(
-                category["title"] == self.category_for_account.title
-                for category in self_account[0]["categories"]
-            )
+        self.assertEqual(len(response.data), 3)
+        self.assertIn("categories", response.data[0])
+        self.assertIn("account_categories", response.data[0])
+        return_account = next(
+            (
+                account
+                for account in response.data
+                if account["id"] == self.account.pk
+            ),
+            None,
+        )
+        return_account_approved = next(
+            (
+                account
+                for account in response.data
+                if account["id"] == account_approved.pk
+            ),
+            None,
         )
 
-        self.assertTrue(
-            any(
-                category["title"] == category_for_account.title
-                for category in response.data["contributor_account"][0][
-                    "categories"
-                ]
-            )
-        )
-        self.assertEqual(len(response.data["own"]), 2)
-        self.assertEqual(len(response.data["contributor_account"]), 1)
-        self.assertEqual(len(self_account[0]["categories"]), 1)
-        self.assertEqual(
-            len(response.data["contributor_account"][0]["categories"]),
-            1,
-        )
+        self.assertEqual(len(return_account["categories"]), 1)
+        self.assertEqual(len(return_account_approved["categories"]), 1)
 
     def test_get_current_user_account(self):
         response = self.c.get("/api/accounts/me/")
