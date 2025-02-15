@@ -1489,6 +1489,10 @@ class AccountCategoryViewTest(TestCase):
         )
 
     def test_associate_category_to_account(self):
+        self.assertEqual(
+            self.account.categories.filter(pk=self.category.pk).count(),
+            0,
+        )
         response = self.c.post(
             "/api/account-categories/",
             {
@@ -1502,6 +1506,29 @@ class AccountCategoryViewTest(TestCase):
         self.assertEqual(
             self.account.categories.filter(pk=self.category.pk).count(),
             1,
+        )
+
+    def test_unlink_category_to_account(self):
+        self.account.categories.add(self.category)
+
+        self.assertEqual(
+            self.account.categories.filter(pk=self.category.pk).count(),
+            1,
+        )
+
+        response = self.c.post(
+            "/api/account-categories/unlink/",
+            {
+                "category": self.category.pk,
+                "account": self.account.pk,
+            },
+        )
+
+        self.assertTrue(status.is_success(response.status_code))
+
+        self.assertEqual(
+            self.account.categories.filter(pk=self.category.pk).count(),
+            0,
         )
 
     def test_associate_category_to_account_that_are_already_linked(self):
