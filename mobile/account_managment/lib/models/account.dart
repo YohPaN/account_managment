@@ -1,12 +1,13 @@
+import 'package:account_managment/helpers/model_factory.dart';
+import 'package:account_managment/models/base_model.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/contributor.dart';
-import 'package:account_managment/models/item.dart';
 
-class Account {
+class Account extends BaseModel {
   int id;
   String name;
   bool isMain;
-  List<Item> items;
+  List<dynamic> items;
   double? ownContribution;
   double? needToAdd;
   List<CategoryApp> categories;
@@ -31,27 +32,46 @@ class Account {
     required this.username,
     required this.salaryBasedSplit,
     required this.total,
-  });
+  }) : super.fromJson({});
 
-  static Account deserialize(jsonAccount) {
+  factory Account.fromJson(json, other) {
     return Account(
-      id: jsonAccount["id"],
-      name: jsonAccount["name"],
-      isMain: jsonAccount["is_main"],
-      items: [],
-      ownContribution: jsonAccount["own_contribution"] != null
-          ? jsonAccount["own_contribution"]["total"]
+      id: json["id"],
+      accountCategories: [
+        ...ModelFactory.fromJson(
+            json: json["account_categories"], type: "category")
+      ],
+      categories: [
+        ...ModelFactory.fromJson(json: json["categories"], type: "category")
+      ],
+      contributor: [
+        ...ModelFactory.fromJson(
+            json: json["contributors"], type: "contributor")
+      ],
+      isMain: json["is_main"],
+      items: [
+        ...ModelFactory.fromJson(
+          json: json["items"],
+          type: "item",
+          other: {"isTransfertItem": false},
+        ),
+        if (json["transfer_items"] != null)
+          ...ModelFactory.fromJson(
+            json: json["transfer_items"],
+            type: "item",
+            other: {"isTransfertItem": false},
+          )
+      ],
+      name: json["name"],
+      needToAdd:
+          json["need_to_add"] != null ? json["need_to_add"]["total"] : null,
+      ownContribution: json["own_contribution"] != null
+          ? json["own_contribution"]["total"]
           : null,
-      needToAdd: jsonAccount["need_to_add"] != null
-          ? jsonAccount["need_to_add"]["total"]
-          : null,
-      contributor: [],
-      categories: [],
-      accountCategories: [],
-      permissions: List<String>.from(jsonAccount["permissions"]),
-      username: jsonAccount["user"]["username"],
-      total: jsonAccount["total"]["total_sum"],
-      salaryBasedSplit: jsonAccount["salary_based_split"],
+      permissions: List<String>.from(json["permissions"]),
+      salaryBasedSplit: json["salary_based_split"],
+      total: double.parse(json["total"]),
+      username: json["user"]["username"],
     );
   }
 
@@ -61,10 +81,11 @@ class Account {
       salaryBasedSplit = data["salary_based_split"];
     }
     if (data["contributors"] != null) {
-      contributor = [];
+      this.contributor = [];
 
-      for (var contributor in data["contributors"]) {
-        this.contributor.add(Contributor.deserialize(contributor));
+      for (var contributorRequest in data["contributors"]) {
+        this.contributor.add(ModelFactory.fromJson(
+            json: contributorRequest, type: 'contributor'));
       }
     }
   }

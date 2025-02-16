@@ -18,13 +18,16 @@ class AccountListScreen extends StatelessWidget {
       builder: (context, accountViewModel, child) {
         return Scaffold(
           body: FutureBuilder(
-            future: accountViewModel.listAccount(),
+            future: accountViewModel.listAccount(
+                user: profileViewModel.user!.username),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 if (snapshot.data!.success) {
                   return RefreshIndicator(
-                    onRefresh: () async =>
-                        {await accountViewModel.listAccount()},
+                    onRefresh: () async => {
+                      await accountViewModel.listAccount(
+                          user: profileViewModel.user!.username)
+                    },
                     child: Column(children: [
                       Text(
                           "${locale.possessive("yours").capitalize()} ${locale.account("many")}"),

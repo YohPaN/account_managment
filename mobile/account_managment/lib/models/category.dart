@@ -1,7 +1,10 @@
+import 'dart:convert';
+
+import 'package:account_managment/models/base_model.dart';
 import 'package:flutter_iconpicker/Models/icon_picker_icon.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
-class CategoryApp {
+class CategoryApp extends BaseModel {
   int id;
   String title;
   int? color;
@@ -12,21 +15,24 @@ class CategoryApp {
     required this.title,
     required this.color,
     required this.icon,
-  });
+  }) : super.fromJson({});
 
-  static CategoryApp deserialize(jsonCategory) {
+  factory CategoryApp.fromJson(Map<String, dynamic> json, dynamic other) {
     return CategoryApp(
-        id: jsonCategory["id"],
-        title: jsonCategory["title"],
-        color: jsonCategory["color"] != ""
-            ? int.parse(jsonCategory["color"])
-            : null,
-        icon: deserializeIcon(jsonCategory["icon"]));
+      id: json["id"],
+      title: json["title"],
+      color: json["color"] != "" ? int.parse(json["color"]) : null,
+      icon: deserializeIcon(json["icon"].runtimeType == String
+          ? jsonDecode(json["icon"])
+          : json["icon"]),
+    );
   }
 
   void update(data) {
     title = data["title"];
     color = int.parse(data["color"]);
-    icon = deserializeIcon(data["icon"]);
+    icon = deserializeIcon(data["icon"].runtimeType == String
+        ? jsonDecode(data["icon"])
+        : data["icon"]);
   }
 }

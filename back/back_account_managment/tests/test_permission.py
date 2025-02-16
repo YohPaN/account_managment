@@ -1,11 +1,6 @@
 from unittest.mock import MagicMock, Mock
 
-from back_account_managment.models import (
-    Account,
-    AccountUser,
-    AccountUserPermission,
-    Item,
-)
+from back_account_managment.models import Account, AccountUser, Item
 from back_account_managment.permissions import (
     IsAccountContributor,
     IsAccountOwner,
@@ -78,10 +73,7 @@ class IsAccountOwnerPermissionTest(TestCase):
             user=self.user, account=self.account
         )
 
-        self.account_user_permission = AccountUserPermission.objects.create(
-            permissions=Permission.objects.first(),
-            account_user=self.account_user,
-        )
+        self.account_user.permissions.add(Permission.objects.first())
 
         factory = APIRequestFactory()
         self.request = factory.get("/")
@@ -146,9 +138,7 @@ class ManageRessourcePermissionTest(TestCase):
         account_user = AccountUser.objects.create(
             account=self.account, user=self.user
         )
-        AccountUserPermission.objects.create(
-            account_user=account_user, permissions=permission
-        )
+        account_user.permissions.add(permission)
 
         request = self.factory.post("/")
         request.user = self.user
@@ -176,9 +166,7 @@ class ManageRessourcePermissionTest(TestCase):
         account_user = AccountUser.objects.create(
             account=self.account, user=self.user
         )
-        AccountUserPermission.objects.create(
-            account_user=account_user, permissions=permission
-        )
+        account_user.permissions.add(permission)
 
         request = self.factory.put("/")
         request.user = self.user
@@ -206,9 +194,7 @@ class ManageRessourcePermissionTest(TestCase):
         account_user = AccountUser.objects.create(
             account=self.account, user=self.user
         )
-        AccountUserPermission.objects.create(
-            account_user=account_user, permissions=permission
-        )
+        account_user.permissions.add(permission)
 
         request = self.factory.patch("/")
         request.user = self.user
@@ -236,9 +222,7 @@ class ManageRessourcePermissionTest(TestCase):
         account_user = AccountUser.objects.create(
             account=self.account, user=self.user
         )
-        AccountUserPermission.objects.create(
-            account_user=account_user, permissions=permission
-        )
+        account_user.permissions.add(permission)
 
         request = self.factory.delete("/")
         request.user = self.user
@@ -283,9 +267,7 @@ class ManageRessourcePermissionTest(TestCase):
         account_user = AccountUser.objects.create(
             account=self.account, user=self.user
         )
-        AccountUserPermission.objects.create(
-            account_user=account_user, permissions=permission
-        )
+        account_user.permissions.add(permission)
 
         request = self.factory.post("/")
         request.user = self.user
@@ -423,9 +405,8 @@ class LinkItemUserPermissionTest(TestCase):
         )
 
     def test_has_change_item_perm(self):
-        AccountUserPermission.objects.create(
-            account_user=self.account_user,
-            permissions=Permission.objects.get(codename="change_item"),
+        self.account_user.permissions.add(
+            Permission.objects.get(codename="change_item")
         )
 
         self.assertTrue(
@@ -437,11 +418,8 @@ class LinkItemUserPermissionTest(TestCase):
     def test_can_link_empty_item(self):
         self.request.data = {}
 
-        AccountUserPermission.objects.create(
-            account_user=self.account_user,
-            permissions=Permission.objects.get(
-                codename="add_item_without_user"
-            ),
+        self.account_user.permissions.add(
+            Permission.objects.get(codename="add_item_without_user")
         )
 
         self.assertTrue(
@@ -464,9 +442,8 @@ class LinkItemUserPermissionTest(TestCase):
 
         self.request.data = {"username": user2.username}
 
-        AccountUserPermission.objects.create(
-            account_user=self.account_user,
-            permissions=Permission.objects.get(codename="link_user_item"),
+        self.account_user.permissions.add(
+            Permission.objects.get(codename="link_user_item")
         )
 
         self.assertTrue(

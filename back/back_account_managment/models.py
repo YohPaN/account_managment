@@ -7,17 +7,7 @@ from django.contrib.contenttypes.fields import (
 )
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import (
-    Case,
-    CheckConstraint,
-    Exists,
-    F,
-    OuterRef,
-    Q,
-    Sum,
-    Value,
-    When,
-)
+from django.db.models import CheckConstraint, Q
 
 
 class Category(models.Model):
@@ -31,9 +21,8 @@ class Category(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
 
     def save(self, **kwargs):
-        # We are testing that both are not None
+        # verify that both are not None
         assert self.content_type != self.object_id
-
         return super().save(**kwargs)
 
     class Meta:
@@ -64,15 +53,35 @@ class Profile(models.Model):
     )
 
 
+class AccountManager(models.Manager):
+    def get_own_accounts_and_contributions(self, queryset, user):
+        contributor_account_user = AccountUser.objects.filter(
+            account=models.OuterRef("pk"), user=user, state="APPROVED"
+        )
+
+        return queryset.filter(
+            models.Q(user=user) | models.Exists(contributor_account_user)
+        )
+
+
 class Account(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=50)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
     salary_based_split = models.BooleanField(default=False)
-    account_categories = models.ManyToManyField(
-        Category, through="AccountCategory"
+    categories = models.ManyToManyField(Category, related_name="accounts")
+    account_user = models.ManyToManyField(
+        User,
+        through="AccountUser",
+        related_name="accounts",
+        through_fields=[
+            "account",
+            "user",
+        ],
     )
+
+    objects = AccountManager()
 
     class Meta:
         permissions = [
@@ -81,27 +90,26 @@ class Account(models.Model):
             ("transfert_item", "Can transfert item into account"),
         ]
 
-    @property
-    def total(self):
-        transfert_item = Transfert.objects.filter(
-            to_account_id=self.pk, item=OuterRef("pk")
-        )
+    def manage_category(self, category_id, link=True):
+        try:
+            category = Category.objects.get(pk=category_id)
+            category_accounts = category.accounts.all()
 
-        total = Item.objects.annotate(
-            calc_valuation=Case(
-                When(Exists(transfert_item), then=F("valuation") * Value(-1)),
-                default=F("valuation"),
-            )
-        ).filter(
-            Q(account_id=self.pk) | Exists(transfert_item),
-        )
+            if link:
+                if category_accounts.filter(~Q(pk=self.pk)).exists():
+                    return {"error": "The category is link to another account"}
 
-        return total.aggregate(total_sum=(Sum("calc_valuation", default=0)))
+                elif category_accounts.filter(pk=self.pk).exists():
+                    return True
 
+                self.categories.add(category)
+            else:
+                self.categories.remove(category)
 
-class AccountCategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+            return True
+
+        except Category.DoesNotExist as e:
+            return {"error": str(e)}
 
 
 class Item(models.Model):
@@ -121,13 +129,20 @@ class Item(models.Model):
 
     def save(self, **kwargs):
         if self.category:
-            account_category = AccountCategory.objects.filter(
-                account=self.account, category=self.category
-            )
-
-            assert account_category.exists()
+            assert self.category.accounts.filter(pk=self.account.pk).exists()
 
         return super().save(**kwargs)
+
+    def manage_transfer(self, to_account=None):
+        if to_account:
+            Transfert.objects.update_or_create(
+                item=self, defaults={"to_account_id": to_account}
+            )
+
+        else:
+            trasfert = getattr(self, "to_account", None)
+            if trasfert:
+                trasfert.delete()
 
 
 class AccountUserState(models.TextChoices):
@@ -137,7 +152,6 @@ class AccountUserState(models.TextChoices):
 
 
 class AccountUser(models.Model):
-
     id = models.BigAutoField(primary_key=True)
     state = models.CharField(
         choices=AccountUserState,
@@ -148,6 +162,7 @@ class AccountUser(models.Model):
         Account, on_delete=models.CASCADE, related_name="contributors"
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    permissions = models.ManyToManyField(Permission, blank=True)
 
     class Meta:
         constraints = [
@@ -160,14 +175,13 @@ class AccountUser(models.Model):
         ]
 
 
-class AccountUserPermission(models.Model):
-    account_user = models.ForeignKey(AccountUser, on_delete=models.CASCADE)
-    permissions = models.ForeignKey(Permission, on_delete=models.CASCADE)
-
-
 class Transfert(models.Model):
-    to_account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    item = models.OneToOneField(Item, on_delete=models.CASCADE)
+    to_account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="transfer_items"
+    )
+    item = models.OneToOneField(
+        Item, on_delete=models.CASCADE, related_name="to_account"
+    )
 
 
 class LogCode(models.TextChoices):

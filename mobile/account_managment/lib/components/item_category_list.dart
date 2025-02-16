@@ -23,7 +23,7 @@ class ItemCategoryList extends StatelessWidget {
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
 
-    final List<Item> items = accountViewModel.account!.items
+    final List items = accountViewModel.account!.items
         .where((item) => item.category?.id == category?.id)
         .toList();
 

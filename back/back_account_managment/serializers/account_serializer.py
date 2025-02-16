@@ -3,14 +3,10 @@ from decimal import Decimal
 from back_account_managment.models import (
     Account,
     AccountUser,
-    AccountUserPermission,
     Category,
     Item,
     Profile,
     Transfert,
-)
-from back_account_managment.serializers.account_user_permission_serializer import (  # noqa
-    AccountUserPermissionsSerializer,
 )
 from back_account_managment.serializers.account_user_serializer import (
     AccountAccountUserSerializer,
@@ -25,7 +21,6 @@ from back_account_managment.serializers.user_serializer import (
     UsernameUserSerilizer,
 )
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
 from django.db.models import Case, Exists, F, OuterRef, Q, Sum, Value, When
 from rest_framework import serializers
 
@@ -41,43 +36,34 @@ class AccountMeta:
         "need_to_add",
         "own_contribution",
         "permissions",
-        "total",
         "user",
         "salary_based_split",
-        "transfert_items",
+        "transfer_items",
         "categories",
-        "account_categories",
     ]
 
 
 class _AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
-    transfert_items = serializers.SerializerMethodField()
+    transfer_items = ItemReadSerializer(many=True)
     contributors = AccountAccountUserSerializer(many=True)
+    total = serializers.DecimalField(max_digits=15, decimal_places=2)
 
     permissions = serializers.SerializerMethodField()
 
     own_contribution = serializers.SerializerMethodField()
     need_to_add = serializers.SerializerMethodField()
 
-    categories = serializers.SerializerMethodField()
-    account_categories = CategorySerializer(many=True)
+    account_categories = serializers.SerializerMethodField()
+    categories = CategorySerializer(many=True)
 
     class Meta:
         pass
 
-    def get_categories(self, account):
+    def get_account_categories(self, account):
         return CategorySerializer(
             Category.objects.filter(object_id=account.id), many=True
         ).data
-
-    def get_transfert_items(self, account):
-        transferts = Transfert.objects.filter(
-            to_account=account, item=OuterRef("pk")
-        )
-        items = Item.objects.filter(Exists(transferts))
-
-        return ItemReadSerializer(items, many=True).data
 
     def get_permissions(self, account):
         user = self.context["request"].user
@@ -85,20 +71,12 @@ class _AccountSerializer(serializers.ModelSerializer):
         if user == account.user:
             return []
 
-        account_user_qs = AccountUser.objects.filter(
+        account_user = AccountUser.objects.get(
             user=user,
             account=account,
-            id=OuterRef("account_user"),
         )
 
-        permissions = Permission.objects.filter(
-            Exists(
-                AccountUserPermission.objects.filter(
-                    permissions=OuterRef("pk"),
-                    account_user__in=account_user_qs,
-                )
-            )
-        )
+        permissions = account_user.permissions.all()
 
         return [
             permission["codename"]
@@ -197,22 +175,24 @@ class AccountListSerializer(_AccountSerializer):
 
     class Meta(AccountMeta):
         fields = [
-            field
-            for field in AccountMeta.fields
-            if field
-            in [
-                "contributors",
-                "id",
-                "is_main",
-                "items",
-                "name",
-                "permissions",
-                "total",
-                "user",
-                "salary_based_split",
-                "categories",
-                "account_categories",
-            ]
+            *[
+                field
+                for field in AccountMeta.fields
+                if field
+                in [
+                    "categories",
+                    "contributors",
+                    "id",
+                    "is_main",
+                    "items",
+                    "name",
+                    "permissions",
+                    "user",
+                    "salary_based_split",
+                ]
+            ],
+            "total",
+            "account_categories",
         ]
 
 
@@ -221,25 +201,27 @@ class AccountSerializer(_AccountSerializer):
 
     class Meta(AccountMeta):
         fields = [
-            field
-            for field in AccountMeta.fields
-            if field
-            in [
-                "contributors",
-                "id",
-                "is_main",
-                "items",
-                "name",
-                "need_to_add",
-                "own_contribution",
-                "permissions",
-                "salary_based_split",
-                "total",
-                "transfert_items",
-                "user",
-                "categories",
-                "account_categories",
-            ]
+            *[
+                field
+                for field in AccountMeta.fields
+                if field
+                in [
+                    "categories",
+                    "contributors",
+                    "id",
+                    "is_main",
+                    "items",
+                    "name",
+                    "need_to_add",
+                    "own_contribution",
+                    "permissions",
+                    "salary_based_split",
+                    "transfer_items",
+                    "user",
+                ]
+            ],
+            "total",
+            "account_categories",
         ]
 
 
@@ -247,4 +229,20 @@ class MinimalAccountSerilizer(_AccountSerializer):
     class Meta(AccountMeta):
         fields = [
             field for field in AccountMeta.fields if field in ["name", "user"]
+        ]
+
+
+class SalaryBasedSplitAccountSerilizer(_AccountSerializer):
+    class Meta(AccountMeta):
+        fields = [
+            field
+            for field in AccountMeta.fields
+            if field in ["salary_based_split"]
+        ]
+
+
+class ContributorAccountSerilizer(_AccountSerializer):
+    class Meta(AccountMeta):
+        fields = [
+            field for field in AccountMeta.fields if field in ["contributors"]
         ]

@@ -1,16 +1,18 @@
-class Contributor {
+import 'package:account_managment/models/base_model.dart';
+
+class Contributor extends BaseModel {
   String username;
   String? state = "PENDING";
 
   Contributor({
     required this.username,
     this.state,
-  });
+  }) : super.fromJson({});
 
-  static Contributor deserialize(jsonContributor) {
+  factory Contributor.fromJson(Map<String, dynamic> json, dynamic other) {
     return Contributor(
-      username: jsonContributor["user"]["username"],
-      state: jsonContributor["state"],
+      username: json["user"]["username"],
+      state: json["state"],
     );
   }
 }
