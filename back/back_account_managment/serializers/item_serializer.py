@@ -1,4 +1,4 @@
-from back_account_managment.models import Item
+from back_account_managment.models import Item, Transfert
 from back_account_managment.serializers.category_serializer import (
     CategorySerializer,
 )
@@ -34,11 +34,11 @@ class _ItemSerializer(serializers.ModelSerializer):
         pass
 
     def get_to_account(self, item):
-        transfert = item.to_account.to_account
+        transfert = Transfert.objects.filter(item=item).first()
 
         return {
-            "id": transfert.pk if transfert else None,
-            "name": transfert.name if transfert else None,
+            "id": transfert.to_account.pk if transfert else None,
+            "name": transfert.to_account.name if transfert else None,
         }
 
 

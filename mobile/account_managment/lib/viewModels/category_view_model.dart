@@ -1,3 +1,4 @@
+import 'package:account_managment/helpers/model_factory.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/category_repository.dart';
@@ -31,9 +32,9 @@ class CategoryViewModel extends ChangeNotifier {
 
     if (repoResponse.success) {
       categories.clear();
-      repoResponse.data.forEach((category) {
-        categories.add(CategoryApp.deserialize(category));
-      });
+      categories.addAll([
+        ...ModelFactory.fromJson(json: repoResponse.data, type: 'category')
+      ]);
     }
 
     notifyListeners();
@@ -45,25 +46,27 @@ class CategoryViewModel extends ChangeNotifier {
     required String title,
     required IconPickerIcon icon,
     required int color,
-    int? accountId,
+    required String contentType,
+    int? objectId,
   }) async {
     final RepoResponse repoResponse = await accountCategoryRepository.create(
-      title: title,
-      icon: icon,
-      color: color,
-      accountId: accountId,
-    );
+        title: title,
+        icon: icon,
+        color: color,
+        objectId: objectId,
+        contentType: contentType);
 
     if (repoResponse.success) {
       List<CategoryApp> categories;
 
-      if (accountId != null) {
-        categories = accountViewModel.account!.categories;
+      if (objectId != null) {
+        categories = accountViewModel.account!.accountCategories;
       } else {
         categories = profileViewModel.profile!.categories;
       }
 
-      categories.add(CategoryApp.deserialize(repoResponse.data));
+      categories.add(
+          ModelFactory.fromJson(json: repoResponse.data, type: 'category'));
     }
 
     notifyListeners();
@@ -89,7 +92,7 @@ class CategoryViewModel extends ChangeNotifier {
       List<CategoryApp> categories;
 
       if (categoryType == "account") {
-        categories = accountViewModel.account!.categories;
+        categories = accountViewModel.account!.accountCategories;
       } else {
         categories = profileViewModel.profile!.categories;
       }
@@ -119,7 +122,7 @@ class CategoryViewModel extends ChangeNotifier {
       List<CategoryApp> categories;
 
       if (categoryType == "account") {
-        categories = accountViewModel.account!.categories;
+        categories = accountViewModel.account!.accountCategories;
       } else {
         categories = profileViewModel.profile!.categories;
       }
@@ -145,9 +148,8 @@ class CategoryViewModel extends ChangeNotifier {
         category: categoryId,
       );
       if (repoResponse.success) {
-        accountViewModel.account!.accountCategories.add(CategoryApp.deserialize(
-          repoResponse.data,
-        ));
+        accountViewModel.account!.categories.add(
+            ModelFactory.fromJson(json: repoResponse.data, type: 'category'));
       }
     } else {
       repoResponse = await accountCategoryRepository.unlink(
@@ -155,7 +157,7 @@ class CategoryViewModel extends ChangeNotifier {
         category: categoryId,
       );
       if (repoResponse.success) {
-        accountViewModel.account!.accountCategories
+        accountViewModel.account!.categories
             .removeWhere((category) => category.id == categoryId);
       }
     }
@@ -171,7 +173,8 @@ class CategoryViewModel extends ChangeNotifier {
 
     if (repoResponse.success) {
       for (var category in repoResponse.data) {
-        defaultCategories.add(CategoryApp.deserialize(category));
+        defaultCategories
+            .add(ModelFactory.fromJson(json: category, type: 'category'));
       }
     }
 

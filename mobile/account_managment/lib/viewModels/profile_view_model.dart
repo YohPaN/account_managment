@@ -1,4 +1,4 @@
-import 'package:account_managment/models/category.dart';
+import 'package:account_managment/helpers/model_factory.dart';
 import 'package:account_managment/models/profile.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/models/user.dart';
@@ -24,7 +24,8 @@ class ProfileViewModel extends ChangeNotifier {
       _user = User.deserialize(repoResponse.data);
       _profile = Profile.deserialize(repoResponse.data!["profile"]);
       for (var category in repoResponse.data!["categories"]) {
-        _profile!.categories.add(CategoryApp.deserialize(category));
+        _profile!.categories
+            .add(ModelFactory.fromJson(json: category, type: 'category'));
       }
     }
 

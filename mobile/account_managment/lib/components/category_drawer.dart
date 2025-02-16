@@ -117,7 +117,8 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
           title: title,
           icon: _selectedIcon!,
           color: currentColor.value,
-          accountId: widget.categoryType == "account"
+          contentType: widget.categoryType,
+          objectId: widget.categoryType == "account"
               ? Provider.of<AccountViewModel>(context, listen: false)
                   .account!
                   .id
