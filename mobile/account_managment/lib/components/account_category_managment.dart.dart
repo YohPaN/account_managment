@@ -114,7 +114,7 @@ class _AccountCategoryManagmentState extends State<AccountCategoryManagment> {
                   CategoryList(
                     categories: Provider.of<AccountViewModel>(context)
                         .account!
-                        .categories,
+                        .accountCategories,
                     accountCategory: true,
                     showModal: showModal,
                   ),

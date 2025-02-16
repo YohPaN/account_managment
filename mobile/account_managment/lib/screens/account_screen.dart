@@ -151,9 +151,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                 .getAccount(accountViewModel.account?.id)
                           },
                           child: ListView.builder(
-                            itemCount: accountViewModel
-                                    .account!.accountCategories.length +
-                                1,
+                            itemCount:
+                                accountViewModel.account!.categories.length + 1,
                             itemBuilder: (context, index) {
                               _controllers.add(ExpansionTileController());
 
@@ -164,10 +163,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5.0),
                                     color: index != 0
-                                        ? Color(accountViewModel
-                                                .account!
-                                                .accountCategories[index - 1]
-                                                .color ??
+                                        ? Color(accountViewModel.account!
+                                                .categories[index - 1].color ??
                                             0)
                                         : Colors.white,
                                     boxShadow: const [
@@ -206,21 +203,19 @@ class _AccountScreenState extends State<AccountScreen> {
                                                   color: textColor(
                                                       accountViewModel
                                                           .account!
-                                                          .accountCategories[
-                                                              index - 1]
+                                                          .categories[index - 1]
                                                           .color),
                                                   IconData(
                                                       accountViewModel
                                                           .account!
-                                                          .accountCategories[
-                                                              index - 1]
+                                                          .categories[index - 1]
                                                           .icon!
                                                           .data
                                                           .codePoint,
                                                       fontFamily:
                                                           accountViewModel
                                                               .account!
-                                                              .accountCategories[
+                                                              .categories[
                                                                   index - 1]
                                                               .icon!
                                                               .data
@@ -233,7 +228,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                                   child: Text(
                                                     (locale.default_category_title(accountViewModel
                                                                     .account!
-                                                                    .accountCategories[
+                                                                    .categories[
                                                                         index -
                                                                             1]
                                                                     .title) !=
@@ -241,13 +236,13 @@ class _AccountScreenState extends State<AccountScreen> {
                                                             ? locale.default_category_title(
                                                                 accountViewModel
                                                                     .account!
-                                                                    .accountCategories[
+                                                                    .categories[
                                                                         index -
                                                                             1]
                                                                     .title)
                                                             : accountViewModel
                                                                 .account!
-                                                                .accountCategories[
+                                                                .categories[
                                                                     index - 1]
                                                                 .title)
                                                         .capitalize(),
@@ -258,7 +253,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                                       color: textColor(
                                                           accountViewModel
                                                               .account!
-                                                              .accountCategories[
+                                                              .categories[
                                                                   index - 1]
                                                               .color!),
                                                     ),
@@ -274,7 +269,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                             return ItemCategoryList(
                                               category: accountViewModel
                                                   .account!
-                                                  .accountCategories[index - 1],
+                                                  .categories[index - 1],
                                             );
                                           }
                                         })

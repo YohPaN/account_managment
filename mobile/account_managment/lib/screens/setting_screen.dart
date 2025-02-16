@@ -39,7 +39,7 @@ class SettingScreen extends StatelessWidget {
             child: CategoryDrawer(
               action: action,
               category: category,
-              categoryType: "profile",
+              categoryType: "user",
             ),
           );
         },

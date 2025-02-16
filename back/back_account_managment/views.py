@@ -253,12 +253,16 @@ class AccountView(ModelViewSet):
 
             if split is True:
                 account_users = AccountUser.objects.filter(
-                    ~Q(user__profile__salary=None),
                     account=account,
                     state="APPROVED",
                 )
 
-                if not account_users.exists():
+                if (
+                    account_users.exists()
+                    and account_users.filter(
+                        ~Q(user__profile__salary=None),
+                    ).exists()
+                ):
                     return Response(
                         {
                             "error": "All user in account must have set their salary"  # noqa
@@ -308,6 +312,7 @@ class AccountView(ModelViewSet):
             )
 
         account.account_user.add(user.first())
+        account.refresh_from_db()
 
         return Response(
             data=ContributorAccountSerilizer(account).data,
@@ -337,6 +342,7 @@ class AccountView(ModelViewSet):
             )
 
         account.account_user.remove(user.first())
+        account.refresh_from_db()
 
         return Response(
             data=ContributorAccountSerilizer(account).data,
@@ -521,7 +527,12 @@ class AccountCategoryView(ModelViewSet):
         )
 
         if link is True:
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(
+                data=CategoryWriteSerializer(
+                    Category.objects.get(pk=request.data.get("category", None))
+                ).data,
+                status=status.HTTP_201_CREATED,
+            )
 
         return Response(link, status=status.HTTP_404_NOT_FOUND)
 

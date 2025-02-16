@@ -1,6 +1,7 @@
+import 'package:account_managment/models/base_model.dart';
 import 'package:account_managment/models/category.dart';
 
-class Item {
+class Item extends BaseModel {
   int id;
   String title;
   String? description;
@@ -19,21 +20,22 @@ class Item {
     this.toAccount,
     required this.valuation,
     required this.transfertItem,
-  });
+  }) : super.fromJson({});
 
-  static Item deserialize(jsonItem, [isTransfertItem = false]) {
+  factory Item.fromJson(json, isTransfertItem) {
     return Item(
-        id: jsonItem["id"],
-        title: jsonItem["title"],
-        description: jsonItem["description"],
-        username: jsonItem["user"] != null ? jsonItem["user"]["username"] : "",
-        valuation: double.parse(
-          jsonItem["valuation"],
-        ),
-        transfertItem: isTransfertItem,
-        toAccount: {
-          "id": jsonItem["to_account"]["id"]?.toString(),
-          "name": jsonItem["to_account"]["name"]
-        });
+      id: json["id"],
+      description: json["description"],
+      title: json["title"],
+      toAccount: {
+        "id": json["to_account"]["id"]?.toString(),
+        "name": json["to_account"]["name"]?.toString()
+      },
+      transfertItem: isTransfertItem ?? false,
+      username: json["user"] != null ? json["user"]["username"] : "",
+      valuation: double.parse(
+        json["valuation"],
+      ),
+    );
   }
 }

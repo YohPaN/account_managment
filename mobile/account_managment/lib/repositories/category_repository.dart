@@ -27,7 +27,8 @@ class CategoryRepository {
     required String title,
     required IconPickerIcon icon,
     required int color,
-    int? accountId,
+    required String contentType,
+    int? objectId,
   }) async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
@@ -37,7 +38,8 @@ class CategoryRepository {
         'title': title,
         'icon': jsonEncode(serializeIcon(icon)),
         'color': color,
-        if (accountId != null) 'account_id': accountId,
+        'content_type': contentType,
+        if (objectId != null) 'object_id': objectId,
       },
     );
 
