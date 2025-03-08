@@ -1,70 +1,98 @@
+import 'package:account_managment/helpers/model_factory.dart';
+import 'package:account_managment/models/base_model.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/contributor.dart';
-import 'package:account_managment/models/item.dart';
 
-class Account {
+class Account extends BaseModel {
   int id;
-  String name;
-  bool isMain;
-  List<Item> items;
-  double? ownContribution;
-  double? needToAdd;
-  List<CategoryApp> categories;
   List<CategoryApp> accountCategories;
+  List<CategoryApp> categories;
   List<Contributor> contributor;
+  bool isMain;
+  List<dynamic> items;
+  String name;
+  double? needToAdd;
+  double? ownContribution;
   List<String> permissions;
-  String username;
-  double total;
   bool salaryBasedSplit;
+  double total;
+  String username;
 
   Account({
     required this.id,
-    required this.name,
+    required this.accountCategories,
+    required this.categories,
+    required this.contributor,
     required this.isMain,
     required this.items,
-    required this.categories,
-    required this.accountCategories,
-    this.ownContribution,
+    required this.name,
     this.needToAdd,
-    required this.contributor,
+    this.ownContribution,
     required this.permissions,
-    required this.username,
     required this.salaryBasedSplit,
     required this.total,
-  });
+    required this.username,
+  }) : super.fromJson({});
 
-  static Account deserialize(jsonAccount) {
+  factory Account.fromJson(json, other) {
     return Account(
-      id: jsonAccount["id"],
-      name: jsonAccount["name"],
-      isMain: jsonAccount["is_main"],
-      items: [],
-      ownContribution: jsonAccount["own_contribution"] != null
-          ? jsonAccount["own_contribution"]["total"]
+      id: json["id"],
+      accountCategories: [
+        ...ModelFactory.fromJson(
+            json: json["account_categories"], type: "category")
+      ],
+      categories: [
+        ...ModelFactory.fromJson(json: json["categories"], type: "category")
+      ],
+      contributor: [
+        ...ModelFactory.fromJson(
+            json: json["contributors"], type: "contributor")
+      ],
+      isMain: json["is_main"],
+      items: [
+        ...ModelFactory.fromJson(
+          json: json["items"],
+          type: "item",
+          other: {"isTransfertItem": false},
+        ),
+        if (json["transfer_items"] != null)
+          ...ModelFactory.fromJson(
+            json: json["transfer_items"],
+            type: "item",
+            other: {"isTransfertItem": false},
+          )
+      ],
+      name: json["name"],
+      needToAdd:
+          json["need_to_add"] != null ? json["need_to_add"]["total"] : null,
+      ownContribution: json["own_contribution"] != null
+          ? json["own_contribution"]["total"]
           : null,
-      needToAdd: jsonAccount["need_to_add"] != null
-          ? jsonAccount["need_to_add"]["total"]
-          : null,
-      contributor: [],
-      categories: [],
-      accountCategories: [],
-      permissions: List<String>.from(jsonAccount["permissions"]),
-      username: jsonAccount["user"]["username"],
-      total: jsonAccount["total"]["total_sum"],
-      salaryBasedSplit: jsonAccount["salary_based_split"],
+      permissions: List<String>.from(json["permissions"]),
+      salaryBasedSplit: json["salary_based_split"],
+      total: double.parse(json["total"]),
+      username: json["user"]["username"],
     );
   }
 
   Future<void> update(data) async {
-    if (data["name"] != null) name = data["name"];
-    if (data["salary_based_split"] != null) {
-      salaryBasedSplit = data["salary_based_split"];
-    }
-    if (data["contributors"] != null) {
-      contributor = [];
+    for (var field in data.keys) {
+      switch (field) {
+        case "contributors":
+          this.contributor = [];
 
-      for (var contributor in data["contributors"]) {
-        this.contributor.add(Contributor.deserialize(contributor));
+          for (var contributorRequest in data["contributors"]) {
+            this.contributor.add(ModelFactory.fromJson(
+                json: contributorRequest, type: 'contributor'));
+          }
+
+        case "name":
+          this.name = data["name"];
+
+        case "salary_based_split":
+          this.salaryBasedSplit = data["salary_based_split"];
+
+        default:
       }
     }
   }

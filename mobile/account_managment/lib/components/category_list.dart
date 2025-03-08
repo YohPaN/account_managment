@@ -47,8 +47,8 @@ class CategoryList extends StatelessWidget {
                                           categories[index].title)
                                       : categories[index].title)
                                   .capitalize()),
-                              value: accountViewModel.account!.accountCategories
-                                  .any((category) =>
+                              value: accountViewModel.account!.categories.any(
+                                  (category) =>
                                       category.id == categories[index].id),
                               onChanged: (bool? value) async {
                                 final RepoResponse repoResponse =

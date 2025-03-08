@@ -1,7 +1,5 @@
+import 'package:account_managment/helpers/model_factory.dart';
 import 'package:account_managment/models/account.dart';
-import 'package:account_managment/models/category.dart';
-import 'package:account_managment/models/contributor.dart';
-import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/account_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -20,80 +18,26 @@ class AccountViewModel extends ChangeNotifier {
 
   int? accountIdToRetrieve;
 
-  Future<RepoResponse> listAccount() async {
+  Future<RepoResponse> listAccount({required String user}) async {
     final RepoResponse repoResponse = await accountRepository.list();
-    final List<Account> accounts = [];
-    final List<Account> contributorAccounts = [];
 
     if (repoResponse.success && repoResponse.data != null) {
-      for (var account in repoResponse.data!["own"]) {
-        final List<Item> items = [];
+      _accounts = [
+        ...ModelFactory.fromJson(
+            json: repoResponse.data
+                .where((account) => account["user"]["username"] == user)
+                .toList(),
+            type: 'account')
+      ];
 
-        for (var item in account["items"]) {
-          items.add(Item.deserialize(item));
-        }
-
-        final List<CategoryApp> categories = [];
-
-        for (var category in account["categories"]) {
-          categories.add(
-            CategoryApp.deserialize(category),
-          );
-        }
-
-        final List<CategoryApp> accountCategories = [];
-
-        for (var category in account["account_categories"]) {
-          accountCategories.add(
-            CategoryApp.deserialize(category),
-          );
-        }
-
-        final List<Contributor> contributors = [];
-
-        for (var contributor in account["contributors"]) {
-          contributors.add(
-            Contributor.deserialize(contributor),
-          );
-        }
-
-        final accountToAdd = Account.deserialize(account);
-        accountToAdd.items = items;
-        accountToAdd.categories = categories;
-        accountToAdd.contributor = contributors;
-        accountToAdd.accountCategories = accountCategories;
-        accounts.add(
-          accountToAdd,
-        );
-      }
-
-      for (var contributorAccount
-          in repoResponse.data!["contributor_account"]) {
-        final List<Item> items = [];
-
-        for (var item in contributorAccount["items"]) {
-          items.add(Item.deserialize(item));
-        }
-
-        final List<Contributor> contributors = [];
-
-        for (var contributor in contributorAccount["contributors"]) {
-          contributors.add(
-            Contributor.deserialize(contributor),
-          );
-        }
-
-        final accountToAdd = Account.deserialize(contributorAccount);
-        accountToAdd.items = items;
-        accountToAdd.contributor = contributors;
-        contributorAccounts.add(
-          accountToAdd,
-        );
-      }
+      _contributorAccounts = [
+        ...ModelFactory.fromJson(
+            json: repoResponse.data
+                .where((account) => account["user"]["username"] != user)
+                .toList(),
+            type: 'account')
+      ];
     }
-
-    _accounts = accounts;
-    _contributorAccounts = contributorAccounts;
 
     return repoResponse;
   }
@@ -102,51 +46,8 @@ class AccountViewModel extends ChangeNotifier {
     final RepoResponse repoResponse = await accountRepository.get(accountId);
 
     if (repoResponse.success && repoResponse.data != null) {
-      final List<Item> items = [];
-      for (var item in repoResponse.data!["items"]) {
-        Item deserializedItem = Item.deserialize(item);
-        if (item["category"] != null) {
-          CategoryApp categoryItem = CategoryApp.deserialize(item["category"]);
-          deserializedItem.category = categoryItem;
-        }
-        items.add(deserializedItem);
-      }
-
-      final List<CategoryApp> categories = [];
-
-      for (var category in repoResponse.data!["categories"]) {
-        categories.add(
-          CategoryApp.deserialize(category),
-        );
-      }
-
-      for (var transfertItem in repoResponse.data!["transfert_items"]) {
-        items.add(Item.deserialize(transfertItem, true));
-      }
-
-      final List<CategoryApp> accountCategories = [];
-
-      for (var category in repoResponse.data!["account_categories"]) {
-        accountCategories.add(
-          CategoryApp.deserialize(category),
-        );
-      }
-
-      final List<Contributor> contributors = [];
-
-      for (var contributor in repoResponse.data!["contributors"]) {
-        contributors.add(
-          Contributor.deserialize(contributor),
-        );
-      }
-
-      final accountToAdd = Account.deserialize(repoResponse.data);
-      accountToAdd.items = items;
-      accountToAdd.categories = categories;
-      accountToAdd.accountCategories = accountCategories;
-      accountToAdd.contributor = contributors;
-
-      account = accountToAdd;
+      account = ModelFactory.fromJson(json: repoResponse.data, type: 'account')
+          as Account;
     }
 
     accountIdToRetrieve = null;
@@ -161,7 +62,10 @@ class AccountViewModel extends ChangeNotifier {
         await accountRepository.create(accountName);
 
     if (repoResponse.success) {
-      Account newAccount = Account.deserialize(repoResponse.data);
+      Account newAccount = ModelFactory.fromJson(
+        json: repoResponse.data,
+        type: 'account',
+      );
       _accounts.add(newAccount);
       account = newAccount;
     }
@@ -196,6 +100,10 @@ class AccountViewModel extends ChangeNotifier {
 
   Future<RepoResponse> deleteAccount(int accountId) async {
     final RepoResponse repoResponse = await accountRepository.delete(accountId);
+
+    if (repoResponse.success) {
+      _accounts.removeWhere((account) => account.id == accountId);
+    }
 
     notifyListeners();
 
@@ -254,6 +162,13 @@ class AccountViewModel extends ChangeNotifier {
       toAccount: toAccount,
     );
 
+    if (repoResponse.success) {
+      account!.items.add(ModelFactory.fromJson(
+        json: repoResponse.data,
+        type: 'item',
+      ));
+    }
+
     notifyListeners();
 
     return repoResponse;
@@ -278,6 +193,15 @@ class AccountViewModel extends ChangeNotifier {
         toAccount: toAccount,
         itemId: itemId);
 
+    if (repoResponse.success) {
+      for (var i = 0; i < account!.items.length; i++) {
+        if (account!.items[i].id == itemId) {
+          await account!.items[i].update(repoResponse.data);
+          break;
+        }
+      }
+    }
+
     notifyListeners();
 
     return repoResponse;
@@ -286,6 +210,11 @@ class AccountViewModel extends ChangeNotifier {
   Future<RepoResponse> deleteItem(int itemId) async {
     final RepoResponse repoResponse =
         await accountRepository.deleteItem(itemId, account!.id);
+
+    if (repoResponse.success) {
+      account!.items.removeWhere((item) => item.id == itemId);
+    }
+
     notifyListeners();
 
     return repoResponse;
