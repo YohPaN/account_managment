@@ -44,7 +44,6 @@ class Item extends BaseModel {
   }
 
   Future<void> update(data) async {
-    print(data);
     for (var field in data.keys) {
       switch (field) {
         case "title":
