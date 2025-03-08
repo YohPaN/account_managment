@@ -33,6 +33,7 @@ from back_account_managment.serializers.category_serializer import (
     CategoryWriteSerializer,
 )
 from back_account_managment.serializers.item_serializer import (
+    ItemReadSerializer,
     ItemWriteSerializer,
 )
 from back_account_managment.serializers.user_serializer import (
@@ -45,7 +46,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import DecimalField, F, Q, Sum, Value
+from django.db.models import DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
@@ -260,9 +261,9 @@ class AccountView(ModelViewSet):
                 if (
                     account_users.exists()
                     and account_users.filter(
-                        ~Q(user__profile__salary=None),
+                        user__profile__salary=None,
                     ).exists()
-                ):
+                ) or account.user.profile.salary is None:
                     return Response(
                         {
                             "error": "All user in account must have set their salary"  # noqa
@@ -351,7 +352,7 @@ class AccountView(ModelViewSet):
 
 
 class ItemView(ModelViewSet):
-    serializer_class = ItemWriteSerializer
+    serializer_class = ItemReadSerializer
     queryset = Item.objects.all()
     permission_classes = [
         permissions.IsAuthenticated,
@@ -366,33 +367,60 @@ class ItemView(ModelViewSet):
         TransfertToAccountPermission,
     ]
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         account = Account.objects.get(
-            pk=self.kwargs.get("account_id"),
+            pk=kwargs.get("account_id"),
         )
-
-        username = self.request.data.get("username", None)
+        username = request.data.get("username", None)
         user = get_object_or_404(User, username=username) if username else None
 
-        item = serializer.save(
-            account=account,
-            user=user,
+        serializer = ItemWriteSerializer(
+            data=request.data,
+            partial=True,
         )
 
-        item.manage_transfer(self.request.data.get("to_account", None))
+        if serializer.is_valid():
+            item = serializer.save(
+                account=account,
+                user=user,
+            )
 
-    def perform_update(self, serializer):
-        username = self.request.data.get("username", None)
+            item.manage_transfer(request.data.get("to_account", None))
+
+            return Response(
+                data=self.get_serializer(item).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        username = request.data.get("username", None)
         user = get_object_or_404(User, username=username) if username else None
 
-        category_id = self.request.data.get("category_id", None)
+        category_id = request.data.get("category_id", None)
+        request.data["user_id"] = user
+        request.data["category_id"] = category_id
 
-        item = serializer.save(
-            category_id=category_id,
-            user=user,
+        serializer = ItemWriteSerializer(
+            instance=self.get_object(),
+            data=request.data,
         )
 
-        item.manage_transfer(self.request.data.get("to_account", None))
+        if serializer.is_valid():
+            item = serializer.save(
+                user=user,
+                category_id=category_id,
+            )
+
+            item.manage_transfer(self.request.data.get("to_account", None))
+
+            return Response(
+                data=self.get_serializer(item).data,
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AccountUserView(ModelViewSet):
