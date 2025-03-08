@@ -5,33 +5,33 @@ import 'package:account_managment/models/contributor.dart';
 
 class Account extends BaseModel {
   int id;
-  String name;
+  List<CategoryApp> accountCategories;
+  List<CategoryApp> categories;
+  List<Contributor> contributor;
   bool isMain;
   List<dynamic> items;
-  double? ownContribution;
+  String name;
   double? needToAdd;
-  List<CategoryApp> categories;
-  List<CategoryApp> accountCategories;
-  List<Contributor> contributor;
+  double? ownContribution;
   List<String> permissions;
-  String username;
-  double total;
   bool salaryBasedSplit;
+  double total;
+  String username;
 
   Account({
     required this.id,
-    required this.name,
+    required this.accountCategories,
+    required this.categories,
+    required this.contributor,
     required this.isMain,
     required this.items,
-    required this.categories,
-    required this.accountCategories,
-    this.ownContribution,
+    required this.name,
     this.needToAdd,
-    required this.contributor,
+    this.ownContribution,
     required this.permissions,
-    required this.username,
     required this.salaryBasedSplit,
     required this.total,
+    required this.username,
   }) : super.fromJson({});
 
   factory Account.fromJson(json, other) {
@@ -76,16 +76,23 @@ class Account extends BaseModel {
   }
 
   Future<void> update(data) async {
-    if (data["name"] != null) name = data["name"];
-    if (data["salary_based_split"] != null) {
-      salaryBasedSplit = data["salary_based_split"];
-    }
-    if (data["contributors"] != null) {
-      this.contributor = [];
+    for (var field in data.keys) {
+      switch (field) {
+        case "contributors":
+          this.contributor = [];
 
-      for (var contributorRequest in data["contributors"]) {
-        this.contributor.add(ModelFactory.fromJson(
-            json: contributorRequest, type: 'contributor'));
+          for (var contributorRequest in data["contributors"]) {
+            this.contributor.add(ModelFactory.fromJson(
+                json: contributorRequest, type: 'contributor'));
+          }
+
+        case "name":
+          this.name = data["name"];
+
+        case "salary_based_split":
+          this.salaryBasedSplit = data["salary_based_split"];
+
+        default:
       }
     }
   }

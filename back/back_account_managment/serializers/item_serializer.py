@@ -28,7 +28,7 @@ class _ItemSerializer(serializers.ModelSerializer):
     user = UsernameUserSerilizer()
     to_account = serializers.SerializerMethodField()
     category = CategorySerializer()
-    category_id = serializers.IntegerField(required=False)
+    category_id = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
         pass

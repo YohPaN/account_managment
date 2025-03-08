@@ -162,6 +162,13 @@ class AccountViewModel extends ChangeNotifier {
       toAccount: toAccount,
     );
 
+    if (repoResponse.success) {
+      account!.items.add(ModelFactory.fromJson(
+        json: repoResponse.data,
+        type: 'item',
+      ));
+    }
+
     notifyListeners();
 
     return repoResponse;
@@ -186,6 +193,15 @@ class AccountViewModel extends ChangeNotifier {
         toAccount: toAccount,
         itemId: itemId);
 
+    if (repoResponse.success) {
+      for (var i = 0; i < account!.items.length; i++) {
+        if (account!.items[i].id == itemId) {
+          await account!.items[i].update(repoResponse.data);
+          break;
+        }
+      }
+    }
+
     notifyListeners();
 
     return repoResponse;
@@ -194,6 +210,11 @@ class AccountViewModel extends ChangeNotifier {
   Future<RepoResponse> deleteItem(int itemId) async {
     final RepoResponse repoResponse =
         await accountRepository.deleteItem(itemId, account!.id);
+
+    if (repoResponse.success) {
+      account!.items.removeWhere((item) => item.id == itemId);
+    }
+
     notifyListeners();
 
     return repoResponse;

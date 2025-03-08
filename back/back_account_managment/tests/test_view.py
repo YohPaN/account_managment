@@ -262,6 +262,12 @@ class AccountViewTest(TestCase):
             username="jonDoe",
             email="jon@doe.test",
         )
+        Profile.objects.create(
+            user=self.user,
+            first_name="test",
+            last_name="test",
+            salary=1256.54,
+        )
 
         self.user2 = User.objects.create(
             username="testeur",
@@ -523,6 +529,7 @@ class AccountViewTest(TestCase):
         self.user2.profile.save()
 
         self.assertFalse(self.account.salary_based_split)
+        self.assertIsNotNone(self.user2.profile.salary)
 
         AccountUser.objects.create(
             account=self.account,
@@ -551,6 +558,28 @@ class AccountViewTest(TestCase):
             user=self.user2,
             state="APPROVED",
         )
+
+        response = self.c.post(
+            f"/api/accounts/{self.account.pk}/split/",
+            {
+                "is_slit": "True",
+            },
+            format="json",
+        )
+
+        self.account.refresh_from_db()
+
+        self.assertFalse(status.is_success(response.status_code))
+        self.assertEqual(
+            response.data["error"],
+            "All user in account must have set their salary",
+        )
+
+    def test_set_split_to_true_without_account_owner_salary(self):
+        self.assertFalse(self.account.salary_based_split)
+
+        self.user.profile.salary = None
+        self.user.profile.save()
 
         response = self.c.post(
             f"/api/accounts/{self.account.pk}/split/",
