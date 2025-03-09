@@ -115,10 +115,12 @@ class _ItemDrawerState extends State<ItemDrawer> {
     ];
 
     for (var account in accountViewModel.accounts) {
-      accountList.add(DropdownMenuEntry<String>(
-        value: account.id.toString(),
-        label: account.name,
-      ));
+      if (account.id != accountViewModel.account!.id) {
+        accountList.add(DropdownMenuEntry<String>(
+          value: account.id.toString(),
+          label: account.name,
+        ));
+      }
     }
 
     for (var category in categoryViewModel.categories) {
