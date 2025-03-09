@@ -1,6 +1,7 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/custom_icon_pack.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/icon_picker_trad.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
@@ -97,6 +98,11 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
           searchHintText: locale.search.capitalize(),
           customIconPack: customIcons,
           iconPackModes: [IconPack.material, IconPack.custom],
+          searchComparator: (String searchValue, IconPickerIcon icon) =>
+              icon.name.toLowerCase().contains(searchValue.toLowerCase()) ||
+              (traductions[icon.name] ?? icon.name)
+                  .toLowerCase()
+                  .contains(searchValue.toLowerCase()),
         ),
       );
 
