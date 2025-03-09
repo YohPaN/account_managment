@@ -6,8 +6,6 @@ import 'package:account_managment/screens/account_screen.dart';
 import 'package:account_managment/screens/profile_screen.dart';
 import 'package:account_managment/screens/setting_screen.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
-import 'package:account_managment/viewModels/category_view_model.dart';
-import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -37,11 +35,6 @@ class _LayoutState extends State<Layout> {
   }
 
   Future<void> _initialize() async {
-    await Provider.of<AccountUserViewModel>(context, listen: false)
-        .countAccountUser();
-
-    setState(() {});
-
     if (Provider.of<AccountUserViewModel>(context, listen: false)
             .accountUsersCount >
         0) {
@@ -56,17 +49,7 @@ class _LayoutState extends State<Layout> {
   @override
   Widget build(BuildContext context) {
     var currentPageIndex = Provider.of<NavigationIndex>(context).getIndex;
-    final ProfileViewModel profileViewModel =
-        Provider.of<ProfileViewModel>(context, listen: false);
-    final CategoryViewModel categoryViewModel =
-        Provider.of<CategoryViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
-
-    if (profileViewModel.user == null) profileViewModel.getProfile();
-
-    if (categoryViewModel.defaultCategories.isEmpty) {
-      categoryViewModel.getDefaultCategory();
-    }
 
     return SafeArea(
         child: Scaffold(

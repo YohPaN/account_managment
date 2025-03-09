@@ -87,7 +87,7 @@ class _LoginFormState extends State<LoginForm> {
 
                   if (!context.mounted) return;
                   Navigator.pushNamedAndRemoveUntil(
-                      context, '/home', (route) => false);
+                      context, '/splash', (route) => false);
                 } else {
                   passwordController.text = "";
                   Provider.of<InternalNotification>(context, listen: false)
