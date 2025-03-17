@@ -12,8 +12,8 @@ class AccountUser {
   static AccountUser deserialize(jsonAccountUser) {
     return AccountUser(
       id: jsonAccountUser["id"],
-      accountName: jsonAccountUser["account"]["name"],
-      adminUsername: jsonAccountUser["account"]["username"],
+      accountName: jsonAccountUser["account_name"],
+      adminUsername: jsonAccountUser["account_owner_username"],
     );
   }
 }

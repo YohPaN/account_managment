@@ -1,6 +1,7 @@
 import 'package:account_managment/common/internal_notification.dart';
 import 'package:account_managment/common/navigation_index.dart';
 import 'package:account_managment/common/router.dart';
+import 'package:account_managment/helpers/push_notification.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
@@ -40,6 +41,14 @@ class MyApp extends StatelessWidget {
                 Provider.of<ProfileViewModel>(context, listen: false),
             accountViewModel:
                 Provider.of<AccountViewModel>(context, listen: false),
+          ),
+        ),
+        ChangeNotifierProvider<PushNotification>(
+          create: (context) => PushNotification(
+            profileViewModel:
+                Provider.of<ProfileViewModel>(context, listen: false),
+            navigationIndex:
+                Provider.of<NavigationIndex>(context, listen: false),
           ),
         )
       ],

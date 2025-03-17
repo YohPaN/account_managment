@@ -1,0 +1,2 @@
+C:/Users/paya/Documents/Documents personels/Dev/manage_account/mobile/account_managment/android/app/.cxx/Debug/1pg2d291/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/paya/Documents/Documents personels/Dev/manage_account/mobile/account_managment/android/app/.cxx/Debug/1pg2d291/armeabi-v7a/CMakeFiles/rebuild_cache.dir

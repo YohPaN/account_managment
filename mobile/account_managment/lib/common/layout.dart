@@ -35,15 +35,19 @@ class _LayoutState extends State<Layout> {
   }
 
   Future<void> _initialize() async {
-    if (Provider.of<AccountUserViewModel>(context, listen: false)
-            .accountUsersCount >
-        0) {
-      toastPendingAccountRequest =
-          Provider.of<InternalNotification>(context, listen: false)
-              .showPendingAccountRequest(
-                  Provider.of<AccountUserViewModel>(context, listen: false)
-                      .accountUsersCount);
-    }
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        if (Provider.of<AccountUserViewModel>(context, listen: false)
+                .accountUsersCount >
+            0) {
+          toastPendingAccountRequest =
+              Provider.of<InternalNotification>(context, listen: false)
+                  .showPendingAccountRequest(
+                      Provider.of<AccountUserViewModel>(context, listen: false)
+                          .accountUsersCount);
+        }
+      },
+    );
   }
 
   @override
@@ -52,49 +56,52 @@ class _LayoutState extends State<Layout> {
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
     return SafeArea(
-        child: Scaffold(
-      appBar: AppBar(),
-      body: allDestinations[currentPageIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentPageIndex,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home),
-            label: locale.home.capitalize(),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.euro),
-            label: locale.account("many").capitalize(),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.account_circle),
-            label: locale.profile.capitalize(),
-          ),
-          NavigationDestination(
-            icon: Badge(
-              isLabelVisible:
-                  Provider.of<AccountUserViewModel>(context).accountUsersCount >
-                      0,
-              label: Text(
-                Provider.of<AccountUserViewModel>(context)
-                    .accountUsersCount
-                    .toString(),
-              ),
-              child: const Icon(Icons.settings),
+      child: Scaffold(
+        appBar: AppBar(),
+        body: allDestinations[currentPageIndex],
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: currentPageIndex,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.home),
+              label: locale.home.capitalize(),
             ),
-            label: locale.settings.capitalize(),
-          ),
-        ],
-        onDestinationSelected: (index) {
-          setState(() {
-            if (toastPendingAccountRequest != null) {
-              toastification.dismiss(toastPendingAccountRequest!);
-            }
-            Provider.of<NavigationIndex>(context, listen: false)
-                .changeIndex(index);
-          });
-        },
+            NavigationDestination(
+              icon: const Icon(Icons.euro),
+              label: locale.account("many").capitalize(),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.account_circle),
+              label: locale.profile.capitalize(),
+            ),
+            NavigationDestination(
+              icon: Badge(
+                isLabelVisible: Provider.of<AccountUserViewModel>(context)
+                        .accountUsersCount >
+                    0,
+                label: Text(
+                  Provider.of<AccountUserViewModel>(context)
+                      .accountUsersCount
+                      .toString(),
+                ),
+                child: const Icon(Icons.settings),
+              ),
+              label: locale.settings.capitalize(),
+            ),
+          ],
+          onDestinationSelected: (index) {
+            setState(
+              () {
+                if (toastPendingAccountRequest != null) {
+                  toastification.dismiss(toastPendingAccountRequest!);
+                }
+                Provider.of<NavigationIndex>(context, listen: false)
+                    .changeIndex(index);
+              },
+            );
+          },
+        ),
       ),
-    ));
+    );
   }
 }

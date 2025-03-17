@@ -13,11 +13,11 @@ class AccountUserViewModel extends ChangeNotifier {
   List<AccountUser> get accountUsers => _accountUsers;
 
   Future<void> countAccountUser() async {
-    final RepoResponse repoResponse = await accountUserRepository.count();
+    final RepoResponse repoResponse = await accountUserRepository.list();
 
     int count = 0;
     if (repoResponse.success && repoResponse.data != null) {
-      count = repoResponse.data!["pending_account_request"];
+      count = repoResponse.data.length;
     }
 
     _accountUsersCount = count;

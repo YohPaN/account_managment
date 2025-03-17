@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+import pusher
 from back_account_managment.models import (
     Account,
     AccountUser,
@@ -315,6 +316,23 @@ class AccountView(ModelViewSet):
         account.account_user.add(user.first())
         account.refresh_from_db()
 
+        pusher_client = pusher.Pusher(
+            app_id="1955499",
+            key="9b36b42d80165db1f005",
+            secret="666c0261eca8886c946a",
+            cluster="eu",
+            ssl=True,
+        )
+
+        pusher_client.trigger(
+            f"account-user-{contributor_to_add}",
+            "add-contributor",
+            {
+                "title": "New contributor",
+                "message": f"You have been added as a contributor in the account of {account.user.username}",  # noqa
+            },
+        )
+
         return Response(
             data=ContributorAccountSerilizer(account).data,
             status=status.HTTP_200_OK,
@@ -344,6 +362,23 @@ class AccountView(ModelViewSet):
 
         account.account_user.remove(user.first())
         account.refresh_from_db()
+
+        pusher_client = pusher.Pusher(
+            app_id="1955499",
+            key="9b36b42d80165db1f005",
+            secret="666c0261eca8886c946a",
+            cluster="eu",
+            ssl=True,
+        )
+
+        pusher_client.trigger(
+            f"account-user-{contributor_to_remove}",
+            "add-contributor",
+            {
+                "title": "Remove contributor",
+                "message": f"You have been removed from the account of {account.user.username}",  # noqa
+            },
+        )
 
         return Response(
             data=ContributorAccountSerilizer(account).data,
