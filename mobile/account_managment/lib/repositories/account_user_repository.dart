@@ -17,16 +17,6 @@ class AccountUserRepository {
     return repoResponse;
   }
 
-  Future<RepoResponse> count() async {
-    final RepoResponse repoResponse = await RequestHandler.handleRequest(
-      method: "GET",
-      uri: "$modelUrl/count/",
-      contentType: 'application/json',
-    );
-
-    return repoResponse;
-  }
-
   Future<RepoResponse> create() async {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",

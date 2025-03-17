@@ -27,7 +27,7 @@ class LoginScreen extends StatelessWidget {
           } else {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushNamedAndRemoveUntil(
-                  context, '/home', (route) => false);
+                  context, '/splash', (route) => false);
             });
             return const SizedBox();
           }

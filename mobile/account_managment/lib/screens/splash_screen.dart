@@ -1,3 +1,4 @@
+import 'package:account_managment/helpers/push_notification.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
@@ -34,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> updateProgress(double value) async {
     await controller.animateTo(value,
-        duration: const Duration(milliseconds: 500));
+        duration: const Duration(milliseconds: 100));
   }
 
   void fetchDataAndNavigate() async {
@@ -43,21 +44,24 @@ class _SplashScreenState extends State<SplashScreen>
 
     try {
       await profileViewModel.getProfile();
-      await updateProgress(0.2);
+      await updateProgress(0.1);
 
       await Provider.of<CategoryViewModel>(context, listen: false)
           .getDefaultCategory();
-      await updateProgress(0.4);
+      await updateProgress(0.3);
 
       await Provider.of<AccountViewModel>(context, listen: false).getAccount();
-      await updateProgress(0.6);
+      await updateProgress(0.5);
 
       await Provider.of<AccountViewModel>(context, listen: false)
           .listAccount(user: profileViewModel.user!.username);
-      await updateProgress(0.8);
+      await updateProgress(0.7);
 
       await Provider.of<AccountUserViewModel>(context, listen: false)
           .countAccountUser();
+      await updateProgress(0.9);
+
+      await Provider.of<PushNotification>(context, listen: false).init(context);
       await updateProgress(1.0);
 
       Navigator.pushReplacementNamed(
