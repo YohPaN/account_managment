@@ -35,7 +35,9 @@ class User {
       "You must provide a ressource or an account",
     );
     if ((account != null && account.username == username) ||
-        (ressource != null && ressource.username == username)) return true;
+        (ressource != null && ressource.username == username)) {
+      return true;
+    }
 
     if (!strict) {
       return permissionsNeeded.any(permissions.contains);

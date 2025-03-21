@@ -27,7 +27,6 @@ class ModelFactory {
           throw Exception("Type inconnu : $type");
       }
     } catch (e) {
-      print("error: $e");
       throw Exception(
           "An error occured with type $type. Data was $json \nError was : $e");
     }
