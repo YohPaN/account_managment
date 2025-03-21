@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:account_managment/common/api_config.dart';
+import 'package:account_managment/main.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/auth_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -18,7 +19,7 @@ class RequestHandler {
     204,
   ];
 
-  static Future<dynamic> handleRequest(
+  static Future<RepoResponse> handleRequest(
       {required String method,
       required String uri,
       required String contentType,
@@ -144,7 +145,8 @@ class RequestHandler {
       } else if (!success && data != null) {
         if (data.containsKey("code") &&
             data["code"] == "token_not_valid" &&
-            uri != "token/refresh/") {
+            uri != "token/refresh/" &&
+            uri != "token/verify/") {
           final RepoResponse repoResponse =
               await AuthRepository().refreshToken();
 
@@ -165,6 +167,14 @@ class RequestHandler {
               message: repoResponse.data!["detail"],
             );
           }
+        } else if (data.containsKey("code") &&
+            data["code"] == "token_not_valid" &&
+            uri == "token/refresh/") {
+          await storage.delete(key: "accessToken");
+          await storage.delete(key: "refreshToken");
+
+          await navigatorKey.currentState!
+              .pushNamedAndRemoveUntil("/", (_) => false);
         }
 
         return RepoResponse(
