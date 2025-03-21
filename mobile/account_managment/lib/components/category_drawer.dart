@@ -11,7 +11,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:flutter_iconpicker/Models/configuration.dart';
-import 'package:flutter_iconpicker/Models/icon_picker_icon.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
@@ -122,7 +121,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
         return await categoryViewModel.createCategory(
           title: title,
           icon: _selectedIcon!,
-          color: currentColor.value,
+          color: currentColor.toARGB32(),
           contentType: widget.categoryType,
           objectId: widget.categoryType == "account"
               ? Provider.of<AccountViewModel>(context, listen: false)
@@ -135,7 +134,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
           categoryId: widget.category!.id,
           title: title,
           icon: _selectedIcon!,
-          color: currentColor.value,
+          color: currentColor.toARGB32(),
           categoryType: widget.categoryType,
         );
       }

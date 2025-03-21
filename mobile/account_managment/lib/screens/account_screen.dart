@@ -178,6 +178,20 @@ class _AccountScreenState extends State<AccountScreen> {
                                   child: ListTile(
                                     title: ExpansionTile(
                                       key: ValueKey(index),
+                                      collapsedIconColor: index != 0
+                                          ? textColor(accountViewModel
+                                                  .account!
+                                                  .categories[index - 1]
+                                                  .color ??
+                                              0)
+                                          : Colors.black,
+                                      iconColor: index != 0
+                                          ? textColor(accountViewModel
+                                                  .account!
+                                                  .categories[index - 1]
+                                                  .color ??
+                                              0)
+                                          : Colors.black,
                                       controller: _controllers[index],
                                       onExpansionChanged: (isExpanded) {
                                         if (isExpanded) {
@@ -264,6 +278,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                       children: [
                                         Builder(builder: (context) {
                                           if (index == 0) {
+                                            // ignore: prefer_const_constructors
                                             return ItemCategoryList(); //MUST BE NOT CONST
                                           } else {
                                             return ItemCategoryList(

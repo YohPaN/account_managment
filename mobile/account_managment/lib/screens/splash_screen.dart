@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
         '/home',
       );
     } catch (e) {
-      print("Error: $e");
+      throw Exception("Error: $e");
     }
   }
 
