@@ -51,22 +51,36 @@ class AccountManagerTest(TestCase):
 
 
 class AccountModelTest(TestCase):
+    fixtures = ["default_categories"]
+
     def setUp(self):
         self.user = User.objects.create(
             username="jonDoe",
             email="jon@doe.test",
         )
+
+        self.account = Account.objects.create(
+            user=self.user, name="first name"
+        )
+        self.account2 = Account.objects.create(
+            user=self.user, name="first name"
+        )
+        self.account3 = Account.objects.create(
+            user=self.user, name="first name"
+        )
+
+        self.default_category = Category.objects.get(pk=1)
         self.category = Category.objects.create(
             title="test_category",
             icon={},
             content_type=ContentType.objects.get_for_model(User),
             object_id=self.user.pk,
         )
-        self.account = Account.objects.create(
-            user=self.user, name="first name"
-        )
-        self.account2 = Account.objects.create(
-            user=self.user, name="first name"
+        self.category_under_account2 = Category.objects.create(
+            title="test_category",
+            icon={},
+            content_type=ContentType.objects.get_for_model(Account),
+            object_id=self.account2.pk,
         )
 
     def test_manage_category_add(self):
@@ -95,12 +109,28 @@ class AccountModelTest(TestCase):
         self.assertEqual(len(self.account.categories.all()), 0)
 
     def test_manage_category_with_category_not_under_account(self):
-        self.account2.categories.add(self.category)
+        self.account2.categories.add(self.category_under_account2)
 
-        response = self.account.manage_category(self.category.pk, link=True)
+        response = self.account3.manage_category(
+            self.category_under_account2.pk, link=True
+        )
 
         self.assertIn("error", response)
         self.assertEqual(len(self.account.categories.all()), 0)
+
+    def test_manage_category_with_default_category_not_under_account(self):
+        response = self.account.manage_category(
+            self.default_category.pk, link=True
+        )
+
+        self.assertTrue(response)
+        self.assertEqual(len(self.account.categories.all()), 1)
+
+    def test_manage_category_with_user_category_not_under_account(self):
+        response = self.account.manage_category(self.category.pk, link=True)
+
+        self.assertTrue(response)
+        self.assertEqual(len(self.account.categories.all()), 1)
 
     def test_manage_category_with_category_already_under_account(self):
         self.account.categories.add(self.category)
