@@ -172,6 +172,8 @@ class CategoryViewModel extends ChangeNotifier {
         await accountCategoryRepository.getDefault();
 
     if (repoResponse.success) {
+      defaultCategories.clear();
+
       for (var category in repoResponse.data) {
         defaultCategories
             .add(ModelFactory.fromJson(json: category, type: 'category'));
