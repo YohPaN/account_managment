@@ -145,156 +145,133 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                       ),
                       Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () async => {
-                            await accountViewModel
-                                .getAccount(accountViewModel.account?.id)
-                          },
-                          child: ListView.builder(
-                            itemCount:
-                                accountViewModel.account!.categories.length + 1,
-                            itemBuilder: (context, index) {
-                              _controllers.add(ExpansionTileController());
+                        child: Builder(
+                          builder: (context) {
+                            final categories =
+                                accountViewModel.account!.categories;
+                            final totalTiles = categories.length +
+                                1; // +1 for "without category"
 
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16, right: 16, top: 8, bottom: 8),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5.0),
-                                    color: index != 0
-                                        ? Color(accountViewModel.account!
-                                                .categories[index - 1].color ??
-                                            0)
-                                        : Colors.white,
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Colors.black,
-                                        offset: Offset(0.0, 1.0),
-                                        blurRadius: 4.0,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ListTile(
-                                    title: ExpansionTile(
-                                      key: ValueKey(index),
-                                      collapsedIconColor: index != 0
-                                          ? textColor(accountViewModel
-                                                  .account!
-                                                  .categories[index - 1]
-                                                  .color ??
-                                              0)
-                                          : Colors.black,
-                                      iconColor: index != 0
-                                          ? textColor(accountViewModel
-                                                  .account!
-                                                  .categories[index - 1]
-                                                  .color ??
-                                              0)
-                                          : Colors.black,
-                                      controller: _controllers[index],
-                                      onExpansionChanged: (isExpanded) {
-                                        if (isExpanded) {
-                                          for (var (key, controller)
-                                              in _controllers.indexed) {
-                                            if (key != index) {
-                                              controller.collapse();
-                                            }
-                                          }
-                                        }
-                                      },
-                                      title: index == 0
-                                          ? Text(
-                                              locale.without_category
-                                                  .capitalize(),
-                                              style: const TextStyle(
-                                                  fontSize: 18.0,
-                                                  fontWeight: FontWeight.bold),
-                                            )
-                                          : Row(
-                                              children: [
-                                                Icon(
-                                                  color: textColor(
-                                                      accountViewModel
-                                                          .account!
-                                                          .categories[index - 1]
-                                                          .color),
-                                                  IconData(
-                                                      accountViewModel
-                                                          .account!
-                                                          .categories[index - 1]
-                                                          .icon!
-                                                          .data
-                                                          .codePoint,
-                                                      fontFamily:
-                                                          accountViewModel
-                                                              .account!
-                                                              .categories[
-                                                                  index - 1]
-                                                              .icon!
-                                                              .data
-                                                              .fontFamily),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 8.0),
-                                                  child: Text(
-                                                    (locale.default_category_title(accountViewModel
-                                                                    .account!
-                                                                    .categories[
-                                                                        index -
-                                                                            1]
-                                                                    .title) !=
-                                                                ""
-                                                            ? locale.default_category_title(
-                                                                accountViewModel
-                                                                    .account!
-                                                                    .categories[
-                                                                        index -
-                                                                            1]
-                                                                    .title)
-                                                            : accountViewModel
-                                                                .account!
-                                                                .categories[
-                                                                    index - 1]
-                                                                .title)
-                                                        .capitalize(),
-                                                    style: TextStyle(
-                                                      fontSize: 18.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: textColor(
-                                                          accountViewModel
-                                                              .account!
-                                                              .categories[
-                                                                  index - 1]
-                                                              .color!),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                      children: [
-                                        Builder(builder: (context) {
-                                          if (index == 0) {
-                                            // ignore: prefer_const_constructors
-                                            return ItemCategoryList(); //MUST BE NOT CONST
-                                          } else {
-                                            return ItemCategoryList(
-                                              category: accountViewModel
-                                                  .account!
-                                                  .categories[index - 1],
-                                            );
-                                          }
-                                        })
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                            if (_controllers.length != totalTiles) {
+                              _controllers.clear();
+                              _controllers.addAll(
+                                List.generate(totalTiles,
+                                    (_) => ExpansionTileController()),
                               );
-                            },
-                          ),
+                            }
+
+                            return RefreshIndicator(
+                              onRefresh: () async {
+                                await accountViewModel
+                                    .getAccount(accountViewModel.account?.id);
+                              },
+                              child: ListView.builder(
+                                itemCount: totalTiles,
+                                itemBuilder: (context, index) {
+                                  final isWithoutCategory = index == 0;
+                                  final category = !isWithoutCategory
+                                      ? categories[index - 1]
+                                      : null;
+                                  final bgColor = !isWithoutCategory
+                                      ? Color(category!.color ?? 0)
+                                      : Colors.white;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                        color: bgColor,
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Colors.black,
+                                            offset: Offset(0.0, 1.0),
+                                            blurRadius: 4.0,
+                                          ),
+                                        ],
+                                      ),
+                                      child: ListTile(
+                                        title: ExpansionTile(
+                                          key: ValueKey(index),
+                                          controller: _controllers[index],
+                                          collapsedIconColor: !isWithoutCategory
+                                              ? textColor(category!.color ?? 0)
+                                              : Colors.black,
+                                          iconColor: !isWithoutCategory
+                                              ? textColor(category!.color ?? 0)
+                                              : Colors.black,
+                                          onExpansionChanged: (isExpanded) {
+                                            if (isExpanded) {
+                                              for (var (i, controller)
+                                                  in _controllers.indexed) {
+                                                if (i != index) {
+                                                  controller.collapse();
+                                                }
+                                              }
+                                            }
+                                          },
+                                          title: isWithoutCategory
+                                              ? Text(
+                                                  locale.without_category
+                                                      .capitalize(),
+                                                  style: const TextStyle(
+                                                    fontSize: 18.0,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                )
+                                              : Row(
+                                                  children: [
+                                                    Icon(
+                                                      color: textColor(
+                                                          category!.color),
+                                                      IconData(
+                                                        category.icon!.data
+                                                            .codePoint,
+                                                        fontFamily: category
+                                                            .icon!
+                                                            .data
+                                                            .fontFamily,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      (locale.default_category_title(
+                                                                      category
+                                                                          .title) !=
+                                                                  ""
+                                                              ? locale
+                                                                  .default_category_title(
+                                                                      category
+                                                                          .title)
+                                                              : category.title)
+                                                          .capitalize(),
+                                                      style: TextStyle(
+                                                        fontSize: 18.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: textColor(
+                                                            category.color!),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                          children: [
+                                            isWithoutCategory
+                                                // ignore: prefer_const_constructors
+                                                ? ItemCategoryList() //MUST BE NOT CONST
+                                                : ItemCategoryList(
+                                                    category: category),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
