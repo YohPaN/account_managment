@@ -17,12 +17,16 @@ class Category(models.Model):
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, null=True, blank=True
     )
-    object_id = models.CharField(max_length=50, blank=True)
+    object_id = models.CharField(max_length=50, null=True, blank=True)  # noqa
     content_object = GenericForeignKey("content_type", "object_id")
+
+    @property
+    def is_default(self):
+        return self.content_type is None and self.object_id is None
 
     def save(self, **kwargs):
         # verify that both are not None
-        assert self.content_type != self.object_id
+        assert not self.is_default
         return super().save(**kwargs)
 
     class Meta:
@@ -96,7 +100,11 @@ class Account(models.Model):
             category_accounts = category.accounts.all()
 
             if link:
-                if category_accounts.filter(~Q(pk=self.pk)).exists():
+                if (
+                    category.content_type
+                    == ContentType.objects.get_for_model(Account)  # noqa
+                    and category_accounts.filter(~Q(pk=self.pk)).exists()
+                ):
                     return {"error": "The category is link to another account"}
 
                 elif category_accounts.filter(pk=self.pk).exists():

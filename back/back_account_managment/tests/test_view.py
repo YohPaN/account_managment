@@ -40,11 +40,6 @@ class UserViewTest(TestCase):
             object_id=self.user.pk,
         )
 
-        self.other_category = Category.objects.create(
-            title="test",
-            icon={},
-        )
-
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
 
@@ -257,6 +252,8 @@ class RegisterViewTest(TestCase):
 
 
 class AccountViewTest(TestCase):
+    fixtures = ["default_categories"]
+
     def setUp(self):
         self.user = User.objects.create(
             username="jonDoe",
@@ -291,10 +288,7 @@ class AccountViewTest(TestCase):
             user=self.user2, name="first name"
         )
 
-        self.default_category = Category.objects.create(
-            title="default_category",
-            icon={},
-        )
+        self.default_category = Category.objects.get(pk=1)
 
         self.category_for_account = Category.objects.create(
             title="category_for_account",
@@ -627,6 +621,8 @@ class AccountViewTest(TestCase):
 
 
 class ItemViewTest(TestCase):
+    fixtures = ["default_categories"]
+
     def setUp(self):
         self.user = User.objects.create(
             username="test", email="test@test.test"
@@ -677,12 +673,11 @@ class ItemViewTest(TestCase):
         self.category = Category.objects.create(
             title="category",
             icon={},
+            object_id=self.account.pk,
+            content_type=ContentType.objects.get_for_model(Account),
         )
 
-        self.category_not_under_account = Category.objects.create(
-            title="other category",
-            icon={},
-        )
+        self.category_not_under_account = Category.objects.get(pk=1)
 
         self.account_category = self.category.accounts.add(self.account)
 
@@ -1196,6 +1191,8 @@ class AccountUserPermissionTest(TestCase):
 
 
 class CategoryViewTest(TestCase):
+    fixtures = ["default_categories"]
+
     def setUp(self):
         self.user = User.objects.create(
             username="jonDoe",
@@ -1215,14 +1212,11 @@ class CategoryViewTest(TestCase):
             user=self.user2, name="first name"
         )
 
-        self.default_category = Category.objects.create(
-            title="default_category",
-            icon={"key": "default", "pack": "default"},
-        )
+        self.default_category = Category.objects.get(pk=1)
 
         self.category_for_account = Category.objects.create(
             title="category_for_account",
-            icon={},
+            icon={"key": "local_restaurant", "pack": "material"},
             content_type=ContentType.objects.get_for_model(Account),
             object_id=self.account.pk,
         )
@@ -1267,7 +1261,7 @@ class CategoryViewTest(TestCase):
     def test_list_default_category(self):
         response = self.c.get("/api/categories/?category=default")
 
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data), 7)
         self.assertTrue(
             any(
                 item["title"] == self.default_category.title
@@ -1438,12 +1432,13 @@ class CategoryViewTest(TestCase):
 
     def test_update_category_with_icon(self):
         self.assertEqual(
-            self.default_category.icon, {"key": "default", "pack": "default"}
+            self.category_for_account.icon,
+            {"key": "local_restaurant", "pack": "material"},
         )
         icon = {"key": "directions_car", "pack": "material"}
 
         response = self.c.put(
-            f"/api/categories/{self.default_category.pk}/",
+            f"/api/categories/{self.category_for_account.pk}/",
             {
                 "title": "new title",
                 "icon": icon,
@@ -1451,12 +1446,14 @@ class CategoryViewTest(TestCase):
             format="json",
         )
 
-        self.default_category.refresh_from_db()
+        self.category_for_account.refresh_from_db()
         self.assertTrue(status.is_success(response.status_code))
-        self.assertEqual(self.default_category.icon, icon)
+        self.assertEqual(self.category_for_account.icon, icon)
 
 
 class AccountCategoryViewTest(TestCase):
+    fixtures = ["default_categories"]
+
     def setUp(self):
         self.user = User.objects.create(
             username="jonDoe",
@@ -1467,10 +1464,7 @@ class AccountCategoryViewTest(TestCase):
             user=self.user, name="first name", is_main=True
         )
 
-        self.category = Category.objects.create(
-            title="default_category",
-            icon={},
-        )
+        self.category = Category.objects.get(pk=1)
 
         self.account_with_category = Account.objects.create(
             user=self.user, name="first name"
@@ -1496,14 +1490,6 @@ class AccountCategoryViewTest(TestCase):
 
         self.c = APIClient()
         self.c.force_authenticate(user=self.user)
-        self.account = Account.objects.create(
-            user=self.user, name="first name", is_main=True
-        )
-
-        self.category = Category.objects.create(
-            title="default_category",
-            icon={},
-        )
 
     def test_associate_category_to_account(self):
         self.assertEqual(
