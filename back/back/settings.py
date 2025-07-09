@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import dotenv_values
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -107,11 +109,11 @@ WSGI_APPLICATION = "back.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "account_managment",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "db",
-        "PORT": "3306",
+        "NAME": dotenv_values(".env")["DB_NAME"],
+        "USER": dotenv_values(".env")["DB_USER"],
+        "PASSWORD": dotenv_values(".env")["DB_PASSWORD"],
+        "HOST": dotenv_values(".env")["DB_HOST"],
+        "PORT": dotenv_values(".env")["DB_PORT"],
     }
 }
 

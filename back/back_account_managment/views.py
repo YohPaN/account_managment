@@ -50,6 +50,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from dotenv import dotenv_values
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -317,9 +318,9 @@ class AccountView(ModelViewSet):
         account.refresh_from_db()
 
         pusher_client = pusher.Pusher(
-            app_id="1955499",
-            key="9b36b42d80165db1f005",
-            secret="666c0261eca8886c946a",
+            app_id=dotenv_values(".env")["PUSHER_ID"],
+            key=dotenv_values(".env")["PUSHER_KEY"],
+            secret=dotenv_values(".env")["PUSHER_SECRET"],
             cluster="eu",
             ssl=True,
         )
@@ -364,9 +365,9 @@ class AccountView(ModelViewSet):
         account.refresh_from_db()
 
         pusher_client = pusher.Pusher(
-            app_id="1955499",
-            key="9b36b42d80165db1f005",
-            secret="666c0261eca8886c946a",
+            app_id=dotenv_values(".env")["PUSHER_ID"],
+            key=dotenv_values(".env")["PUSHER_KEY"],
+            secret=dotenv_values(".env")["PUSHER_SECRET"],
             cluster="eu",
             ssl=True,
         )
