@@ -226,7 +226,7 @@ class RequestHandler {
   }
 
   static Uri buildUri(String uri) {
-    return Uri.parse("http://${APIConfig.baseUrl}:${APIConfig.port}/api/$uri");
+    return Uri.parse("${APIConfig.baseUrl}/api/$uri");
   }
 
   static String serializeBody(Map<String, dynamic> body) {
