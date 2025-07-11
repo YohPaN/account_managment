@@ -1,4 +1,3 @@
 account_managment/
 **/__pycache__/
 .coverage
-.env
