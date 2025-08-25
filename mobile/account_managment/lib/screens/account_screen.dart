@@ -257,7 +257,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                                     ),
                                                     const SizedBox(width: 12),
                                                     Text(
-                                                      "${accountViewModel.account!.items.where((item) => item.category.id == category.id).fold<double>(0, (sum, item) => sum + (item.transfertItem ? -1 * item.valuation : item.valuation)).toStringAsFixed(2)}€",
+                                                      "${accountViewModel.account!.items.where((item) => item.category?.id == category.id).fold<double>(0, (sum, item) => sum + (item.transfertItem ? -1 * item.valuation : item.valuation)).toStringAsFixed(2)}€",
                                                       style: TextStyle(
                                                         fontSize: 16.0,
                                                         fontWeight:

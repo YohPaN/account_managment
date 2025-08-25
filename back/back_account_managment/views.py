@@ -159,10 +159,12 @@ class AccountView(ModelViewSet):
         "contributors",
     ).annotate(
         items_total=Coalesce(
-            Sum("items__valuation"), Value(0), output_field=DecimalField()
+            Sum("items__valuation", distinct=True),
+            Value(0),
+            output_field=DecimalField(),
         ),
         transfer_items_total=Coalesce(
-            Sum("transfer_items__item__valuation"),
+            Sum("transfer_items__item__valuation", distinct=True),
             Value(0),
             output_field=DecimalField(),
         ),
