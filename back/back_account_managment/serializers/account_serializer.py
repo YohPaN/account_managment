@@ -45,7 +45,7 @@ class AccountMeta:
 
 class _AccountSerializer(serializers.ModelSerializer):
     items = ItemReadSerializer(many=True)
-    transfer_items = ItemReadSerializer(many=True)
+    transfer_items = serializers.SerializerMethodField()
     contributors = AccountAccountUserSerializer(many=True)
     total = serializers.DecimalField(max_digits=15, decimal_places=2)
 
@@ -59,6 +59,12 @@ class _AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         pass
+
+    def get_transfer_items(self, account):
+        return ItemReadSerializer(
+            [transfert.item for transfert in account.transfer_items.all()],
+            many=True,
+        ).data
 
     def get_account_categories(self, account):
         return CategorySerializer(
