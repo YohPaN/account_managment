@@ -158,13 +158,15 @@ class AccountView(ModelViewSet):
         "transfer_items",
         "contributors",
     ).annotate(
-        total=Coalesce(
-            Sum(
-                F("items__valuation") + F("transfer_items__item__valuation"),
-            ),
+        items_total=Coalesce(
+            Sum("items__valuation"), Value(0), output_field=DecimalField()
+        ),
+        transfer_items_total=Coalesce(
+            Sum("transfer_items__item__valuation"),
             Value(0),
             output_field=DecimalField(),
-        )
+        ),
+        total=F("items_total") + -1 * F("transfer_items_total"),
     )
     serializer_class = AccountSerializer
     permission_classes = [

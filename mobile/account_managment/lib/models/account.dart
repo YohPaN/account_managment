@@ -59,7 +59,7 @@ class Account extends BaseModel {
           ...ModelFactory.fromJson(
             json: json["transfer_items"],
             type: "item",
-            other: {"isTransfertItem": false},
+            other: {"isTransfertItem": true},
           )
       ],
       name: json["name"],
