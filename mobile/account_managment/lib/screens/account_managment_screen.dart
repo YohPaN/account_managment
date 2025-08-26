@@ -1,5 +1,5 @@
 import 'package:account_managment/components/account_based_split_checkbox.dart';
-import 'package:account_managment/components/account_category_managment.dart.dart';
+import 'package:account_managment/components/account_category_managment.dart';
 import 'package:account_managment/components/contributor_managment.dart';
 import 'package:account_managment/components/contributors_list.dart';
 import 'package:account_managment/forms/account_form.dart';
