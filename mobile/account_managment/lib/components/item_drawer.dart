@@ -209,140 +209,142 @@ class _ItemDrawerState extends State<ItemDrawer> {
         right: 16.0,
         bottom: MediaQuery.of(context).viewInsets.bottom + 4.0,
       ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                textCapitalization: TextCapitalization.sentences,
-                controller: titleController,
-                decoration:
-                    InputDecoration(labelText: locale.title.capitalize()),
-                maxLength: 15,
-                validator: (value) => ValidationHelper.validateInput(
-                    value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                textCapitalization: TextCapitalization.sentences,
-                controller: descriptionController,
-                decoration:
-                    InputDecoration(labelText: locale.description.capitalize()),
-                maxLength: 50,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: valuationController,
-                decoration:
-                    InputDecoration(labelText: locale.valuation.capitalize()),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                maxLength: 15,
-                validator: (value) => ValidationHelper.validateInput(value, [
-                  "notEmpty",
-                  "notNull",
-                  "twoDigitMax",
-                  "validPositifDouble"
-                ]),
-              ),
-              const SizedBox(height: 16),
-              DropdownMenu(
-                expandedInsets: const EdgeInsets.all(50),
-                label: Text(locale.category(1).capitalize()),
-                initialSelection: _category,
-                onSelected: (value) => setState(() {
-                  _category = value!;
-                }),
-                dropdownMenuEntries: categoryList,
-              ),
-              const SizedBox(height: 16),
-              DropdownMenu(
-                expandedInsets: const EdgeInsets.all(50),
-                label: Text("${locale.item_owner}:".capitalize()),
-                initialSelection: _username,
-                onSelected: (value) => setState(() {
-                  _username = value!;
-                }),
-                dropdownMenuEntries: menuEntries,
-              ),
-              const SizedBox(height: 16),
-              DropdownMenu(
-                expandedInsets: const EdgeInsets.all(50),
-                label: Text("${locale.transfert_to}:".capitalize()),
-                initialSelection: _toAccount,
-                onSelected: (value) => setState(() {
-                  _toAccount = value!;
-                }),
-                dropdownMenuEntries: accountList,
-              ),
-              const SizedBox(height: 16),
-              ToggleButtons(
-                onPressed: (int index) => switchButton(index),
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: _buttonStyle["selectedColor"],
-                selectedColor: Colors.white,
-                fillColor: _buttonStyle["fillColor"],
-                color: _buttonStyle["color"],
-                constraints: const BoxConstraints(
-                  minHeight: 40.0,
-                  minWidth: 80.0,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  textCapitalization: TextCapitalization.sentences,
+                  controller: titleController,
+                  decoration:
+                      InputDecoration(labelText: locale.title.capitalize()),
+                  maxLength: 15,
+                  validator: (value) => ValidationHelper.validateInput(
+                      value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
                 ),
-                isSelected: _selectButton,
-                children: [
-                  Text(locale.expense.capitalize()),
-                  Text(locale.income.capitalize())
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  if (widget.action == "update" &&
-                      profileViewModel.user!.hasPermission(
-                        ressource: widget.item,
-                        account: accountViewModel.account,
-                        permissionsNeeded: ["delete_item"],
-                        permissions: accountViewModel.account!.permissions,
-                      ))
-                    ElevatedButton(
-                      onPressed: () async {
-                        RepoResponse repoResponse =
-                            await accountViewModel.deleteItem(widget.item!.id);
-                        Provider.of<InternalNotification>(context,
-                                listen: false)
-                            .showMessage(
-                                repoResponse.message, repoResponse.success);
-                        Navigator.pop(context);
-                      },
-                      child: Text(locale.action("delete").capitalize()),
-                    ),
-                  if (profileViewModel.user!.hasPermission(
-                    ressource: widget.item,
-                    account: accountViewModel.account,
-                    permissionsNeeded: [
-                      "${widget.action == "update" ? "change" : "add"}_item"
-                    ],
-                    permissions: accountViewModel.account!.permissions,
-                  ))
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          RepoResponse repoResponse = await createOrUpdate();
-
+                const SizedBox(height: 16),
+                TextFormField(
+                  textCapitalization: TextCapitalization.sentences,
+                  controller: descriptionController,
+                  decoration: InputDecoration(
+                      labelText: locale.description.capitalize()),
+                  maxLength: 50,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: valuationController,
+                  decoration:
+                      InputDecoration(labelText: locale.valuation.capitalize()),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  maxLength: 15,
+                  validator: (value) => ValidationHelper.validateInput(value, [
+                    "notEmpty",
+                    "notNull",
+                    "twoDigitMax",
+                    "validPositifDouble"
+                  ]),
+                ),
+                const SizedBox(height: 16),
+                DropdownMenu(
+                  expandedInsets: const EdgeInsets.all(50),
+                  label: Text(locale.category(1).capitalize()),
+                  initialSelection: _category,
+                  onSelected: (value) => setState(() {
+                    _category = value!;
+                  }),
+                  dropdownMenuEntries: categoryList,
+                ),
+                const SizedBox(height: 16),
+                DropdownMenu(
+                  expandedInsets: const EdgeInsets.all(50),
+                  label: Text("${locale.item_owner}:".capitalize()),
+                  initialSelection: _username,
+                  onSelected: (value) => setState(() {
+                    _username = value!;
+                  }),
+                  dropdownMenuEntries: menuEntries,
+                ),
+                const SizedBox(height: 16),
+                DropdownMenu(
+                  expandedInsets: const EdgeInsets.all(50),
+                  label: Text("${locale.transfert_to}:".capitalize()),
+                  initialSelection: _toAccount,
+                  onSelected: (value) => setState(() {
+                    _toAccount = value!;
+                  }),
+                  dropdownMenuEntries: accountList,
+                ),
+                const SizedBox(height: 16),
+                ToggleButtons(
+                  onPressed: (int index) => switchButton(index),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  selectedBorderColor: _buttonStyle["selectedColor"],
+                  selectedColor: Colors.white,
+                  fillColor: _buttonStyle["fillColor"],
+                  color: _buttonStyle["color"],
+                  constraints: const BoxConstraints(
+                    minHeight: 40.0,
+                    minWidth: 80.0,
+                  ),
+                  isSelected: _selectButton,
+                  children: [
+                    Text(locale.expense.capitalize()),
+                    Text(locale.income.capitalize())
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    if (widget.action == "update" &&
+                        profileViewModel.user!.hasPermission(
+                          ressource: widget.item,
+                          account: accountViewModel.account,
+                          permissionsNeeded: ["delete_item"],
+                          permissions: accountViewModel.account!.permissions,
+                        ))
+                      ElevatedButton(
+                        onPressed: () async {
+                          RepoResponse repoResponse = await accountViewModel
+                              .deleteItem(widget.item!.id);
                           Provider.of<InternalNotification>(context,
                                   listen: false)
                               .showMessage(
                                   repoResponse.message, repoResponse.success);
                           Navigator.pop(context);
-                        }
-                      },
-                      child: Text(locale.action(widget.action).capitalize()),
-                    ),
-                ],
-              ),
-            ],
+                        },
+                        child: Text(locale.action("delete").capitalize()),
+                      ),
+                    if (profileViewModel.user!.hasPermission(
+                      ressource: widget.item,
+                      account: accountViewModel.account,
+                      permissionsNeeded: [
+                        "${widget.action == "update" ? "change" : "add"}_item"
+                      ],
+                      permissions: accountViewModel.account!.permissions,
+                    ))
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            RepoResponse repoResponse = await createOrUpdate();
+
+                            Provider.of<InternalNotification>(context,
+                                    listen: false)
+                                .showMessage(
+                                    repoResponse.message, repoResponse.success);
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text(locale.action(widget.action).capitalize()),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

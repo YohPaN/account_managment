@@ -178,11 +178,16 @@ class SettingScreen extends StatelessWidget {
                                                     .data
                                                     .fontFamily),
                                           ),
-                                          Text(
-                                            profileViewModel.profile!
-                                                .categories[index].title
-                                                .capitalize(),
+                                          const SizedBox(width: 12), // Gap
+                                          Flexible(
+                                            child: Text(
+                                              profileViewModel.profile!
+                                                  .categories[index].title
+                                                  .capitalize(),
+                                              overflow: TextOverflow.visible,
+                                            ),
                                           ),
+                                          const SizedBox(width: 12), // Gap
                                           Icon(
                                             Icons.circle,
                                             size: 16,
@@ -192,6 +197,7 @@ class SettingScreen extends StatelessWidget {
                                                     .color ??
                                                 0),
                                           ),
+                                          const SizedBox(width: 12), // Gap
                                           ElevatedButton(
                                             onPressed: () => showModal(
                                               "update",

@@ -236,23 +236,28 @@ class _AccountScreenState extends State<AccountScreen> {
                                                       ),
                                                     ),
                                                     const SizedBox(width: 8),
-                                                    Text(
-                                                      (locale.default_category_title(
-                                                                      category
-                                                                          .title) !=
-                                                                  ""
-                                                              ? locale
-                                                                  .default_category_title(
-                                                                      category
-                                                                          .title)
-                                                              : category.title)
-                                                          .capitalize(),
-                                                      style: TextStyle(
-                                                        fontSize: 18.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: textColor(
-                                                            category.color!),
+                                                    Flexible(
+                                                      child: Text(
+                                                        (locale.default_category_title(
+                                                                        category
+                                                                            .title) !=
+                                                                    ""
+                                                                ? locale
+                                                                    .default_category_title(
+                                                                        category
+                                                                            .title)
+                                                                : category
+                                                                    .title)
+                                                            .capitalize(),
+                                                        style: TextStyle(
+                                                          fontSize: 18.0,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: textColor(
+                                                              category.color!),
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .visible,
                                                       ),
                                                     ),
                                                     const SizedBox(width: 12),

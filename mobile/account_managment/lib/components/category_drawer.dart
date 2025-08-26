@@ -157,7 +157,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                 controller: titleController,
                 decoration:
                     InputDecoration(labelText: locale.title.capitalize()),
-                maxLength: 30,
+                maxLength: 25,
                 validator: (value) => ValidationHelper.validateInput(
                     value, ["notEmpty", "notNull", "validTextOrDigitOnly"]),
               ),
