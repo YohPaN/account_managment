@@ -1,7 +1,7 @@
 import 'package:account_managment/UI/components/category_drawer.dart';
 import 'package:account_managment/UI/components/category_list.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/models/category.dart';
+import 'package:account_managment/helpers/show_modal_helper.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
@@ -27,32 +27,6 @@ class _AccountCategoryManagmentState extends State<AccountCategoryManagment> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations locale = AppLocalizations.of(context)!;
-
-    showModal(String action, [CategoryApp? category]) {
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        isScrollControlled: true,
-        builder: (BuildContext drawerContext) {
-          return MultiProvider(
-            providers: [
-              InheritedProvider<CategoryViewModel>(
-                update: (context, value) {
-                  return Provider.of<CategoryViewModel>(context, listen: false);
-                },
-              ),
-            ],
-            child: CategoryDrawer(
-              action: action,
-              category: category,
-              categoryType: "account",
-            ),
-          );
-        },
-      );
-    }
 
     return Consumer<AccountViewModel>(
       builder: (context, accountViewModel, child) {
@@ -116,11 +90,19 @@ class _AccountCategoryManagmentState extends State<AccountCategoryManagment> {
                         .account!
                         .accountCategories,
                     accountCategory: true,
-                    showModal: showModal,
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        showModal("create");
+                        showModalHelper<CategoryViewModel>(
+                          context: context,
+                          childBuilder: (context) {
+                            return CategoryDrawer(
+                              action: "create",
+                              category: null,
+                              categoryType: "account",
+                            );
+                          },
+                        );
                       },
                       child: Text(locale.action("create").capitalize())),
                 ],

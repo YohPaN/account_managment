@@ -1,5 +1,7 @@
+import 'package:account_managment/UI/components/category_drawer.dart';
 import 'package:account_managment/helpers/internal_notification_helper.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/helpers/show_modal_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
@@ -76,9 +78,17 @@ class CategoryList extends StatelessWidget {
                                 children: [
                                   Text(categories[index].title),
                                   IconButton(
-                                    onPressed: () {
-                                      showModal!('update', categories[index]);
-                                    },
+                                    onPressed: () =>
+                                        showModalHelper<CategoryViewModel>(
+                                      context: context,
+                                      childBuilder: (context) {
+                                        return CategoryDrawer(
+                                          action: "update",
+                                          category: categories[index],
+                                          categoryType: "account",
+                                        );
+                                      },
+                                    ),
                                     icon: const Icon(Icons.mode),
                                   ),
                                 ],
