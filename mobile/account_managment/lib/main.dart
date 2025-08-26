@@ -6,6 +6,7 @@ import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
+import 'package:account_managment/viewModels/item_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<AccountViewModel>(
           create: (context) => AccountViewModel(),
+        ),
+        ChangeNotifierProvider<ItemViewModel>(
+          create: (context) => ItemViewModel(),
         ),
         ChangeNotifierProvider<CategoryViewModel>(
           create: (context) => CategoryViewModel(

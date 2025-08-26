@@ -5,6 +5,7 @@ import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
+import 'package:account_managment/viewModels/item_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -77,6 +78,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
   Widget build(BuildContext context) {
     final AccountViewModel accountViewModel =
         Provider.of<AccountViewModel>(context, listen: false);
+    final ItemViewModel itemViewModel =
+        Provider.of<ItemViewModel>(context, listen: false);
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
     final CategoryViewModel categoryViewModel =
@@ -182,7 +185,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
           : valuationController.text;
 
       if (widget.action == "create") {
-        return await accountViewModel.createItem(
+        return await itemViewModel.createItem(
+          account: accountViewModel.account!,
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
@@ -191,7 +195,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
           toAccount: _toAccount != "" ? _toAccount : null,
         );
       } else {
-        return await accountViewModel.updateItem(
+        return await itemViewModel.updateItem(
+          account: accountViewModel.account!,
           title: titleController.text,
           description: descriptionController.text,
           valuation: valuation,
@@ -309,8 +314,11 @@ class _ItemDrawerState extends State<ItemDrawer> {
                         ))
                       ElevatedButton(
                         onPressed: () async {
-                          RepoResponse repoResponse = await accountViewModel
-                              .deleteItem(widget.item!.id);
+                          RepoResponse repoResponse =
+                              await itemViewModel.deleteItem(
+                            account: accountViewModel.account!,
+                            itemId: widget.item!.id,
+                          );
                           Provider.of<InternalNotification>(context,
                                   listen: false)
                               .showMessage(
