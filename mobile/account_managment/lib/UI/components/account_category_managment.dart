@@ -1,5 +1,5 @@
-import 'package:account_managment/components/category_drawer.dart';
-import 'package:account_managment/components/category_list.dart';
+import 'package:account_managment/UI/components/category_drawer.dart';
+import 'package:account_managment/UI/components/category_list.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';

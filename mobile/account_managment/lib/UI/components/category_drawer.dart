@@ -1,7 +1,7 @@
-import 'package:account_managment/common/internal_notification.dart';
-import 'package:account_managment/custom_icon_pack.dart';
+import 'package:account_managment/helpers/internal_notification_helper.dart';
+import 'package:account_managment/config/custom_icon_pack.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/icon_picker_trad.dart';
+import 'package:account_managment/config/icon_picker_trad.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';

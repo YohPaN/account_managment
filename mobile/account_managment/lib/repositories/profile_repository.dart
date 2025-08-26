@@ -1,4 +1,4 @@
-import 'package:account_managment/helpers/request_handler.dart';
+import 'package:account_managment/common/request_handler.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 
 class ProfileRepository {

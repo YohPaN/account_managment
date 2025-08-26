@@ -1,4 +1,4 @@
-import 'package:account_managment/helpers/text_w_or_dark.dart';
+import 'package:account_managment/helpers/text_w_or_dark_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

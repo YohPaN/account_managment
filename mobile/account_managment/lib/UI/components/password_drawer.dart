@@ -1,4 +1,4 @@
-import 'package:account_managment/forms/password_form.dart';
+import 'package:account_managment/UI/forms/password_form.dart';
 import 'package:flutter/material.dart';
 
 class PasswordDrawerState extends StatelessWidget {

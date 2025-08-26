@@ -1,4 +1,4 @@
-import 'package:account_managment/common/navigation_index.dart';
+import 'package:account_managment/helpers/navigation_index_helper.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';

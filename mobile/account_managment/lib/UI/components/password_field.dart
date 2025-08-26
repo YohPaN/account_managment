@@ -1,4 +1,4 @@
-import 'package:account_managment/components/icon_visibility.dart';
+import 'package:account_managment/UI/components/icon_visibility.dart';
 import 'package:account_managment/helpers/pwd_validation_helper.dart';
 import 'package:flutter/material.dart';
 

@@ -1,4 +1,4 @@
-import 'package:account_managment/common/layout.dart';
+import 'package:account_managment/UI/layout.dart';
 import 'package:account_managment/screens/account_managment_screen.dart';
 import 'package:account_managment/screens/login_screen.dart';
 import 'package:account_managment/screens/profile_screen.dart';

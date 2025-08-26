@@ -1,4 +1,4 @@
-import 'package:account_managment/common/internal_notification.dart';
+import 'package:account_managment/helpers/internal_notification_helper.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/models/category.dart';

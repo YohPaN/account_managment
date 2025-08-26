@@ -1,5 +1,5 @@
-import 'package:account_managment/common/profile_form_future_builder.dart';
-import 'package:account_managment/forms/profile_form.dart';
+import 'package:account_managment/UI/forms/profile_form_future_builder.dart';
+import 'package:account_managment/UI/forms/profile_form.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:account_managment/common/api_config.dart';
-import 'package:account_managment/common/navigation_index.dart';
+import 'package:account_managment/config/api_config.dart';
+import 'package:account_managment/helpers/navigation_index_helper.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

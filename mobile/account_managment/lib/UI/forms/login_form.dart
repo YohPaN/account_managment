@@ -1,6 +1,6 @@
-import 'package:account_managment/common/internal_notification.dart';
-import 'package:account_managment/common/navigation_index.dart';
-import 'package:account_managment/components/icon_visibility.dart';
+import 'package:account_managment/helpers/internal_notification_helper.dart';
+import 'package:account_managment/helpers/navigation_index_helper.dart';
+import 'package:account_managment/UI/components/icon_visibility.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:flutter/material.dart';

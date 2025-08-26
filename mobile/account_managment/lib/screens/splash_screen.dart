@@ -1,4 +1,4 @@
-import 'package:account_managment/helpers/push_notification.dart';
+import 'package:account_managment/common/push_notification.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';

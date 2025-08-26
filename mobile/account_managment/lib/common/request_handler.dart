@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:account_managment/common/api_config.dart';
+import 'package:account_managment/config/api_config.dart';
 import 'package:account_managment/main.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/auth_repository.dart';

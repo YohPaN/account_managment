@@ -1,8 +1,8 @@
-import 'package:account_managment/components/account_based_split_checkbox.dart';
-import 'package:account_managment/components/account_category_managment.dart';
-import 'package:account_managment/components/contributor_managment.dart';
-import 'package:account_managment/components/contributors_list.dart';
-import 'package:account_managment/forms/account_form.dart';
+import 'package:account_managment/UI/components/account_based_split_checkbox.dart';
+import 'package:account_managment/UI/components/account_category_managment.dart';
+import 'package:account_managment/UI/components/contributor_managment.dart';
+import 'package:account_managment/UI/components/contributors_list.dart';
+import 'package:account_managment/UI/forms/account_form.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

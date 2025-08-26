@@ -1,4 +1,4 @@
-import 'package:account_managment/components/password_field.dart';
+import 'package:account_managment/UI/components/password_field.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';

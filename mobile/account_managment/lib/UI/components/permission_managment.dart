@@ -1,4 +1,4 @@
-import 'package:account_managment/components/permission_checkbox.dart';
+import 'package:account_managment/UI/components/permission_checkbox.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';

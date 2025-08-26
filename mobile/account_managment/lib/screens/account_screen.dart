@@ -1,7 +1,7 @@
-import 'package:account_managment/components/item_category_list.dart';
-import 'package:account_managment/components/item_drawer.dart';
+import 'package:account_managment/UI/components/item_category_list.dart';
+import 'package:account_managment/UI/components/item_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/helpers/text_w_or_dark.dart';
+import 'package:account_managment/helpers/text_w_or_dark_helper.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';

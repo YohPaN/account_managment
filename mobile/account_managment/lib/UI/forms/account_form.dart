@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:account_managment/common/internal_notification.dart';
+import 'package:account_managment/helpers/internal_notification_helper.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/repo_reponse.dart';

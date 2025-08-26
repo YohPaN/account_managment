@@ -1,4 +1,4 @@
-import 'package:account_managment/helpers/model_factory.dart';
+import 'package:account_managment/common/model_factory.dart';
 import 'package:account_managment/models/account.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/repositories/account_repository.dart';

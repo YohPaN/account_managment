@@ -1,4 +1,4 @@
-import 'package:account_managment/common/internal_notification.dart';
+import 'package:account_managment/helpers/internal_notification_helper.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
