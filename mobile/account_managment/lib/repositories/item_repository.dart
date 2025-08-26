@@ -16,7 +16,6 @@ class ItemRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/",
-      contentType: 'application/json',
       body: {
         'account': accountId.toString(),
         if (username != null) 'username': username,
@@ -43,7 +42,6 @@ class ItemRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PUT",
       uri: "$modelUrl/$itemId/",
-      contentType: 'application/json',
       body: {
         if (username != null) 'username': username,
         if (toAccount != null) 'to_account': toAccount,
@@ -61,7 +59,6 @@ class ItemRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "DELETE",
       uri: "$modelUrl/$itemId/",
-      contentType: 'application/json',
     );
 
     return repoResponse;

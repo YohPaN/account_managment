@@ -11,7 +11,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -21,7 +20,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/${accountId ?? "me"}/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -31,7 +29,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/",
-      contentType: 'application/json',
       body: {'name': name},
     );
 
@@ -45,7 +42,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
       uri: "$modelUrl/$id/",
-      contentType: 'application/json',
       body: {'name': name},
     );
 
@@ -56,7 +52,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "DELETE",
       uri: "$modelUrl/$accountId/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -69,7 +64,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$id/contributors/add/",
-      contentType: 'application/json',
       body: {'user_username': username},
     );
 
@@ -83,7 +77,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$id/contributors/remove/",
-      contentType: 'application/json',
       body: {'user_username': username},
     );
 
@@ -95,7 +88,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/$accountId/$username/permissions/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -109,7 +101,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$id/$username/permissions/",
-      contentType: 'application/json',
       body: {
         'permission': permission,
       },
@@ -125,7 +116,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$accountId/split/",
-      contentType: 'application/json',
       body: {
         'is_slit': isSplit ? "True" : "False",
       },

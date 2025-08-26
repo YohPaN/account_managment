@@ -22,7 +22,7 @@ class RequestHandler {
   static Future<RepoResponse> handleRequest(
       {required String method,
       required String uri,
-      required String contentType,
+      String contentType = 'application/json',
       bool? needAuth = true,
       Map<String, dynamic>? body}) async {
     http.Response? response;

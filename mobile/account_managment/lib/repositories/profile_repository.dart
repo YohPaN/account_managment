@@ -8,7 +8,6 @@ class ProfileRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/me/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -19,7 +18,6 @@ class ProfileRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
         method: "POST",
         uri: "register/",
-        contentType: 'application/json',
         needAuth: false,
         body: {
           'username': username,
@@ -38,7 +36,6 @@ class ProfileRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
         method: "PATCH",
         uri: "$modelUrl/me/update/",
-        contentType: 'application/json',
         body: {
           'username': username,
           'first_name': firstName,
@@ -56,7 +53,6 @@ class ProfileRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
         method: "PATCH",
         uri: "$modelUrl/password/",
-        contentType: 'application/json',
         body: {
           'old_password': oldPassword,
           'new_password': newPassword,

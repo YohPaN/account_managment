@@ -55,9 +55,7 @@ class AccountViewModel extends ChangeNotifier {
     return repoResponse;
   }
 
-  Future<RepoResponse> createAccount({
-    required String accountName,
-  }) async {
+  Future<RepoResponse> createAccount({required String accountName}) async {
     final RepoResponse repoResponse =
         await accountRepository.create(accountName);
 
@@ -75,9 +73,7 @@ class AccountViewModel extends ChangeNotifier {
     return repoResponse;
   }
 
-  Future<RepoResponse> updateAccount({
-    required String accountName,
-  }) async {
+  Future<RepoResponse> updateAccount({required String accountName}) async {
     final RepoResponse repoResponse = await accountRepository.update(
       id: account!.id,
       name: accountName,
@@ -98,7 +94,7 @@ class AccountViewModel extends ChangeNotifier {
     return repoResponse;
   }
 
-  Future<RepoResponse> deleteAccount(int accountId) async {
+  Future<RepoResponse> deleteAccount({required int accountId}) async {
     final RepoResponse repoResponse = await accountRepository.delete(accountId);
 
     if (repoResponse.success) {
