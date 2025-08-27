@@ -1,16 +1,14 @@
+import 'package:account_managment/UI/components/categories/category_color_picker.dart';
+import 'package:account_managment/UI/components/categories/category_icon_picker.dart';
 import 'package:account_managment/helpers/internal_notification_helper.dart';
-import 'package:account_managment/config/custom_icon_pack.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/config/icon_picker_trad.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
-import 'package:flutter_iconpicker/Models/configuration.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
@@ -33,10 +31,7 @@ class CategoryDrawer extends StatefulWidget {
 
 class _CategoryDrawerState extends State<CategoryDrawer> {
   final TextEditingController titleController = TextEditingController();
-  final TextEditingController iconController = TextEditingController();
-  final TextEditingController colorController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  Color pickerColor = const Color(0xff443a49);
   Color currentColor = const Color(0xff443a49);
   IconPickerIcon? _selectedIcon = const IconPickerIcon(
       name: "category",
@@ -53,73 +48,19 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
     }
   }
 
-  void changeColor(Color color) {
-    setState(() => pickerColor = color);
-  }
-
   @override
   Widget build(BuildContext context) {
     final CategoryViewModel categoryViewModel =
         Provider.of<CategoryViewModel>(context);
+    final InternalNotification internalNotification =
+        Provider.of<InternalNotification>(context, listen: false);
 
     final AppLocalizations locale = AppLocalizations.of(context)!;
 
-    Future<void> colorDialogBuilder(BuildContext context) {
-      return showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(locale.pick_color.capitalize()),
-          content: SingleChildScrollView(
-            child: BlockPicker(
-              pickerColor: currentColor,
-              onColorChanged: changeColor,
-            ),
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              child: Text(locale.ok.capitalize()),
-              onPressed: () {
-                setState(() => currentColor = pickerColor);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
-    }
-
-    Future<void> pickIcon() async {
-      IconPickerIcon? icon = await showIconPicker(
-        context,
-        configuration: SinglePickerConfiguration(
-          title: Text(locale.pick_icon.capitalize()),
-          closeChild: Text(locale.close.capitalize()),
-          searchHintText: locale.search.capitalize(),
-          customIconPack: customIcons,
-          iconPackModes: [IconPack.material, IconPack.custom],
-          searchComparator: (String searchValue, IconPickerIcon icon) =>
-              icon.name.toLowerCase().contains(searchValue.toLowerCase()) ||
-              (traductions[icon.name] ?? icon.name)
-                  .toLowerCase()
-                  .contains(searchValue.toLowerCase()),
-        ),
-      );
-
-      if (icon != null) {
-        setState(() {
-          _selectedIcon = icon;
-        });
-      }
-    }
-
-    Future<RepoResponse> submit({
-      required String title,
-      required String icon,
-      required String color,
-    }) async {
+    Future<RepoResponse> submit() async {
       if (widget.action == "create") {
         return await categoryViewModel.createCategory(
-          title: title,
+          title: titleController.text,
           icon: _selectedIcon!,
           color: currentColor.toARGB32(),
           contentType: widget.categoryType,
@@ -132,7 +73,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
       } else {
         return await categoryViewModel.updateCategory(
           categoryId: widget.category!.id,
-          title: title,
+          title: titleController.text,
           icon: _selectedIcon!,
           color: currentColor.toARGB32(),
           categoryType: widget.categoryType,
@@ -165,19 +106,23 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  ElevatedButton(
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: currentColor),
-                    onPressed: () async {
-                      await colorDialogBuilder(context);
+                  CategoryColorPicker(
+                    currentColor: currentColor,
+                    onColorChanged: (color) {
+                      setState(() {
+                        currentColor = color;
+                      });
+                      Navigator.of(context).pop();
                     },
-                    child: const Icon(Icons.brush,
-                        color: Colors.white, size: 24.0),
                   ),
-                  ElevatedButton(
-                    onPressed: pickIcon,
-                    child: Icon(_selectedIcon?.data),
-                  ),
+                  CategoryIconPicker(
+                    selectedIcon: _selectedIcon,
+                    onIconSelected: (value) {
+                      setState(() {
+                        _selectedIcon = value;
+                      });
+                    },
+                  )
                 ],
               ),
               const SizedBox(height: 16),
@@ -187,15 +132,9 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        RepoResponse repoResponse = await submit(
-                          title: titleController.text,
-                          icon: iconController.text,
-                          color: colorController.text,
-                        );
-                        Provider.of<InternalNotification>(context,
-                                listen: false)
-                            .showMessage(
-                                repoResponse.message, repoResponse.success);
+                        RepoResponse repoResponse = await submit();
+                        internalNotification.showMessage(
+                            repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       }
                     },
@@ -209,11 +148,8 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                           categoryId: widget.category!.id,
                           categoryType: widget.categoryType,
                         );
-
-                        Provider.of<InternalNotification>(context,
-                                listen: false)
-                            .showMessage(
-                                repoResponse.message, repoResponse.success);
+                        internalNotification.showMessage(
+                            repoResponse.message, repoResponse.success);
                         Navigator.pop(context);
                       },
                       child: Text(locale.action('delete').capitalize()),
