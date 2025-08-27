@@ -3,6 +3,7 @@ import 'package:account_managment/helpers/navigation_index_helper.dart';
 import 'package:account_managment/UI/components/password/password_drawer.dart';
 import 'package:account_managment/UI/components/password/password_field.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
+import 'package:account_managment/helpers/show_modal_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
 import 'package:account_managment/models/profile.dart';
 import 'package:account_managment/models/repo_reponse.dart';
@@ -151,14 +152,9 @@ class _ProfileFormState extends State<ProfileForm> {
             if (widget.action == "update")
               ElevatedButton(
                 onPressed: () {
-                  showModalBottomSheet(
+                  showModalHelper<PasswordDrawerState>(
                     context: context,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
+                    childBuilder: (context) {
                       return PasswordDrawerState(
                         action: widget.action,
                       );
