@@ -1,3 +1,4 @@
+import 'package:account_managment/UI/components/items/item_switch_button.dart';
 import 'package:account_managment/helpers/internal_notification_helper.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/validation_helper.dart';
@@ -31,36 +32,17 @@ class _ItemDrawerState extends State<ItemDrawer> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController valuationController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final List<bool> _selectButton = [true, false];
   String _username = "";
   String _toAccount = "";
   String _category = "";
-
-  final List<Map<String, Color?>> buttonStyleChoices = [
-    {
-      "selectedColor": Colors.red[700],
-      "fillColor": Colors.red[200],
-      "color": Colors.red[400]
-    },
-    {
-      "selectedColor": Colors.green[700],
-      "fillColor": Colors.green[200],
-      "color": Colors.green[400]
-    }
-  ];
-
-  late Map<String, Color?> _buttonStyle;
+  bool isIncome = false;
 
   @override
   void initState() {
     super.initState();
-    _buttonStyle = buttonStyleChoices[0];
-
     if (widget.action == "update") {
       if (widget.item!.valuation > 0) {
-        _selectButton[0] = false;
-        _selectButton[1] = true;
-        _buttonStyle = buttonStyleChoices[1];
+        isIncome = true;
       }
 
       if (widget.item != null) {
@@ -85,16 +67,6 @@ class _ItemDrawerState extends State<ItemDrawer> {
     final CategoryViewModel categoryViewModel =
         Provider.of<CategoryViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
-
-    switchButton(index) {
-      setState(() {
-        for (int i = 0; i < _selectButton.length; i++) {
-          _selectButton[i] = i == index;
-        }
-
-        _buttonStyle = buttonStyleChoices[index];
-      });
-    }
 
     final List<DropdownMenuEntry<String>> categoryList = [
       const DropdownMenuEntry<String>(
@@ -180,9 +152,8 @@ class _ItemDrawerState extends State<ItemDrawer> {
     }
 
     createOrUpdate() async {
-      final valuation = _selectButton[0]
-          ? "-${valuationController.text}"
-          : valuationController.text;
+      final valuation =
+          isIncome ? valuationController.text : "-${valuationController.text}";
 
       if (widget.action == "create") {
         return await itemViewModel.createItem(
@@ -284,22 +255,13 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   dropdownMenuEntries: accountList,
                 ),
                 const SizedBox(height: 16),
-                ToggleButtons(
-                  onPressed: (int index) => switchButton(index),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  selectedBorderColor: _buttonStyle["selectedColor"],
-                  selectedColor: Colors.white,
-                  fillColor: _buttonStyle["fillColor"],
-                  color: _buttonStyle["color"],
-                  constraints: const BoxConstraints(
-                    minHeight: 40.0,
-                    minWidth: 80.0,
-                  ),
-                  isSelected: _selectButton,
-                  children: [
-                    Text(locale.expense.capitalize()),
-                    Text(locale.income.capitalize())
-                  ],
+                ItemSwitchButton(
+                  onSwitch: (value) {
+                    setState(() {
+                      isIncome = value;
+                    });
+                  },
+                  isIncome: isIncome,
                 ),
                 const SizedBox(height: 16),
                 Row(
