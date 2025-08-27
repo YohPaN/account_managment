@@ -1,5 +1,5 @@
-import 'package:account_managment/UI/components/item_drawer.dart';
-import 'package:account_managment/UI/components/list_item.dart';
+import 'package:account_managment/UI/components/items/item_drawer.dart';
+import 'package:account_managment/UI/components/items/list_item.dart';
 import 'package:account_managment/models/category.dart';
 import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';

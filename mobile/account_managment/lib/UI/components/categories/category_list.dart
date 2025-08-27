@@ -1,4 +1,4 @@
-import 'package:account_managment/UI/components/category_drawer.dart';
+import 'package:account_managment/UI/components/categories/category_drawer.dart';
 import 'package:account_managment/helpers/internal_notification_helper.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/helpers/show_modal_helper.dart';
