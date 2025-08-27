@@ -1,3 +1,6 @@
+import 'package:account_managment/UI/components/items/dropdowns/item_account_dropdown.dart';
+import 'package:account_managment/UI/components/items/dropdowns/item_categories_dropdown.dart';
+import 'package:account_managment/UI/components/items/dropdowns/item_owner_dropdown.dart';
 import 'package:account_managment/UI/components/items/item_switch_button.dart';
 import 'package:account_managment/helpers/internal_notification_helper.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
@@ -67,89 +70,6 @@ class _ItemDrawerState extends State<ItemDrawer> {
     final CategoryViewModel categoryViewModel =
         Provider.of<CategoryViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
-
-    final List<DropdownMenuEntry<String>> categoryList = [
-      const DropdownMenuEntry<String>(
-        value: "",
-        label: "",
-      ),
-    ];
-
-    final List<DropdownMenuEntry<String>> menuEntries = [
-      DropdownMenuEntry<String>(
-        value: accountViewModel.account!.username,
-        label: locale.me.capitalize(),
-      ),
-    ];
-
-    final List<DropdownMenuEntry<String?>> accountList = [
-      const DropdownMenuEntry<String>(
-        value: "",
-        label: "",
-      )
-    ];
-
-    for (var account in accountViewModel.accounts) {
-      if (account.id != accountViewModel.account!.id) {
-        accountList.add(DropdownMenuEntry<String>(
-          value: account.id.toString(),
-          label: account.name,
-        ));
-      }
-    }
-
-    for (var category in categoryViewModel.categories) {
-      categoryList.add(DropdownMenuEntry<String>(
-          value: category.id.toString(),
-          label: (locale.default_category_title(category.title) != ""
-                  ? locale.default_category_title(category.title)
-                  : category.title)
-              .capitalize()));
-    }
-
-    for (var account in accountViewModel.contributorAccounts ?? []) {
-      if (profileViewModel.user!.hasPermission(
-          account: account,
-          permissionsNeeded: ["transfert_item"],
-          permissions: account.permissions)) {
-        accountList.add(DropdownMenuEntry<String>(
-          value: account.id.toString(),
-          label: account.name,
-        ));
-      }
-    }
-
-    if (widget.action == "update" ||
-        profileViewModel.user!.hasPermission(
-          account: accountViewModel.account,
-          permissionsNeeded: ["link_user_item"],
-          permissions: accountViewModel.account!.permissions,
-        )) {
-      menuEntries.addAll(
-        accountViewModel.account!.contributor.map(
-          (contributor) => DropdownMenuEntry<String>(
-            value: contributor.username,
-            label: contributor.username,
-          ),
-        ),
-      );
-    }
-
-    if (widget.action == "update" ||
-        profileViewModel.user!.hasPermission(
-          account: accountViewModel.account,
-          permissionsNeeded: ["add_item_without_user"],
-          permissions: accountViewModel.account!.permissions,
-        )) {
-      menuEntries.add(
-        const DropdownMenuEntry<String>(
-          value: "",
-          label: "",
-        ),
-      );
-    } else {
-      _username = accountViewModel.account!.username;
-    }
 
     createOrUpdate() async {
       final valuation =
@@ -225,35 +145,39 @@ class _ItemDrawerState extends State<ItemDrawer> {
                   ]),
                 ),
                 const SizedBox(height: 16),
-                DropdownMenu(
-                  expandedInsets: const EdgeInsets.all(50),
-                  label: Text(locale.category(1).capitalize()),
-                  initialSelection: _category,
-                  onSelected: (value) => setState(() {
-                    _category = value!;
-                  }),
-                  dropdownMenuEntries: categoryList,
-                ),
+                ItemCategoriesDropdown(
+                    initialValue: _category,
+                    values: categoryViewModel.categories,
+                    onSelect: (value) {
+                      setState(() {
+                        _category = value!;
+                      });
+                    }),
                 const SizedBox(height: 16),
-                DropdownMenu(
-                  expandedInsets: const EdgeInsets.all(50),
-                  label: Text("${locale.item_owner}:".capitalize()),
-                  initialSelection: _username,
-                  onSelected: (value) => setState(() {
-                    _username = value!;
-                  }),
-                  dropdownMenuEntries: menuEntries,
-                ),
+                ItemOwnerDropdown(
+                    initialValue: _username,
+                    account: accountViewModel.account!,
+                    user: profileViewModel.user!,
+                    values: accountViewModel.account!.contributor,
+                    onSelect: (value) {
+                      setState(() {
+                        _username = value!;
+                      });
+                    }),
                 const SizedBox(height: 16),
-                DropdownMenu(
-                  expandedInsets: const EdgeInsets.all(50),
-                  label: Text("${locale.transfert_to}:".capitalize()),
-                  initialSelection: _toAccount,
-                  onSelected: (value) => setState(() {
-                    _toAccount = value!;
-                  }),
-                  dropdownMenuEntries: accountList,
-                ),
+                ItemAccountDropdown(
+                    initialValue: _toAccount,
+                    account: accountViewModel.account!,
+                    user: profileViewModel.user!,
+                    contributorAccounts:
+                        accountViewModel.contributorAccounts ?? [],
+                    values: accountViewModel.accounts +
+                        (accountViewModel.contributorAccounts ?? []),
+                    onSelect: (value) {
+                      setState(() {
+                        _toAccount = value!;
+                      });
+                    }),
                 const SizedBox(height: 16),
                 ItemSwitchButton(
                   onSwitch: (value) {
