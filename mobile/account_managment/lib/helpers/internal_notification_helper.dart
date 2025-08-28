@@ -13,7 +13,7 @@ class InternalNotification extends ChangeNotifier {
         borderRadius: BorderRadius.circular(12.0),
         boxShadow: highModeShadow,
         closeOnClick: true,
-        closeButtonShowType: CloseButtonShowType.none);
+        closeButton: ToastCloseButton(showType: CloseButtonShowType.none));
   }
 
   ToastificationItem showPendingAccountRequest(int count) {
