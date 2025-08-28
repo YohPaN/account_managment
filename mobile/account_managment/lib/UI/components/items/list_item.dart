@@ -1,19 +1,20 @@
+import 'package:account_managment/UI/components/items/item_drawer.dart';
+import 'package:account_managment/helpers/show_modal_helper.dart';
 import 'package:account_managment/helpers/text_w_or_dark_helper.dart';
 import 'package:account_managment/models/item.dart';
+import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ListItem extends StatelessWidget {
   final Item item;
   final int accountId;
-  final Function(String, Item) callbackFunc;
   bool canManage = false;
 
   ListItem({
     super.key,
     required this.item,
     required this.accountId,
-    required this.callbackFunc,
     required this.canManage,
   });
 
@@ -61,9 +62,15 @@ class ListItem extends StatelessWidget {
               iconColor:
                   WidgetStatePropertyAll(textColor(item.category?.color)),
             ),
-            onPressed: () {
-              callbackFunc("update", item);
-            },
+            onPressed: () => showModalHelper<AccountViewModel>(
+              context: context,
+              childBuilder: (context) {
+                return ItemDrawer(
+                  item: item,
+                  action: "update",
+                );
+              },
+            ),
             icon: const Icon(Icons.mode),
           ),
       ],

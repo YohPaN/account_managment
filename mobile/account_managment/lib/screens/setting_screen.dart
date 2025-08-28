@@ -1,6 +1,6 @@
 import 'package:account_managment/UI/components/categories/category_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/models/category.dart';
+import 'package:account_managment/helpers/show_modal_helper.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
@@ -16,35 +16,7 @@ class SettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AccountUserViewModel accountUserViewModel =
         Provider.of<AccountUserViewModel>(context);
-    final CategoryViewModel categoryViewModel =
-        Provider.of<CategoryViewModel>(context);
     final AppLocalizations locale = AppLocalizations.of(context)!;
-
-    showModal(String action, [CategoryApp? category]) {
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        isScrollControlled: true,
-        builder: (BuildContext drawerContext) {
-          return MultiProvider(
-            providers: [
-              InheritedProvider<CategoryViewModel>(
-                update: (context, value) {
-                  return categoryViewModel;
-                },
-              ),
-            ],
-            child: CategoryDrawer(
-              action: action,
-              category: category,
-              categoryType: "user",
-            ),
-          );
-        },
-      );
-    }
 
     return Scaffold(
       body: Padding(
@@ -199,11 +171,18 @@ class SettingScreen extends StatelessWidget {
                                           ),
                                           const SizedBox(width: 12), // Gap
                                           ElevatedButton(
-                                            onPressed: () => showModal(
-                                              "update",
-                                              profileViewModel
-                                                  .profile!.categories[index],
-                                            ),
+                                            onPressed: () => showModalHelper<
+                                                    CategoryViewModel>(
+                                                context: context,
+                                                childBuilder: (context) {
+                                                  return CategoryDrawer(
+                                                    action: "update",
+                                                    category: profileViewModel
+                                                        .profile!
+                                                        .categories[index],
+                                                    categoryType: "user",
+                                                  );
+                                                }),
                                             child: const Icon(
                                               Icons.mode,
                                             ),
@@ -222,7 +201,14 @@ class SettingScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           ElevatedButton(
-                            onPressed: () => showModal("create"),
+                            onPressed: () => showModalHelper<CategoryViewModel>(
+                                context: context,
+                                childBuilder: (context) {
+                                  return CategoryDrawer(
+                                    action: "create",
+                                    categoryType: "user",
+                                  );
+                                }),
                             child: Text(locale.create_category(1).capitalize()),
                           ),
                         ],

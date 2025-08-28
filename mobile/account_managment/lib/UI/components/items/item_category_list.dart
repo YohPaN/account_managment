@@ -1,9 +1,6 @@
-import 'package:account_managment/UI/components/items/item_drawer.dart';
 import 'package:account_managment/UI/components/items/list_item.dart';
 import 'package:account_managment/models/category.dart';
-import 'package:account_managment/models/item.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
-import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,32 +24,6 @@ class ItemCategoryList extends StatelessWidget {
         .where((item) => item.category?.id == category?.id)
         .toList();
 
-    showModal(String action, [Item? item]) async {
-      await Provider.of<CategoryViewModel>(context, listen: false).listCategory(
-        categoryType: "account_categories",
-        accountId: accountViewModel.account!.id,
-      );
-
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        isScrollControlled: true,
-        builder: (BuildContext drawerContext) {
-          return InheritedProvider<AccountViewModel>(
-            update: (context, value) {
-              return accountViewModel;
-            },
-            child: ItemDrawer(
-              item: item,
-              action: action,
-            ),
-          );
-        },
-      );
-    }
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -73,7 +44,6 @@ class ItemCategoryList extends StatelessWidget {
                       title: ListItem(
                         item: items[index],
                         accountId: accountViewModel.account!.id,
-                        callbackFunc: showModal,
                         canManage: profileViewModel.user!.hasPermission(
                           ressource: items[index],
                           account: accountViewModel.account,

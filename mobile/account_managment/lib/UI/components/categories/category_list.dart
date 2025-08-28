@@ -13,13 +13,11 @@ import 'package:provider/provider.dart';
 class CategoryList extends StatelessWidget {
   final List<CategoryApp> categories;
   bool accountCategory;
-  Function? showModal;
 
   CategoryList({
     super.key,
     required this.categories,
     this.accountCategory = false,
-    this.showModal,
   });
 
   @override

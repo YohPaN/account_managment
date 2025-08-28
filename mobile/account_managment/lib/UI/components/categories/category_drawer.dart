@@ -22,7 +22,7 @@ class CategoryDrawer extends StatefulWidget {
     super.key,
     required this.action,
     required this.categoryType,
-    required this.category,
+    this.category,
   });
 
   @override
