@@ -1,4 +1,4 @@
-import 'package:account_managment/helpers/request_handler.dart';
+import 'package:account_managment/common/request_handler.dart';
 
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -11,7 +11,6 @@ class AccountUserRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -21,7 +20,6 @@ class AccountUserRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/",
-      contentType: 'application/json',
       body: {},
     );
 
@@ -33,7 +31,6 @@ class AccountUserRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
       uri: "$modelUrl/$accountUserId/",
-      contentType: 'application/json',
       body: {"state": state},
     );
 

@@ -1,5 +1,6 @@
 import json
 from decimal import Decimal
+from unittest.mock import patch
 
 from back_account_managment.models import Category, Profile, Transfert
 from back_account_managment.views import Account, AccountUser, Item
@@ -401,7 +402,8 @@ class AccountViewTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(self.account.name, "second name")
 
-    def test_add_contributors(self):
+    @patch("back_account_managment.views.pusher.Pusher")
+    def test_add_contributors(self, mock):
         self.assertEqual(
             len(
                 AccountUser.objects.filter(
@@ -431,7 +433,10 @@ class AccountViewTest(TestCase):
             1,
         )
 
-    def test_remove_contributors(self):
+        mock.assert_called_once()
+
+    @patch("back_account_managment.views.pusher.Pusher")
+    def test_remove_contributors(self, mock):
         AccountUser.objects.create(account=self.account, user=self.user2)
 
         response = self.c.post(
@@ -453,6 +458,8 @@ class AccountViewTest(TestCase):
             ),
             0,
         )
+
+        mock.assert_called_once()
 
     def test_destroy_account(self):
         account_user = AccountUser.objects.create(
@@ -687,8 +694,9 @@ class ItemViewTest(TestCase):
     def test_create_item(self):
         self.assertFalse(Item.objects.filter(category=self.category).exists())
         response = self.c.post(
-            f"/api/accounts/{self.account.pk}/items/",
+            "/api/items/",
             {
+                "account": self.account.pk,
                 "title": "mon",
                 "description": "petit poney",
                 "valuation": 12.56,
@@ -707,8 +715,9 @@ class ItemViewTest(TestCase):
 
     def test_create_item_without_username(self):
         response = self.c.post(
-            f"/api/accounts/{self.account.pk}/items/",
+            "/api/items/",
             {
+                "account": self.account.pk,
                 "title": "mon",
                 "valuation": 12.56,
             },
@@ -735,8 +744,9 @@ class ItemViewTest(TestCase):
 
     def test_create_item_with_transfert(self):
         response = self.c.post(
-            f"/api/accounts/{self.account.pk}/items/",
+            "/api/items/",
             {
+                "account": self.account.pk,
                 "title": "mon",
                 "valuation": 12.56,
                 "username": self.user.username,
@@ -754,8 +764,9 @@ class ItemViewTest(TestCase):
     def test_create_item_with_a_category_not_under_account(self):
         with self.assertRaises(AssertionError):
             self.c.post(
-                f"/api/accounts/{self.account.pk}/items/",
+                "/api/items/",
                 {
+                    "account": self.account.pk,
                     "title": "mon",
                     "description": "petit poney",
                     "valuation": 12.56,
@@ -767,7 +778,7 @@ class ItemViewTest(TestCase):
 
     def test_update_item(self):
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "description": "petit poney",
@@ -786,7 +797,7 @@ class ItemViewTest(TestCase):
         self.assertIsNone(self.item.category)
 
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "description": "petit poney",
@@ -805,7 +816,7 @@ class ItemViewTest(TestCase):
         self.category_not_under_account.accounts.add(self.account)
 
         self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "description": "petit poney",
@@ -820,7 +831,7 @@ class ItemViewTest(TestCase):
         self.assertEqual(self.item.category, self.category_not_under_account)
 
         self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "description": "petit poney",
@@ -836,7 +847,7 @@ class ItemViewTest(TestCase):
     def test_update_item_with_category_not_under_account(self):
         with self.assertRaises(AssertionError):
             self.c.put(
-                f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+                f"/api/items/{self.item.pk}/",
                 {
                     "title": "mon",
                     "description": "petit poney",
@@ -848,7 +859,7 @@ class ItemViewTest(TestCase):
 
     def test_update_item_with_another_user_under_item(self):
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "description": "petit poney",
@@ -865,7 +876,7 @@ class ItemViewTest(TestCase):
 
     def test_update_item_with_an_empty_user(self):
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "valuation": 12.56,
@@ -880,7 +891,7 @@ class ItemViewTest(TestCase):
 
     def test_update_item_with_a_non_existing_username(self):
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "mon",
                 "valuation": 12.56,
@@ -894,7 +905,7 @@ class ItemViewTest(TestCase):
 
     def test_update_item_create_transfert(self):
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "test",
                 "description": "description",
@@ -918,7 +929,7 @@ class ItemViewTest(TestCase):
         )
 
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "test",
                 "description": "description",
@@ -939,7 +950,7 @@ class ItemViewTest(TestCase):
         Transfert.objects.create(item=self.item, to_account=self.account2)
 
         response = self.c.put(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/",
+            f"/api/items/{self.item.pk}/",
             {
                 "title": "test",
                 "description": "description",
@@ -959,9 +970,7 @@ class ItemViewTest(TestCase):
         )
 
     def test_delete_items(self):
-        response = self.c.delete(
-            f"/api/accounts/{self.account.pk}/items/{self.item.pk}/"
-        )
+        response = self.c.delete(f"/api/items/{self.item.pk}/")
 
         self.assertTrue(status.is_success(response.status_code))
         self.assertEqual(len(Item.objects.all()), 0)

@@ -1,4 +1,4 @@
-import 'package:account_managment/components/account_list_item.dart';
+import 'package:account_managment/UI/components/accounts/account_list_item.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';

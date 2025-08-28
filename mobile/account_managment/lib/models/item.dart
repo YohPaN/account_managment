@@ -1,4 +1,4 @@
-import 'package:account_managment/helpers/model_factory.dart';
+import 'package:account_managment/common/model_factory.dart';
 import 'package:account_managment/models/base_model.dart';
 import 'package:account_managment/models/category.dart';
 

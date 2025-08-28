@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:account_managment/helpers/request_handler.dart';
+import 'package:account_managment/common/request_handler.dart';
 
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
@@ -17,7 +17,6 @@ class CategoryRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/?category=$categoryType&account=$accountId",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -33,7 +32,6 @@ class CategoryRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/",
-      contentType: 'application/json',
       body: {
         'title': title,
         'icon': jsonEncode(serializeIcon(icon)),
@@ -55,7 +53,6 @@ class CategoryRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PUT",
       uri: "$modelUrl/$categoryId/",
-      contentType: 'application/json',
       body: {
         'title': title,
         'icon': jsonEncode(serializeIcon(icon)),
@@ -72,7 +69,6 @@ class CategoryRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "DELETE",
       uri: "$modelUrl/$categoryId/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -85,7 +81,6 @@ class CategoryRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "account-categories/",
-      contentType: 'application/json',
       body: {
         'account': account,
         'category': category,
@@ -102,7 +97,6 @@ class CategoryRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "account-categories/unlink/",
-      contentType: 'application/json',
       body: {
         'account': account,
         'category': category,
@@ -116,7 +110,6 @@ class CategoryRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/?category=default",
-      contentType: 'application/json',
     );
 
     return repoResponse;

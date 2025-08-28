@@ -20,7 +20,7 @@ router.register(
 )
 router.register(r"account_user", AccountUserView)
 router.register(
-    r"accounts/(?P<account_id>[^/.]+)/items", ItemView, basename="items"
+    r"items", ItemView, basename="items"
 )
 router.register(
     r"accounts/(?P<account_id>[^/.]+)/(?P<user_username>[^/.]+)/permissions",

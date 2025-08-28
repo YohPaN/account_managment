@@ -1,11 +1,10 @@
-import 'package:account_managment/components/item_category_list.dart';
-import 'package:account_managment/components/item_drawer.dart';
+import 'package:account_managment/UI/components/items/item_category_list.dart';
+import 'package:account_managment/UI/components/items/item_drawer.dart';
 import 'package:account_managment/helpers/capitalize_helper.dart';
-import 'package:account_managment/helpers/text_w_or_dark.dart';
-import 'package:account_managment/models/item.dart';
+import 'package:account_managment/helpers/show_modal_helper.dart';
+import 'package:account_managment/helpers/text_w_or_dark_helper.dart';
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
-import 'package:account_managment/viewModels/category_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,32 +33,6 @@ class _AccountScreenState extends State<AccountScreen> {
     final ProfileViewModel profileViewModel =
         Provider.of<ProfileViewModel>(context, listen: false);
     final AppLocalizations locale = AppLocalizations.of(context)!;
-
-    showModal(String action, [Item? item]) async {
-      await Provider.of<CategoryViewModel>(context, listen: false).listCategory(
-        categoryType: "account_categories",
-        accountId: accountViewModel.account!.id,
-      );
-
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        isScrollControlled: true,
-        builder: (BuildContext drawerContext) {
-          return InheritedProvider<AccountViewModel>(
-            update: (context, value) {
-              return accountViewModel;
-            },
-            child: ItemDrawer(
-              item: item,
-              action: action,
-            ),
-          );
-        },
-      );
-    }
 
     Future<RepoResponse?> getAccount() async {
       var accountID =
@@ -299,7 +272,13 @@ class _AccountScreenState extends State<AccountScreen> {
                       permissions: accountViewModel.account!.permissions,
                     ),
                     child: FloatingActionButton(
-                      onPressed: () => showModal("create"),
+                      onPressed: () => showModalHelper<AccountViewModel>(
+                          context: context,
+                          childBuilder: (context) {
+                            return ItemDrawer(
+                              action: "create",
+                            );
+                          }),
                       foregroundColor: Theme.of(context).colorScheme.primary,
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       child: const Icon(Icons.add),
