@@ -42,6 +42,7 @@
     "needs_to_add": "doit ajouter",
     "salary_based_split": "partage basé sur le salaire",
     "your_contribution": "votre contribution",
+    "no_transfer": "aucun transfert",
     "@@comment": "Item",
     "expense": "dépense",
     "income": "revenu",

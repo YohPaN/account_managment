@@ -409,7 +409,7 @@ class ItemView(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         account = Account.objects.get(
-            pk=kwargs.get("account_id"),
+            pk=request.data.get("account", None),
         )
         username = request.data.get("username", None)
         user = get_object_or_404(User, username=username) if username else None

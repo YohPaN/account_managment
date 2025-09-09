@@ -1,6 +1,6 @@
 import 'package:account_managment/helpers/capitalize_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:account_managment/forms/login_form.dart';
+import 'package:account_managment/UI/forms/login_form.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

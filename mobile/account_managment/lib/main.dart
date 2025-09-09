@@ -1,11 +1,12 @@
-import 'package:account_managment/common/internal_notification.dart';
-import 'package:account_managment/common/navigation_index.dart';
-import 'package:account_managment/common/router.dart';
-import 'package:account_managment/helpers/push_notification.dart';
+import 'package:account_managment/helpers/internal_notification_helper.dart';
+import 'package:account_managment/helpers/navigation_index_helper.dart';
+import 'package:account_managment/config/router.dart';
+import 'package:account_managment/common/push_notification.dart';
 import 'package:account_managment/viewModels/account_user_view_model.dart';
 import 'package:account_managment/viewModels/account_view_model.dart';
 import 'package:account_managment/viewModels/auth_view_model.dart';
 import 'package:account_managment/viewModels/category_view_model.dart';
+import 'package:account_managment/viewModels/item_view_model.dart';
 import 'package:account_managment/viewModels/profile_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<AccountViewModel>(
           create: (context) => AccountViewModel(),
+        ),
+        ChangeNotifierProvider<ItemViewModel>(
+          create: (context) => ItemViewModel(),
         ),
         ChangeNotifierProvider<CategoryViewModel>(
           create: (context) => CategoryViewModel(

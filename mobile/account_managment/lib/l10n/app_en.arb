@@ -90,6 +90,7 @@
     "needs_to_add": "needs to add",
     "salary_based_split": "salary based split",
     "your_contribution": "your contribution",
+    "no_transfer": "no transfer",
     "@@comment": "Item",
     "expense": "expense",
     "income": "income",

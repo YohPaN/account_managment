@@ -1,4 +1,4 @@
-import 'package:account_managment/helpers/request_handler.dart';
+import 'package:account_managment/common/request_handler.dart';
 
 import 'package:account_managment/models/repo_reponse.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -11,7 +11,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -21,7 +20,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/${accountId ?? "me"}/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -31,7 +29,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/",
-      contentType: 'application/json',
       body: {'name': name},
     );
 
@@ -45,7 +42,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "PATCH",
       uri: "$modelUrl/$id/",
-      contentType: 'application/json',
       body: {'name': name},
     );
 
@@ -56,7 +52,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "DELETE",
       uri: "$modelUrl/$accountId/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -69,7 +64,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$id/contributors/add/",
-      contentType: 'application/json',
       body: {'user_username': username},
     );
 
@@ -83,73 +77,7 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$id/contributors/remove/",
-      contentType: 'application/json',
       body: {'user_username': username},
-    );
-
-    return repoResponse;
-  }
-
-  Future<RepoResponse> createItem({
-    required String title,
-    required String description,
-    required String valuation,
-    required int accountId,
-    int? categoryId,
-    String? username,
-    String? toAccount,
-  }) async {
-    final RepoResponse repoResponse = await RequestHandler.handleRequest(
-      method: "POST",
-      uri: "$modelUrl/$accountId/items/",
-      contentType: 'application/json',
-      body: {
-        'account': accountId.toString(),
-        if (username != null) 'username': username,
-        if (toAccount != null) 'to_account': toAccount,
-        'title': title,
-        'description': description,
-        'valuation': valuation,
-        if (categoryId != null) 'category_id': categoryId.toString(),
-      },
-    );
-
-    return repoResponse;
-  }
-
-  Future<RepoResponse> updateItem({
-    required String title,
-    required String description,
-    required String valuation,
-    required int accountId,
-    int? categoryId,
-    String? username,
-    String? toAccount,
-    required int itemId,
-  }) async {
-    final RepoResponse repoResponse = await RequestHandler.handleRequest(
-      method: "PUT",
-      uri: "$modelUrl/$accountId/items/$itemId/",
-      contentType: 'application/json',
-      body: {
-        'account': accountId.toString(),
-        if (username != null) 'username': username,
-        if (toAccount != null) 'to_account': toAccount,
-        if (categoryId != null) 'category_id': categoryId.toString(),
-        'title': title,
-        'description': description,
-        'valuation': valuation,
-      },
-    );
-
-    return repoResponse;
-  }
-
-  Future<RepoResponse> deleteItem(int itemId, int accountId) async {
-    final RepoResponse repoResponse = await RequestHandler.handleRequest(
-      method: "DELETE",
-      uri: "$modelUrl/$accountId/items/$itemId/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -160,7 +88,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "GET",
       uri: "$modelUrl/$accountId/$username/permissions/",
-      contentType: 'application/json',
     );
 
     return repoResponse;
@@ -174,7 +101,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$id/$username/permissions/",
-      contentType: 'application/json',
       body: {
         'permission': permission,
       },
@@ -190,7 +116,6 @@ class AccountRepository {
     final RepoResponse repoResponse = await RequestHandler.handleRequest(
       method: "POST",
       uri: "$modelUrl/$accountId/split/",
-      contentType: 'application/json',
       body: {
         'is_slit': isSplit ? "True" : "False",
       },
