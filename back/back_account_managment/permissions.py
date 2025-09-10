@@ -124,7 +124,7 @@ class TransfertToAccountPermission(permissions.BasePermission):
         )
 
         permissions = account_user.permissions.values_list(
-            "permissions__codename", flat=True
+            "codename", flat=True
         )
 
         return "transfert_item" in permissions
